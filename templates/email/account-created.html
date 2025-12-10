@@ -1,0 +1,56 @@
+<div style="padding: 32px 0;">
+  <h1 style="font-size: 24px; font-weight: 600; color: #111827; margin: 0 0 16px 0;">
+    Welcome to SchoolBox!
+  </h1>
+  
+  <p style="font-size: 16px; line-height: 24px; color: #374151; margin: 0 0 24px 0;">
+    Hello {{firstName}},
+  </p>
+  
+  <p style="font-size: 16px; line-height: 24px; color: #374151; margin: 0 0 24px 0;">
+    An account has been created for you on SchoolBox. Below are your login credentials:
+  </p>
+
+  <!-- Credentials SchoolBox -->
+  <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin: 0 0 24px 0;">
+    <div style="margin-bottom: 16px;">
+      <p style="font-size: 14px; font-weight: 600; color: #6b7280; margin: 0 0 4px 0;">USERNAME</p>
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">@{{username}}</p>
+    </div>
+    
+    <div style="margin-bottom: 16px;">
+      <p style="font-size: 14px; font-weight: 600; color: #6b7280; margin: 0 0 4px 0;">EMAIL</p>
+      <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">{{email}}</p>
+    </div>
+    
+    <div>
+      <p style="font-size: 14px; font-weight: 600; color: #6b7280; margin: 0 0 4px 0;">TEMPORARY PASSWORD</p>
+      <p style="font-size: 18px; font-weight: 700; color: #111827; font-family: 'Courier New', monospace; margin: 0; letter-spacing: 2px;">{{password}}</p>
+    </div>
+  </div>
+
+  <!-- Security Notice -->
+  <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 0 0 24px 0; border-radius: 4px;">
+    <p style="font-size: 14px; font-weight: 600; color: #92400e; margin: 0 0 8px 0;">
+      🔒 Security Notice
+    </p>
+    <p style="font-size: 14px; line-height: 20px; color: #78350f; margin: 0;">
+      For security reasons, please change your password after your first login. Keep your credentials secure and do not share them with anyone.
+    </p>
+  </div>
+
+  <p style="font-size: 16px; line-height: 24px; color: #374151; margin: 0 0 24px 0;">
+    Your role has been set to <strong>{{roleName}}</strong>. You can now access the platform and start exploring.
+  </p>
+
+  <!-- Login Button -->
+  <div style="text-align: center; margin: 32px 0;">
+    <a href="{{loginUrl}}" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 6px; font-weight: 600; font-size: 16px;">
+      Login to Your Account
+    </a>
+  </div>
+
+  <p style="font-size: 14px; line-height: 20px; color: #6b7280; margin: 24px 0 0 0;">
+    If you have any questions or need assistance, please don't hesitate to contact our support team.
+  </p>
+</div>

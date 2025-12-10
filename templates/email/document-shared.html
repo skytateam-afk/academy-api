@@ -1,0 +1,63 @@
+<div style="text-align: center; padding: 40px 20px;">
+  <h1 style="color: #1a202c; font-size: 28px; font-weight: 700; margin: 0 0 16px 0;">Document Shared With You</h1>
+  <p style="color: #4a5568; font-size: 16px; line-height: 1.6; margin: 0 0 32px 0;">
+    {{sharerName}} has shared a document with you
+  </p>
+</div>
+
+<div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 32px;">
+  <h2 style="color: #2d3748; font-size: 20px; font-weight: 600; margin: 0 0 16px 0;">{{documentTitle}}</h2>
+  {{#documentDescription}}
+  <p style="color: #718096; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
+    {{documentDescription}}
+  </p>
+  {{/documentDescription}}
+  
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+    <div>
+      <p style="color: #a0aec0; font-size: 12px; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.5px;">File Type</p>
+      <p style="color: #2d3748; font-size: 14px; font-weight: 600; margin: 0;">{{fileType}}</p>
+    </div>
+    <div>
+      <p style="color: #a0aec0; font-size: 12px; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.5px;">File Size</p>
+      <p style="color: #2d3748; font-size: 14px; font-weight: 600; margin: 0;">{{fileSize}}</p>
+    </div>
+  </div>
+  
+  {{#hasPassword}}
+  <div style="background: #f9fafb; border: 1px solid #e2e8f0; padding: 12px 16px; margin-bottom: 20px;">
+    <p style="color: #4a5568; font-size: 14px; margin: 0;">
+      <strong>Password Protected:</strong> You'll need a password to access this document
+    </p>
+  </div>
+  {{/hasPassword}}
+  
+  {{#expiresAt}}
+  <div style="background: #f9fafb; border: 1px solid #e2e8f0; padding: 12px 16px; margin-bottom: 20px;">
+    <p style="color: #4a5568; font-size: 14px; margin: 0;">
+      <strong>Expires:</strong> {{expiresAt}}
+    </p>
+  </div>
+  {{/expiresAt}}
+  
+  <div style="text-align: center; margin-top: 24px;">
+    <a href="{{shareUrl}}" style="display: inline-block; background: #ffffff; color: #2d3748; text-decoration: none; padding: 12px 24px; border: 1px solid #d1d5db; font-weight: 500; font-size: 15px;">
+      View Document
+    </a>
+  </div>
+</div>
+
+<div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 32px;">
+  <h3 style="color: #2d3748; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">Shared By</h3>
+  <p style="color: #4a5568; font-size: 14px; margin: 0;">
+    <strong>{{sharerName}}</strong><br/>
+    {{sharerEmail}}
+  </p>
+</div>
+
+<div style="text-align: center; padding: 20px; border-top: 1px solid #e2e8f0;">
+  <p style="color: #718096; font-size: 14px; line-height: 1.6; margin: 0;">
+    This link was shared via SchoolBox Document Management.<br/>
+    If you did not expect this document, you can safely ignore this email.
+  </p>
+</div>
