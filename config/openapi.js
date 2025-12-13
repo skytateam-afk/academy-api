@@ -22,7 +22,7 @@ const openApiSpec = {
   },
   servers: [
     {
-      url: `http://localhost:${PORT}`,
+      url: process.env.BASE_URL,
       description: 'Development server'
     },
     {
