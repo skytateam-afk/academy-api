@@ -8,11 +8,11 @@ const PORT = process.env.PORT || 8080;
 const openApiSpec = {
   openapi: '3.1.0',
   info: {
-    title: 'SchoolBox API',
+    title: 'Skyta Academy',
     version: '1.0.0',
     description: 'A comprehensive Learning Management System API with RBAC, course management, and rich content support',
     contact: {
-      name: 'SchoolBox Support',
+      name: 'skyta Academy Support',
       email: 'support@topuniverse.org'
     },
     license: {
@@ -383,7 +383,7 @@ const openApiSpec = {
       InstitutionSettings: {
         type: 'object',
         properties: {
-          institutionName: { type: 'string', example: 'SchoolBox Academy' },
+          institutionName: { type: 'string', example: 'Skyta Academy' },
           institutionEmail: { type: 'string', format: 'email', nullable: true },
           institutionPhone: { type: 'string', nullable: true },
           institutionAddress: { type: 'string', nullable: true },

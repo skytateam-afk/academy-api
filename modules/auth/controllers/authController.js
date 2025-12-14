@@ -154,7 +154,7 @@ class AuthController {
                 });
                 // Don't block signup if email fails
             }
-
+            console.log(newUser)
             // Return success without token - user must verify email first
             res.status(201).json({
                 success: true,
