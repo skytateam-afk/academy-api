@@ -54,12 +54,12 @@ app.use(helmet({
     contentSecurityPolicy: false, // Disable for Scalar to work properly
 }));
 
-// CORS configuration - allow all during development
+// CORS configuration - use environment variable for all origins
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production'
-        ? process.env.CORS_ORIGIN?.split(',') || []
-        : ['https://academy.skyta.space','http://localhost:3000', 'http://localhost:3001', 'http://localhost:4000', 'https://localhost:4000', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:4000'],
-    credentials: true
+    origin: process.env.CORS_ORIGIN?.split(',').map(origin => origin.trim()) || ['http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Body parser middleware
