@@ -258,8 +258,6 @@ class Role {
      * @returns {Promise<boolean>} Success status
      */
     static async syncPermissions(roleId, permissionIds) {
-        const client = await db.getClient();
-
         try {
             await client.query('BEGIN');
 
