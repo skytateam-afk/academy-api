@@ -92,7 +92,6 @@ exports.seed = async function(knex) {
       status: 'available',
       pages: 464,
       edition: '1st',
-      price: 45.99,
       is_featured: true,
       added_by: addedBy
     },
@@ -115,7 +114,6 @@ exports.seed = async function(knex) {
       status: 'available',
       pages: 416,
       edition: '1st',
-      price: 54.99,
       is_featured: true,
       added_by: addedBy
     },
@@ -139,7 +137,6 @@ exports.seed = async function(knex) {
       status: 'available',
       pages: 176,
       edition: '1st',
-      price: 29.99,
       is_featured: false,
       added_by: addedBy
     },
@@ -161,7 +158,6 @@ exports.seed = async function(knex) {
       status: 'available',
       pages: 342,
       edition: '1st',
-      price: 39.99,
       is_featured: true,
       added_by: addedBy
     },
@@ -185,7 +181,6 @@ exports.seed = async function(knex) {
       status: 'available',
       pages: 770,
       edition: '3rd',
-      price: 49.99,
       is_featured: true,
       added_by: addedBy
     },
@@ -208,7 +203,6 @@ exports.seed = async function(knex) {
       status: 'available',
       pages: 384,
       edition: '1st',
-      price: 44.99,
       is_featured: false,
       added_by: addedBy
     },
@@ -232,7 +226,6 @@ exports.seed = async function(knex) {
       status: 'available',
       pages: 336,
       edition: '1st',
-      price: 27.99,
       is_featured: true,
       added_by: addedBy
     },
@@ -256,7 +249,6 @@ exports.seed = async function(knex) {
       status: 'available',
       pages: 216,
       edition: '3rd',
-      price: 32.99,
       is_featured: true,
       added_by: addedBy
     },
@@ -279,7 +271,6 @@ exports.seed = async function(knex) {
       status: 'available',
       pages: 368,
       edition: 'Revised',
-      price: 18.99,
       is_featured: false,
       added_by: addedBy
     },
@@ -299,7 +290,6 @@ exports.seed = async function(knex) {
       available_copies: 1,
       tags: JSON.stringify(['javascript', 'video', 'tutorial']),
       status: 'available',
-      price: 0,
       is_featured: false,
       added_by: addedBy
     }

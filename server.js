@@ -58,7 +58,7 @@ app.use(helmet({
 app.use(cors({
     origin: process.env.NODE_ENV === 'production'
         ? process.env.CORS_ORIGIN?.split(',') || []
-        : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:4000', 'https://localhost:4000', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:4000'],
+        : ['https://academy.skyta.space','http://localhost:3000', 'http://localhost:3001', 'http://localhost:4000', 'https://localhost:4000', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:4000'],
     credentials: true
 }));
 
