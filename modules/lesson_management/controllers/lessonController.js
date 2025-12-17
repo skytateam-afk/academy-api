@@ -13,6 +13,12 @@ class LessonController {
   /**
    * Helper method to check if user is enrolled in a course
    */
+
+  constructor() {
+    this.getLessonsByCourse = this.getLessonsByCourse.bind(this);
+    this.getLessonById = this.getLessonById.bind(this);
+    this.createLesson = this.createLesson.bind(this);
+  }
   async checkUserEnrollment(userId, courseId) {
     try {
       const knex = require('../../../config/knex');
