@@ -27,7 +27,7 @@ const checkPermission = requirePermission;
 router.get(
   '/courses/:courseId/lessons',
   authenticate,
-  lessonController.getLessonsByCourse
+  (req, res) => lessonController.getLessonsByCourse(req, res)
 );
 
 /**
