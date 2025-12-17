@@ -26,6 +26,7 @@ const checkPermission = requirePermission;
  */
 router.get(
   '/courses/:courseId/lessons',
+  authenticate,
   lessonController.getLessonsByCourse
 );
 
@@ -36,6 +37,7 @@ router.get(
  */
 router.get(
   '/courses/:courseId/lessons/search',
+  authenticate,
   lessonController.searchLessons
 );
 

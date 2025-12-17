@@ -50,7 +50,7 @@ class LessonController {
           message: 'Course not found'
         });
       }
- console.log(req.user, 'Request User');
+
       // Check permissions for unpublished lessons
       const canViewUnpublished = req.user && (
         req.user.role === 'super_admin' ||
@@ -73,7 +73,6 @@ class LessonController {
 
       // Filter lesson content based on enrollment status
       let lessons = result.lessons;
-      console.log(lessons, `User enrolled: ${isEnrolled}, Can view unpublished: ${canViewUnpublished}`);
       if (!isEnrolled && !canViewUnpublished) {
         // For non-enrolled users, only show basic lesson info, hide asset URLs
         console.log(`[Content Filter] Filtering ${lessons.length} lessons for non-enrolled user`);
