@@ -74,7 +74,7 @@ class LessonController {
       const result = await lessonRepository.findByCourse(courseId, {
         page: parseInt(page) || 1,
         limit: parseInt(limit) || 50,
-        includeUnpublished: includeUnpublished === 'true' && canViewUnpublished
+        includeUnpublished: true && canViewUnpublished
       });
 
       // Filter lesson content based on enrollment status
