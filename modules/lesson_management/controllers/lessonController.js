@@ -50,7 +50,7 @@ class LessonController {
           message: 'Course not found'
         });
       }
-
+ console.log(req.user, 'Request User');
       // Check permissions for unpublished lessons
       const canViewUnpublished = req.user && (
         req.user.role === 'super_admin' ||
