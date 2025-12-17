@@ -73,7 +73,7 @@ class LessonController {
 
       // Filter lesson content based on enrollment status
       let lessons = result.lessons;
-      console.log(lesson, `User enrolled: ${isEnrolled}, Can view unpublished: ${canViewUnpublished}`);
+      console.log(lessons, `User enrolled: ${isEnrolled}, Can view unpublished: ${canViewUnpublished}`);
       if (!isEnrolled && !canViewUnpublished) {
         // For non-enrolled users, only show basic lesson info, hide asset URLs
         console.log(`[Content Filter] Filtering ${lessons.length} lessons for non-enrolled user`);
