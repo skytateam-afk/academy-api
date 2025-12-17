@@ -127,6 +127,7 @@ class LessonRepository {
    * Update lesson
    */
   async update(id, lessonData) {
+    console.log('Updating lesson ID:', id, 'with data:', lessonData);
     const updateData = { ...lessonData };
     
     // Convert objects to JSON strings if present

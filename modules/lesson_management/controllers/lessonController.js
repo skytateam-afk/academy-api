@@ -265,7 +265,6 @@ class LessonController {
     try {
       const { id } = req.params;
       const updateData = req.body;
-
       const lesson = await lessonRepository.findByIdWithCourse(id);
       if (!lesson) {
         return res.status(404).json({
