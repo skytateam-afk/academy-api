@@ -1007,7 +1007,7 @@ class AuthController {
             // Mark user as verified
             await userRepository.update(user.id, {
                 is_verified: true,
-                email_verified_at: knex.fn.now()
+                email_verified_at: new Date()
             });
 
             logger.success('Email verified successfully', {
