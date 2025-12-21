@@ -105,7 +105,7 @@ exports.getModulesByCourse = async (req, res, next) => {
       if (userId && i > 0) {
         const previousLesson = lessons[i - 1];
         const previousLessonProgress = lessonProgressMap.get(previousLesson.id);
-
+        console.log('Previous Lesson Progress:', previousLessonProgress);
         // Check if previous lesson is complete
         if (!previousLessonProgress || !previousLessonProgress.is_completed) {
           isLocked = true;
@@ -546,9 +546,7 @@ exports.deleteModule = async (req, res, next) => {
   }
 };
 
-/**
- * Toggle module publish status
- */
+
 exports.togglePublishStatus = async (req, res, next) => {
   try {
     const { id } = req.params;

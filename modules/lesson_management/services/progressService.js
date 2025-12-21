@@ -121,10 +121,11 @@ class ProgressService {
 
             console.log('Upsert result:', upsertResult.rows ? upsertResult.rows[0] : 'No rows returned');
 
-            await trx.commit(); // Commit early to allow side effects to fail gracefully without rolling back progress
+            
+
+            await trx.commit();
             console.log('Transaction committed successfully');
 
-            // 5. Trigger side effects (Async, don't block response)
             this.handleCompletionSideEffects(userId, moduleId, lesson, data).catch(err => {
                 logger.error(`Error processing side effects for module ${moduleId}:`, err);
                 console.error(`Error processing side effects for module ${moduleId}:`, err);
@@ -135,7 +136,7 @@ class ProgressService {
                 success: true,
                 data: progressData
             };
-
+            
         } catch (error) {
             console.error('=== ProgressService.completeModule ERROR ===', error);
             await trx.rollback();
