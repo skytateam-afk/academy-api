@@ -191,8 +191,8 @@ const openApiSpec = {
           title: { type: 'string', example: 'Introduction to JavaScript' },
           slug: { type: 'string', example: 'intro-to-javascript' },
           description: { type: 'string', nullable: true },
-          contentType: { 
-            type: 'string', 
+          contentType: {
+            type: 'string',
             enum: ['video', 'audio', 'text', 'document', 'interactive', 'mixed'],
             description: 'Type of lesson content'
           },
@@ -239,8 +239,8 @@ const openApiSpec = {
           title: { type: 'string', example: 'Variables and Data Types' },
           slug: { type: 'string', example: 'variables-and-data-types' },
           description: { type: 'string', nullable: true },
-          contentType: { 
-            type: 'string', 
+          contentType: {
+            type: 'string',
             enum: ['video', 'audio', 'text', 'document', 'interactive', 'quiz', 'mixed'],
             description: 'Type of module content'
           },
@@ -485,15 +485,15 @@ const openApiSpec = {
                 type: 'object',
                 required: ['email', 'password'],
                 properties: {
-                  email: { 
-                    type: 'string', 
-                    format: 'email', 
+                  email: {
+                    type: 'string',
+                    format: 'email',
                     example: 'newuser@example.com',
                     description: 'User email address'
                   },
-                  password: { 
-                    type: 'string', 
-                    minLength: 8, 
+                  password: {
+                    type: 'string',
+                    minLength: 8,
                     example: 'SecurePass123!',
                     description: 'Password (min 8 chars, must contain uppercase, lowercase, and number)'
                   }
@@ -553,15 +553,15 @@ const openApiSpec = {
                 type: 'object',
                 required: ['email', 'password'],
                 properties: {
-                  email: { 
-                    type: 'string', 
-                    format: 'email', 
+                  email: {
+                    type: 'string',
+                    format: 'email',
                     example: 'user@example.com',
                     description: 'User email address'
                   },
-                  password: { 
-                    type: 'string', 
-                    minLength: 8, 
+                  password: {
+                    type: 'string',
+                    minLength: 8,
                     example: 'SecurePass123!',
                     description: 'Password (min 8 chars, must contain uppercase, lowercase, and number)'
                   }
@@ -627,18 +627,18 @@ const openApiSpec = {
                 type: 'object',
                 required: ['password'],
                 properties: {
-                  user: { 
-                    type: 'string', 
+                  user: {
+                    type: 'string',
                     example: 'user@example.com',
                     description: 'Username or email address'
                   },
-                  username: { 
-                    type: 'string', 
+                  username: {
+                    type: 'string',
                     example: 'johndoe',
                     description: 'Username (alternative to user field)'
                   },
-                  password: { 
-                    type: 'string', 
+                  password: {
+                    type: 'string',
                     example: 'SecurePass123!',
                     description: 'User password'
                   }
@@ -683,6 +683,133 @@ const openApiSpec = {
           },
           '401': {
             description: 'Invalid credentials',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/auth/forgot-password': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Forgot password',
+        description: 'Request a password reset link. If the email exists, a reset link will be sent. Always returns success to prevent email enumeration.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['email'],
+                properties: {
+                  email: {
+                    type: 'string',
+                    format: 'email',
+                    example: 'user@example.com',
+                    description: 'Registered user email address'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Password reset email processed',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: {
+                      type: 'string',
+                      example: 'If this email is registered, you will receive a password reset link'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Invalid email input',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/auth/reset-password': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Reset password',
+        description: 'Reset user password using a valid password reset token',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['token', 'newPassword'],
+                properties: {
+                  token: {
+                    type: 'string',
+                    example: '9f8c1b7a4e2d3c...',
+                    description: 'Password reset token sent to user email'
+                  },
+                  newPassword: {
+                    type: 'string',
+                    minLength: 8,
+                    example: 'NewSecurePass123!',
+                    description: 'New password (min 8 chars, must contain uppercase, lowercase, and number)'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Password reset successful',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: {
+                      type: 'string',
+                      example: 'Password has been reset successfully'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Invalid or expired token / weak password',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error',
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/Error' }
@@ -1264,8 +1391,8 @@ const openApiSpec = {
                 type: 'object',
                 required: ['role_name'],
                 properties: {
-                  role_name: { 
-                    type: 'string', 
+                  role_name: {
+                    type: 'string',
                     example: 'instructor',
                     description: 'New role name (e.g., student, instructor, admin, super_admin)'
                   }
@@ -1331,13 +1458,13 @@ const openApiSpec = {
                 type: 'object',
                 required: ['new_password'],
                 properties: {
-                  current_password: { 
-                    type: 'string', 
+                  current_password: {
+                    type: 'string',
                     format: 'password',
                     description: 'Current password (optional for admin)'
                   },
-                  new_password: { 
-                    type: 'string', 
+                  new_password: {
+                    type: 'string',
                     format: 'password',
                     minLength: 8,
                     example: 'NewSecurePass123!',
@@ -1678,12 +1805,12 @@ const openApiSpec = {
                 type: 'object',
                 required: ['name'],
                 properties: {
-                  name: { 
+                  name: {
                     type: 'string',
                     example: 'content_manager',
                     description: 'Unique role name'
                   },
-                  description: { 
+                  description: {
                     type: 'string',
                     example: 'Manages course content and lessons',
                     description: 'Role description'
@@ -1743,10 +1870,10 @@ const openApiSpec = {
         description: 'Retrieve a specific role with its permissions (requires role.read permission)',
         security: [{ bearerAuth: [] }],
         parameters: [
-          { 
-            name: 'id', 
-            in: 'path', 
-            required: true, 
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
             schema: { type: 'string', format: 'uuid' },
             description: 'Role ID'
           }
@@ -1803,10 +1930,10 @@ const openApiSpec = {
         description: 'Update role details (requires role.update permission)',
         security: [{ bearerAuth: [] }],
         parameters: [
-          { 
-            name: 'id', 
-            in: 'path', 
-            required: true, 
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
             schema: { type: 'string', format: 'uuid' },
             description: 'Role ID'
           }
@@ -1818,12 +1945,12 @@ const openApiSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  name: { 
+                  name: {
                     type: 'string',
                     example: 'content_manager',
                     description: 'Role name'
                   },
-                  description: { 
+                  description: {
                     type: 'string',
                     example: 'Manages all course content',
                     description: 'Role description'
@@ -1881,10 +2008,10 @@ const openApiSpec = {
         description: 'Delete a role (requires role.delete permission). Cannot delete system roles.',
         security: [{ bearerAuth: [] }],
         parameters: [
-          { 
-            name: 'id', 
-            in: 'path', 
-            required: true, 
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
             schema: { type: 'string', format: 'uuid' },
             description: 'Role ID'
           }
@@ -1938,10 +2065,10 @@ const openApiSpec = {
         description: 'Retrieve all permissions assigned to a role (requires role.read permission)',
         security: [{ bearerAuth: [] }],
         parameters: [
-          { 
-            name: 'id', 
-            in: 'path', 
-            required: true, 
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
             schema: { type: 'string', format: 'uuid' },
             description: 'Role ID'
           }
@@ -1980,10 +2107,10 @@ const openApiSpec = {
         description: 'Replace all role permissions with new set (requires role.update permission)',
         security: [{ bearerAuth: [] }],
         parameters: [
-          { 
-            name: 'id', 
-            in: 'path', 
-            required: true, 
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
             schema: { type: 'string', format: 'uuid' },
             description: 'Role ID'
           }
@@ -2056,10 +2183,10 @@ const openApiSpec = {
         description: 'Retrieve all users assigned to a specific role (requires role.read permission)',
         security: [{ bearerAuth: [] }],
         parameters: [
-          { 
-            name: 'id', 
-            in: 'path', 
-            required: true, 
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
             schema: { type: 'string', format: 'uuid' },
             description: 'Role ID'
           }
@@ -2364,10 +2491,10 @@ const openApiSpec = {
         description: 'Retrieve a specific permission with associated roles and users (requires role.read permission)',
         security: [{ bearerAuth: [] }],
         parameters: [
-          { 
-            name: 'id', 
-            in: 'path', 
-            required: true, 
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
             schema: { type: 'string', format: 'uuid' },
             description: 'Permission ID'
           }
@@ -2422,10 +2549,10 @@ const openApiSpec = {
         description: 'Update permission details (super admin only)',
         security: [{ bearerAuth: [] }],
         parameters: [
-          { 
-            name: 'id', 
-            in: 'path', 
-            required: true, 
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
             schema: { type: 'string', format: 'uuid' },
             description: 'Permission ID'
           }
@@ -2494,10 +2621,10 @@ const openApiSpec = {
         description: 'Delete a permission from the system (super admin only)',
         security: [{ bearerAuth: [] }],
         parameters: [
-          { 
-            name: 'id', 
-            in: 'path', 
-            required: true, 
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
             schema: { type: 'string', format: 'uuid' },
             description: 'Permission ID'
           }
@@ -5797,193 +5924,24 @@ const openApiSpec = {
       }
     },
     // ==================== LIBRARY MANAGEMENT ====================
-  
-  '/api/library/categories': {
-    get: {
-      tags: ['Library'],
-      summary: 'Get all library categories',
-      description: 'Retrieve all library categories',
-      responses: {
-        '200': {
-          description: 'List of library categories',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/LibraryCategory' }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    post: {
-      tags: ['Library'],
-      summary: 'Create library category',
-      description: 'Create a new library category (requires library.manage permission)',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              required: ['name'],
-              properties: {
-                name: { type: 'string', example: 'Science Fiction' },
-                description: { type: 'string' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '201': {
-          description: 'Category created successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/LibraryCategory' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  
-  '/api/library/categories/{id}': {
-    get: {
-      tags: ['Library'],
-      summary: 'Get library category by ID',
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Category details',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/LibraryCategory' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    put: {
-      tags: ['Library'],
-      summary: 'Update library category',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                name: { type: 'string' },
-                description: { type: 'string' },
-                isActive: { type: 'boolean' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '200': {
-          description: 'Category updated successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/LibraryCategory' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    delete: {
-      tags: ['Library'],
-      summary: 'Delete library category',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Category deleted successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
 
-  '/api/library/items': {
-    get: {
-      tags: ['Library'],
-      summary: 'Get all library items',
-      description: 'Retrieve paginated list of library items',
-      parameters: [
-        { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
-        { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
-        { name: 'search', in: 'query', schema: { type: 'string' } },
-        { name: 'categoryId', in: 'query', schema: { type: 'string', format: 'uuid' } },
-        { name: 'itemType', in: 'query', schema: { type: 'string', enum: ['book', 'ebook', 'audiobook', 'journal', 'magazine', 'other'] } },
-        { name: 'format', in: 'query', schema: { type: 'string', enum: ['physical', 'digital', 'both'] } }
-      ],
-      responses: {
-        '200': {
-          description: 'List of library items',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/LibraryItem' }
-                  },
-                  pagination: {
-                    type: 'object',
-                    properties: {
-                      page: { type: 'integer' },
-                      limit: { type: 'integer' },
-                      total: { type: 'integer' },
-                      totalPages: { type: 'integer' }
+    '/api/library/categories': {
+      get: {
+        tags: ['Library'],
+        summary: 'Get all library categories',
+        description: 'Retrieve all library categories',
+        responses: {
+          '200': {
+            description: 'List of library categories',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/LibraryCategory' }
                     }
                   }
                 }
@@ -5991,282 +5949,37 @@ const openApiSpec = {
             }
           }
         }
-      }
-    },
-    post: {
-      tags: ['Library'],
-      summary: 'Create library item',
-      description: 'Create a new library item (requires library.manage permission)',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              required: ['title', 'itemType', 'format'],
-              properties: {
-                title: { type: 'string', example: 'The Great Gatsby' },
-                author: { type: 'string', example: 'F. Scott Fitzgerald' },
-                isbn: { type: 'string' },
-                publisher: { type: 'string' },
-                publishedDate: { type: 'string', format: 'date' },
-                description: { type: 'string' },
-                categoryId: { type: 'string', format: 'uuid' },
-                itemType: { type: 'string', enum: ['book', 'ebook', 'audiobook', 'journal', 'magazine', 'other'] },
-                format: { type: 'string', enum: ['physical', 'digital', 'both'] },
-                totalCopies: { type: 'integer', default: 1 },
-                location: { type: 'string' },
-                tags: { type: 'array', items: { type: 'string' } }
-              }
-            }
-          }
-        }
       },
-      responses: {
-        '201': {
-          description: 'Item created successfully',
+      post: {
+        tags: ['Library'],
+        summary: 'Create library category',
+        description: 'Create a new library category (requires library.manage permission)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
+                required: ['name'],
                 properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/LibraryItem' }
+                  name: { type: 'string', example: 'Science Fiction' },
+                  description: { type: 'string' }
                 }
               }
             }
           }
-        }
-      }
-    }
-  },
-
-  '/api/library/items/featured': {
-    get: {
-      tags: ['Library'],
-      summary: 'Get featured library items',
-      parameters: [
-        { name: 'limit', in: 'query', schema: { type: 'integer', default: 6 } }
-      ],
-      responses: {
-        '200': {
-          description: 'List of featured items',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/LibraryItem' }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/library/items/search': {
-    get: {
-      tags: ['Library'],
-      summary: 'Search library items',
-      parameters: [
-        { name: 'q', in: 'query', required: true, schema: { type: 'string' }, description: 'Search query' },
-        { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
-        { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
-      ],
-      responses: {
-        '200': {
-          description: 'Search results',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/LibraryItem' }
-                  },
-                  pagination: {
-                    type: 'object',
-                    properties: {
-                      page: { type: 'integer' },
-                      limit: { type: 'integer' },
-                      total: { type: 'integer' },
-                      totalPages: { type: 'integer' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/library/items/{id}': {
-    get: {
-      tags: ['Library'],
-      summary: 'Get library item by ID',
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Item details',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/LibraryItem' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    put: {
-      tags: ['Library'],
-      summary: 'Update library item',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                title: { type: 'string' },
-                author: { type: 'string' },
-                isbn: { type: 'string' },
-                publisher: { type: 'string' },
-                publishedDate: { type: 'string', format: 'date' },
-                description: { type: 'string' },
-                categoryId: { type: 'string', format: 'uuid' },
-                itemType: { type: 'string', enum: ['book', 'ebook', 'audiobook', 'journal', 'magazine', 'other'] },
-                format: { type: 'string', enum: ['physical', 'digital', 'both'] },
-                totalCopies: { type: 'integer' },
-                location: { type: 'string' },
-                isFeatured: { type: 'boolean' },
-                tags: { type: 'array', items: { type: 'string' } }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '200': {
-          description: 'Item updated successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/LibraryItem' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    delete: {
-      tags: ['Library'],
-      summary: 'Delete library item',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Item deleted successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/library/items/{id}/download': {
-    get: {
-      tags: ['Library'],
-      summary: 'Download digital file',
-      description: 'Download digital file for library item (requires authentication)',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'File download initiated',
-          content: {
-            'application/octet-stream': {
-              schema: {
-                type: 'string',
-                format: 'binary'
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/library/borrowings': {
-    get: {
-      tags: ['Library'],
-      summary: 'Get all borrowings',
-      description: 'Get all borrowings (requires library.view permission)',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
-        { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
-        { name: 'status', in: 'query', schema: { type: 'string', enum: ['active', 'returned', 'overdue'] } }
-      ],
-      responses: {
-        '200': {
-          description: 'List of borrowings',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/LibraryBorrowing' }
-                  },
-                  pagination: {
-                    type: 'object',
-                    properties: {
-                      page: { type: 'integer' },
-                      limit: { type: 'integer' },
-                      total: { type: 'integer' },
-                      totalPages: { type: 'integer' }
-                    }
+        },
+        responses: {
+          '201': {
+            description: 'Category created successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/LibraryCategory' }
                   }
                 }
               }
@@ -6275,122 +5988,87 @@ const openApiSpec = {
         }
       }
     },
-    post: {
-      tags: ['Library'],
-      summary: 'Borrow a library item',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              required: ['itemId', 'userId', 'dueDate'],
-              properties: {
-                itemId: { type: 'string', format: 'uuid' },
-                userId: { type: 'string', format: 'uuid' },
-                dueDate: { type: 'string', format: 'date-time' },
-                notes: { type: 'string' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '201': {
-          description: 'Item borrowed successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/LibraryBorrowing' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
 
-  '/api/library/borrowings/my': {
-    get: {
-      tags: ['Library'],
-      summary: 'Get my borrowings',
-      description: 'Get current user\'s borrowings',
-      security: [{ bearerAuth: [] }],
-      responses: {
-        '200': {
-          description: 'List of borrowings',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/LibraryBorrowing' }
+    '/api/library/categories/{id}': {
+      get: {
+        tags: ['Library'],
+        summary: 'Get library category by ID',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Category details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/LibraryCategory' }
                   }
                 }
               }
             }
           }
         }
-      }
-    }
-  },
-
-  '/api/library/borrowings/{id}/return': {
-    put: {
-      tags: ['Library'],
-      summary: 'Return a borrowed item',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Item returned successfully',
+      },
+      put: {
+        tags: ['Library'],
+        summary: 'Update library category',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
                 properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/LibraryBorrowing' }
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  isActive: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Category updated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/LibraryCategory' }
+                  }
                 }
               }
             }
           }
         }
-      }
-    }
-  },
-
-  '/api/library/reservations': {
-    get: {
-      tags: ['Library'],
-      summary: 'Get all reservations',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
-        { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
-      ],
-      responses: {
-        '200': {
-          description: 'List of reservations',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/LibraryReservation' }
+      },
+      delete: {
+        tags: ['Library'],
+        summary: 'Delete library category',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Category deleted successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
                   }
                 }
               }
@@ -6399,667 +6077,156 @@ const openApiSpec = {
         }
       }
     },
-    post: {
-      tags: ['Library'],
-      summary: 'Reserve a library item',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              required: ['itemId'],
-              properties: {
-                itemId: { type: 'string', format: 'uuid' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '201': {
-          description: 'Reservation created successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/LibraryReservation' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
 
-  '/api/library/statistics': {
-    get: {
-      tags: ['Library'],
-      summary: 'Get library statistics',
-      security: [{ bearerAuth: [] }],
-      responses: {
-        '200': {
-          description: 'Library statistics',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'object',
-                    properties: {
-                      totalItems: { type: 'integer' },
-                      totalBorrowings: { type: 'integer' },
-                      activeBorrowings: { type: 'integer' },
-                      overdueBorrowings: { type: 'integer' },
-                      totalReservations: { type: 'integer' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  // ==================== SETTINGS ====================
-
-  '/api/settings': {
-    get: {
-      tags: ['Settings'],
-      summary: 'Get user settings',
-      description: 'Get current user\'s settings',
-      security: [{ bearerAuth: [] }],
-      responses: {
-        '200': {
-          description: 'User settings',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'object',
-                    properties: {
-                      notifications: { type: 'object' },
-                      preferences: { type: 'object' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    put: {
-      tags: ['Settings'],
-      summary: 'Update user settings',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                notifications: { type: 'object' },
-                preferences: { type: 'object' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '200': {
-          description: 'Settings updated successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/settings/institution': {
-    get: {
-      tags: ['Settings'],
-      summary: 'Get institution settings',
-      description: 'Get institution-wide settings (public)',
-      security: [{ bearerAuth: [] }],
-      responses: {
-        '200': {
-          description: 'Institution settings',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/InstitutionSettings' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    put: {
-      tags: ['Settings'],
-      summary: 'Update institution settings',
-      description: 'Update institution-wide settings (requires settings.update permission)',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                institutionName: { type: 'string' },
-                institutionEmail: { type: 'string', format: 'email' },
-                institutionPhone: { type: 'string' },
-                institutionAddress: { type: 'string' },
-                primaryColor: { type: 'string' },
-                secondaryColor: { type: 'string' },
-                timezone: { type: 'string' },
-                currency: { type: 'string' },
-                language: { type: 'string' },
-                maintenanceMode: { type: 'boolean' },
-                allowRegistration: { type: 'boolean' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '200': {
-          description: 'Institution settings updated',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/InstitutionSettings' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/settings/institution/logo': {
-    post: {
-      tags: ['Settings'],
-      summary: 'Upload institution logo',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'multipart/form-data': {
-            schema: {
-              type: 'object',
-              required: ['logo'],
-              properties: {
-                logo: {
-                  type: 'string',
-                  format: 'binary',
-                  description: 'Logo image file'
-                },
-                type: {
-                  type: 'string',
-                  enum: ['light', 'dark', 'favicon'],
-                  description: 'Logo type'
-                }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '200': {
-          description: 'Logo uploaded successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'object',
-                    properties: {
-                      logoUrl: { type: 'string' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  // ==================== PROMOTIONS ====================
-
-  '/api/promotions': {
-    get: {
-      tags: ['Promotions'],
-      summary: 'Get all promotions',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
-        { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
-      ],
-      responses: {
-        '200': {
-          description: 'List of promotions',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/Promotion' }
-                  },
-                  pagination: {
-                    type: 'object',
-                    properties: {
-                      page: { type: 'integer' },
-                      limit: { type: 'integer' },
-                      total: { type: 'integer' },
-                      totalPages: { type: 'integer' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    post: {
-      tags: ['Promotions'],
-      summary: 'Create promotion',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              required: ['title', 'message', 'startDate', 'endDate'],
-              properties: {
-                title: { type: 'string', example: 'Summer Sale' },
-                message: { type: 'string' },
-                imageUrl: { type: 'string' },
-                link: { type: 'string' },
-                targetAudience: { type: 'string', enum: ['all', 'students', 'instructors', 'admins'] },
-                startDate: { type: 'string', format: 'date-time' },
-                endDate: { type: 'string', format: 'date-time' },
-                isActive: { type: 'boolean' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '201': {
-          description: 'Promotion created',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Promotion' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/promotions/active': {
-    get: {
-      tags: ['Promotions'],
-      summary: 'Get active promotions',
-      security: [{ bearerAuth: [] }],
-      responses: {
-        '200': {
-          description: 'Active promotions',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/Promotion' }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/promotions/{id}': {
-    get: {
-      tags: ['Promotions'],
-      summary: 'Get promotion by ID',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Promotion details',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Promotion' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    put: {
-      tags: ['Promotions'],
-      summary: 'Update promotion',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                title: { type: 'string' },
-                message: { type: 'string' },
-                imageUrl: { type: 'string' },
-                link: { type: 'string' },
-                targetAudience: { type: 'string', enum: ['all', 'students', 'instructors', 'admins'] },
-                startDate: { type: 'string', format: 'date-time' },
-                endDate: { type: 'string', format: 'date-time' },
-                isActive: { type: 'boolean' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '200': {
-          description: 'Promotion updated',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Promotion' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    delete: {
-      tags: ['Promotions'],
-      summary: 'Delete promotion',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Promotion deleted',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/promotions/upload-image': {
-    post: {
-      tags: ['Promotions'],
-      summary: 'Upload promotion image',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'multipart/form-data': {
-            schema: {
-              type: 'object',
-              required: ['image'],
-              properties: {
-                image: {
-                  type: 'string',
-                  format: 'binary',
-                  description: 'Image file'
-                }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '200': {
-          description: 'Image uploaded',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'object',
-                    properties: {
-                      imageUrl: { type: 'string' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/promotions/{id}/display': {
-    post: {
-      tags: ['Promotions'],
-      summary: 'Record promotion display',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '201': {
-          description: 'Display recorded',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'object',
-                    properties: {
-                      displayId: { type: 'string', format: 'uuid' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/promotions/displays/{displayId}/click': {
-    post: {
-      tags: ['Promotions'],
-      summary: 'Record promotion click',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'displayId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Click recorded',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/promotions/displays/{displayId}/dismiss': {
-    post: {
-      tags: ['Promotions'],
-      summary: 'Record promotion dismissal',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'displayId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Dismissal recorded',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/promotions/{id}/stats': {
-    get: {
-      tags: ['Promotions'],
-      summary: 'Get promotion statistics',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Promotion statistics',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'object',
-                    properties: {
-                      totalDisplays: { type: 'integer' },
-                      totalClicks: { type: 'integer' },
-                      totalDismissals: { type: 'integer' },
-                      clickThroughRate: { type: 'number' },
-                      dismissalRate: { type: 'number' }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/promotions/{id}/performance': {
-    get: {
-      tags: ['Promotions'],
-      summary: 'Get promotion performance over time',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Promotion performance data',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: {
+    '/api/library/items': {
+      get: {
+        tags: ['Library'],
+        summary: 'Get all library items',
+        description: 'Retrieve paginated list of library items',
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'search', in: 'query', schema: { type: 'string' } },
+          { name: 'categoryId', in: 'query', schema: { type: 'string', format: 'uuid' } },
+          { name: 'itemType', in: 'query', schema: { type: 'string', enum: ['book', 'ebook', 'audiobook', 'journal', 'magazine', 'other'] } },
+          { name: 'format', in: 'query', schema: { type: 'string', enum: ['physical', 'digital', 'both'] } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of library items',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/LibraryItem' }
+                    },
+                    pagination: {
                       type: 'object',
                       properties: {
-                        date: { type: 'string', format: 'date' },
-                        displays: { type: 'integer' },
-                        clicks: { type: 'integer' },
-                        dismissals: { type: 'integer' }
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      post: {
+        tags: ['Library'],
+        summary: 'Create library item',
+        description: 'Create a new library item (requires library.manage permission)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['title', 'itemType', 'format'],
+                properties: {
+                  title: { type: 'string', example: 'The Great Gatsby' },
+                  author: { type: 'string', example: 'F. Scott Fitzgerald' },
+                  isbn: { type: 'string' },
+                  publisher: { type: 'string' },
+                  publishedDate: { type: 'string', format: 'date' },
+                  description: { type: 'string' },
+                  categoryId: { type: 'string', format: 'uuid' },
+                  itemType: { type: 'string', enum: ['book', 'ebook', 'audiobook', 'journal', 'magazine', 'other'] },
+                  format: { type: 'string', enum: ['physical', 'digital', 'both'] },
+                  totalCopies: { type: 'integer', default: 1 },
+                  location: { type: 'string' },
+                  tags: { type: 'array', items: { type: 'string' } }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Item created successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/LibraryItem' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/library/items/featured': {
+      get: {
+        tags: ['Library'],
+        summary: 'Get featured library items',
+        parameters: [
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 6 } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of featured items',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/LibraryItem' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/library/items/search': {
+      get: {
+        tags: ['Library'],
+        summary: 'Search library items',
+        parameters: [
+          { name: 'q', in: 'query', required: true, schema: { type: 'string' }, description: 'Search query' },
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
+        ],
+        responses: {
+          '200': {
+            description: 'Search results',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/LibraryItem' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
                       }
                     }
                   }
@@ -7069,40 +6236,546 @@ const openApiSpec = {
           }
         }
       }
-    }
-  },
+    },
 
-  // ==================== ANNOUNCEMENTS ====================
-
-  '/api/announcements': {
-    get: {
-      tags: ['Announcements'],
-      summary: 'Get all announcements',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
-        { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
-      ],
-      responses: {
-        '200': {
-          description: 'List of announcements',
+    '/api/library/items/{id}': {
+      get: {
+        tags: ['Library'],
+        summary: 'Get library item by ID',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Item details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/LibraryItem' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      put: {
+        tags: ['Library'],
+        summary: 'Update library item',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
                 properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/Announcement' }
+                  title: { type: 'string' },
+                  author: { type: 'string' },
+                  isbn: { type: 'string' },
+                  publisher: { type: 'string' },
+                  publishedDate: { type: 'string', format: 'date' },
+                  description: { type: 'string' },
+                  categoryId: { type: 'string', format: 'uuid' },
+                  itemType: { type: 'string', enum: ['book', 'ebook', 'audiobook', 'journal', 'magazine', 'other'] },
+                  format: { type: 'string', enum: ['physical', 'digital', 'both'] },
+                  totalCopies: { type: 'integer' },
+                  location: { type: 'string' },
+                  isFeatured: { type: 'boolean' },
+                  tags: { type: 'array', items: { type: 'string' } }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Item updated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/LibraryItem' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Library'],
+        summary: 'Delete library item',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Item deleted successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/library/items/{id}/download': {
+      get: {
+        tags: ['Library'],
+        summary: 'Download digital file',
+        description: 'Download digital file for library item (requires authentication)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'File download initiated',
+            content: {
+              'application/octet-stream': {
+                schema: {
+                  type: 'string',
+                  format: 'binary'
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/library/borrowings': {
+      get: {
+        tags: ['Library'],
+        summary: 'Get all borrowings',
+        description: 'Get all borrowings (requires library.view permission)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['active', 'returned', 'overdue'] } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of borrowings',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/LibraryBorrowing' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      post: {
+        tags: ['Library'],
+        summary: 'Borrow a library item',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['itemId', 'userId', 'dueDate'],
+                properties: {
+                  itemId: { type: 'string', format: 'uuid' },
+                  userId: { type: 'string', format: 'uuid' },
+                  dueDate: { type: 'string', format: 'date-time' },
+                  notes: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Item borrowed successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/LibraryBorrowing' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/library/borrowings/my': {
+      get: {
+        tags: ['Library'],
+        summary: 'Get my borrowings',
+        description: 'Get current user\'s borrowings',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'List of borrowings',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/LibraryBorrowing' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/library/borrowings/{id}/return': {
+      put: {
+        tags: ['Library'],
+        summary: 'Return a borrowed item',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Item returned successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/LibraryBorrowing' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/library/reservations': {
+      get: {
+        tags: ['Library'],
+        summary: 'Get all reservations',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of reservations',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/LibraryReservation' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      post: {
+        tags: ['Library'],
+        summary: 'Reserve a library item',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['itemId'],
+                properties: {
+                  itemId: { type: 'string', format: 'uuid' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Reservation created successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/LibraryReservation' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/library/statistics': {
+      get: {
+        tags: ['Library'],
+        summary: 'Get library statistics',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Library statistics',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        totalItems: { type: 'integer' },
+                        totalBorrowings: { type: 'integer' },
+                        activeBorrowings: { type: 'integer' },
+                        overdueBorrowings: { type: 'integer' },
+                        totalReservations: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    // ==================== SETTINGS ====================
+
+    '/api/settings': {
+      get: {
+        tags: ['Settings'],
+        summary: 'Get user settings',
+        description: 'Get current user\'s settings',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'User settings',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        notifications: { type: 'object' },
+                        preferences: { type: 'object' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      put: {
+        tags: ['Settings'],
+        summary: 'Update user settings',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  notifications: { type: 'object' },
+                  preferences: { type: 'object' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Settings updated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/settings/institution': {
+      get: {
+        tags: ['Settings'],
+        summary: 'Get institution settings',
+        description: 'Get institution-wide settings (public)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Institution settings',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/InstitutionSettings' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      put: {
+        tags: ['Settings'],
+        summary: 'Update institution settings',
+        description: 'Update institution-wide settings (requires settings.update permission)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  institutionName: { type: 'string' },
+                  institutionEmail: { type: 'string', format: 'email' },
+                  institutionPhone: { type: 'string' },
+                  institutionAddress: { type: 'string' },
+                  primaryColor: { type: 'string' },
+                  secondaryColor: { type: 'string' },
+                  timezone: { type: 'string' },
+                  currency: { type: 'string' },
+                  language: { type: 'string' },
+                  maintenanceMode: { type: 'boolean' },
+                  allowRegistration: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Institution settings updated',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/InstitutionSettings' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/settings/institution/logo': {
+      post: {
+        tags: ['Settings'],
+        summary: 'Upload institution logo',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['logo'],
+                properties: {
+                  logo: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'Logo image file'
                   },
-                  pagination: {
-                    type: 'object',
-                    properties: {
-                      page: { type: 'integer' },
-                      limit: { type: 'integer' },
-                      total: { type: 'integer' },
-                      totalPages: { type: 'integer' }
+                  type: {
+                    type: 'string',
+                    enum: ['light', 'dark', 'favicon'],
+                    description: 'Logo type'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Logo uploaded successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        logoUrl: { type: 'string' }
+                      }
                     }
                   }
                 }
@@ -7112,251 +6785,39 @@ const openApiSpec = {
         }
       }
     },
-    post: {
-      tags: ['Announcements'],
-      summary: 'Create announcement',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              required: ['title', 'message', 'startDate', 'endDate'],
-              properties: {
-                title: { type: 'string', example: 'System Maintenance' },
-                message: { type: 'string' },
-                type: { type: 'string', enum: ['info', 'warning', 'success', 'error'] },
-                priority: { type: 'string', enum: ['low', 'medium', 'high', 'urgent'] },
-                targetAudience: { type: 'string', enum: ['all', 'students', 'instructors', 'admins'] },
-                startDate: { type: 'string', format: 'date-time' },
-                endDate: { type: 'string', format: 'date-time' },
-                isActive: { type: 'boolean' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '201': {
-          description: 'Announcement created',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Announcement' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
 
-  '/api/announcements/active': {
-    get: {
-      tags: ['Announcements'],
-      summary: 'Get active announcements',
-      description: 'Get active announcements for current user',
-      security: [{ bearerAuth: [] }],
-      responses: {
-        '200': {
-          description: 'Active announcements',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/Announcement' }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
+    // ==================== PROMOTIONS ====================
 
-  '/api/announcements/{id}': {
-    get: {
-      tags: ['Announcements'],
-      summary: 'Get announcement by ID',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Announcement details',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Announcement' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    put: {
-      tags: ['Announcements'],
-      summary: 'Update announcement',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                title: { type: 'string' },
-                message: { type: 'string' },
-                type: { type: 'string', enum: ['info', 'warning', 'success', 'error'] },
-                priority: { type: 'string', enum: ['low', 'medium', 'high', 'urgent'] },
-                targetAudience: { type: 'string', enum: ['all', 'students', 'instructors', 'admins'] },
-                startDate: { type: 'string', format: 'date-time' },
-                endDate: { type: 'string', format: 'date-time' },
-                isActive: { type: 'boolean' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '200': {
-          description: 'Announcement updated',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Announcement' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    delete: {
-      tags: ['Announcements'],
-      summary: 'Delete announcement',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Announcement deleted',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/announcements/{id}/view': {
-    post: {
-      tags: ['Announcements'],
-      summary: 'Mark announcement as viewed',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Announcement marked as viewed',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/announcements/{id}/dismiss': {
-    post: {
-      tags: ['Announcements'],
-      summary: 'Dismiss announcement',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Announcement dismissed',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/announcements/{id}/stats': {
-    get: {
-      tags: ['Announcements'],
-      summary: 'Get announcement statistics',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Announcement statistics',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'object',
-                    properties: {
-                      totalViews: { type: 'integer' },
-                      totalDismissals: { type: 'integer' },
-                      viewRate: { type: 'number' },
-                      dismissalRate: { type: 'number' }
+    '/api/promotions': {
+      get: {
+        tags: ['Promotions'],
+        summary: 'Get all promotions',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of promotions',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Promotion' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
+                      }
                     }
                   }
                 }
@@ -7364,41 +6825,68 @@ const openApiSpec = {
             }
           }
         }
-      }
-    }
-  },
-
-  // ==================== PATHWAYS ====================
-
-  '/api/pathways': {
-    get: {
-      tags: ['Pathways'],
-      summary: 'Get all pathways',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
-        { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
-      ],
-      responses: {
-        '200': {
-          description: 'List of pathways',
+      },
+      post: {
+        tags: ['Promotions'],
+        summary: 'Create promotion',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
+                required: ['title', 'message', 'startDate', 'endDate'],
                 properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/Pathway' }
-                  },
-                  pagination: {
-                    type: 'object',
-                    properties: {
-                      page: { type: 'integer' },
-                      limit: { type: 'integer' },
-                      total: { type: 'integer' },
-                      totalPages: { type: 'integer' }
+                  title: { type: 'string', example: 'Summer Sale' },
+                  message: { type: 'string' },
+                  imageUrl: { type: 'string' },
+                  link: { type: 'string' },
+                  targetAudience: { type: 'string', enum: ['all', 'students', 'instructors', 'admins'] },
+                  startDate: { type: 'string', format: 'date-time' },
+                  endDate: { type: 'string', format: 'date-time' },
+                  isActive: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Promotion created',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Promotion' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/promotions/active': {
+      get: {
+        tags: ['Promotions'],
+        summary: 'Get active promotions',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Active promotions',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Promotion' }
                     }
                   }
                 }
@@ -7408,66 +6896,951 @@ const openApiSpec = {
         }
       }
     },
-    post: {
-      tags: ['Pathways'],
-      summary: 'Create pathway',
-      security: [{ bearerAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              required: ['title', 'description'],
-              properties: {
-                title: { type: 'string', example: 'Web Development Pathway' },
-                description: { type: 'string' },
-                slug: { type: 'string' },
-                imageUrl: { type: 'string' },
-                duration: { type: 'string' },
-                difficulty: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
-                isPublished: { type: 'boolean' },
-                isFeatured: { type: 'boolean' }
+
+    '/api/promotions/{id}': {
+      get: {
+        tags: ['Promotions'],
+        summary: 'Get promotion by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Promotion details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Promotion' }
+                  }
+                }
               }
             }
           }
         }
       },
-      responses: {
-        '201': {
-          description: 'Pathway created',
+      put: {
+        tags: ['Promotions'],
+        summary: 'Update promotion',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
                 properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Pathway' }
+                  title: { type: 'string' },
+                  message: { type: 'string' },
+                  imageUrl: { type: 'string' },
+                  link: { type: 'string' },
+                  targetAudience: { type: 'string', enum: ['all', 'students', 'instructors', 'admins'] },
+                  startDate: { type: 'string', format: 'date-time' },
+                  endDate: { type: 'string', format: 'date-time' },
+                  isActive: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Promotion updated',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Promotion' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Promotions'],
+        summary: 'Delete promotion',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Promotion deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
                 }
               }
             }
           }
         }
       }
-    }
-  },
+    },
 
-  '/api/pathways/featured': {
-    get: {
-      tags: ['Pathways'],
-      summary: 'Get featured pathways',
-      responses: {
-        '200': {
-          description: 'Featured pathways',
+    '/api/promotions/upload-image': {
+      post: {
+        tags: ['Promotions'],
+        summary: 'Upload promotion image',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['image'],
+                properties: {
+                  image: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'Image file'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Image uploaded',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        imageUrl: { type: 'string' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/promotions/{id}/display': {
+      post: {
+        tags: ['Promotions'],
+        summary: 'Record promotion display',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '201': {
+            description: 'Display recorded',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        displayId: { type: 'string', format: 'uuid' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/promotions/displays/{displayId}/click': {
+      post: {
+        tags: ['Promotions'],
+        summary: 'Record promotion click',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'displayId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Click recorded',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/promotions/displays/{displayId}/dismiss': {
+      post: {
+        tags: ['Promotions'],
+        summary: 'Record promotion dismissal',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'displayId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Dismissal recorded',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/promotions/{id}/stats': {
+      get: {
+        tags: ['Promotions'],
+        summary: 'Get promotion statistics',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Promotion statistics',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        totalDisplays: { type: 'integer' },
+                        totalClicks: { type: 'integer' },
+                        totalDismissals: { type: 'integer' },
+                        clickThroughRate: { type: 'number' },
+                        dismissalRate: { type: 'number' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/promotions/{id}/performance': {
+      get: {
+        tags: ['Promotions'],
+        summary: 'Get promotion performance over time',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Promotion performance data',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          date: { type: 'string', format: 'date' },
+                          displays: { type: 'integer' },
+                          clicks: { type: 'integer' },
+                          dismissals: { type: 'integer' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    // ==================== ANNOUNCEMENTS ====================
+
+    '/api/announcements': {
+      get: {
+        tags: ['Announcements'],
+        summary: 'Get all announcements',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of announcements',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Announcement' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      post: {
+        tags: ['Announcements'],
+        summary: 'Create announcement',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['title', 'message', 'startDate', 'endDate'],
+                properties: {
+                  title: { type: 'string', example: 'System Maintenance' },
+                  message: { type: 'string' },
+                  type: { type: 'string', enum: ['info', 'warning', 'success', 'error'] },
+                  priority: { type: 'string', enum: ['low', 'medium', 'high', 'urgent'] },
+                  targetAudience: { type: 'string', enum: ['all', 'students', 'instructors', 'admins'] },
+                  startDate: { type: 'string', format: 'date-time' },
+                  endDate: { type: 'string', format: 'date-time' },
+                  isActive: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Announcement created',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Announcement' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/announcements/active': {
+      get: {
+        tags: ['Announcements'],
+        summary: 'Get active announcements',
+        description: 'Get active announcements for current user',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Active announcements',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Announcement' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/announcements/{id}': {
+      get: {
+        tags: ['Announcements'],
+        summary: 'Get announcement by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Announcement details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Announcement' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      put: {
+        tags: ['Announcements'],
+        summary: 'Update announcement',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
                 properties: {
-                  success: { type: 'boolean' },
-                  data: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/Pathway' }
+                  title: { type: 'string' },
+                  message: { type: 'string' },
+                  type: { type: 'string', enum: ['info', 'warning', 'success', 'error'] },
+                  priority: { type: 'string', enum: ['low', 'medium', 'high', 'urgent'] },
+                  targetAudience: { type: 'string', enum: ['all', 'students', 'instructors', 'admins'] },
+                  startDate: { type: 'string', format: 'date-time' },
+                  endDate: { type: 'string', format: 'date-time' },
+                  isActive: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Announcement updated',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Announcement' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Announcements'],
+        summary: 'Delete announcement',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Announcement deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/announcements/{id}/view': {
+      post: {
+        tags: ['Announcements'],
+        summary: 'Mark announcement as viewed',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Announcement marked as viewed',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/announcements/{id}/dismiss': {
+      post: {
+        tags: ['Announcements'],
+        summary: 'Dismiss announcement',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Announcement dismissed',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/announcements/{id}/stats': {
+      get: {
+        tags: ['Announcements'],
+        summary: 'Get announcement statistics',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Announcement statistics',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        totalViews: { type: 'integer' },
+                        totalDismissals: { type: 'integer' },
+                        viewRate: { type: 'number' },
+                        dismissalRate: { type: 'number' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    // ==================== PATHWAYS ====================
+
+    '/api/pathways': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get all pathways',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of pathways',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Pathway' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      post: {
+        tags: ['Pathways'],
+        summary: 'Create pathway',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['title', 'description'],
+                properties: {
+                  title: { type: 'string', example: 'Web Development Pathway' },
+                  description: { type: 'string' },
+                  slug: { type: 'string' },
+                  imageUrl: { type: 'string' },
+                  duration: { type: 'string' },
+                  difficulty: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
+                  isPublished: { type: 'boolean' },
+                  isFeatured: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Pathway created',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Pathway' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/pathways/featured': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get featured pathways',
+        responses: {
+          '200': {
+            description: 'Featured pathways',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Pathway' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/pathways/slug/{slug}': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get pathway by slug',
+        parameters: [
+          { name: 'slug', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Pathway details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Pathway' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/pathways/{id}': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get pathway by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Pathway details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Pathway' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      put: {
+        tags: ['Pathways'],
+        summary: 'Update pathway',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  slug: { type: 'string' },
+                  imageUrl: { type: 'string' },
+                  duration: { type: 'string' },
+                  difficulty: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
+                  isPublished: { type: 'boolean' },
+                  isFeatured: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Pathway updated',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Pathway' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Pathways'],
+        summary: 'Delete pathway',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Pathway deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/pathways/{id}/publish': {
+      patch: {
+        tags: ['Pathways'],
+        summary: 'Toggle pathway publish status',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Publish status toggled',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Pathway' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/pathways/{id}/featured': {
+      patch: {
+        tags: ['Pathways'],
+        summary: 'Toggle pathway featured status',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Featured status toggled',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Pathway' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/pathways/{id}/courses': {
+      post: {
+        tags: ['Pathways'],
+        summary: 'Add course to pathway',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['courseId', 'order'],
+                properties: {
+                  courseId: { type: 'string', format: 'uuid' },
+                  order: { type: 'integer', description: 'Order of course in pathway' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Course added to pathway',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Pathway' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/pathways/{id}/courses/{courseId}': {
+      delete: {
+        tags: ['Pathways'],
+        summary: 'Remove course from pathway',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          { name: 'courseId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Course removed from pathway',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
                   }
                 }
               }
@@ -7476,252 +7849,6 @@ const openApiSpec = {
         }
       }
     }
-  },
-
-  '/api/pathways/slug/{slug}': {
-    get: {
-      tags: ['Pathways'],
-      summary: 'Get pathway by slug',
-      parameters: [
-        { name: 'slug', in: 'path', required: true, schema: { type: 'string' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Pathway details',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Pathway' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/pathways/{id}': {
-    get: {
-      tags: ['Pathways'],
-      summary: 'Get pathway by ID',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Pathway details',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Pathway' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    put: {
-      tags: ['Pathways'],
-      summary: 'Update pathway',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                title: { type: 'string' },
-                description: { type: 'string' },
-                slug: { type: 'string' },
-                imageUrl: { type: 'string' },
-                duration: { type: 'string' },
-                difficulty: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
-                isPublished: { type: 'boolean' },
-                isFeatured: { type: 'boolean' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '200': {
-          description: 'Pathway updated',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Pathway' }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    delete: {
-      tags: ['Pathways'],
-      summary: 'Delete pathway',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Pathway deleted',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/pathways/{id}/publish': {
-    patch: {
-      tags: ['Pathways'],
-      summary: 'Toggle pathway publish status',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Publish status toggled',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Pathway' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/pathways/{id}/featured': {
-    patch: {
-      tags: ['Pathways'],
-      summary: 'Toggle pathway featured status',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Featured status toggled',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Pathway' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/pathways/{id}/courses': {
-    post: {
-      tags: ['Pathways'],
-      summary: 'Add course to pathway',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              required: ['courseId', 'order'],
-              properties: {
-                courseId: { type: 'string', format: 'uuid' },
-                order: { type: 'integer', description: 'Order of course in pathway' }
-              }
-            }
-          }
-        }
-      },
-      responses: {
-        '200': {
-          description: 'Course added to pathway',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  data: { $ref: '#/components/schemas/Pathway' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-
-  '/api/pathways/{id}/courses/{courseId}': {
-    delete: {
-      tags: ['Pathways'],
-      summary: 'Remove course from pathway',
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
-        { name: 'courseId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
-      ],
-      responses: {
-        '200': {
-          description: 'Course removed from pathway',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  success: { type: 'boolean' },
-                  message: { type: 'string' }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
   },
 };
 
