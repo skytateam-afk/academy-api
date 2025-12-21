@@ -16,7 +16,7 @@ exports.getModulesByCourse = async (req, res, next) => {
     const { courseId } = req.params;
     const userId = req.user?.userId;
     const knex = require('../../../config/knex');
-    
+
     // Check if user is admin or super admin
     const isAdmin = req.user?.role === 'admin' || req.user?.role === 'super_admin';
 
@@ -104,10 +104,12 @@ exports.getModulesByCourse = async (req, res, next) => {
       let isLocked = false;
       if (userId && i > 0) {
         const previousLesson = lessons[i - 1];
-        const previousLessonProgress = lessonProgressMap.get(previousLesson.id);
-        console.log('Previous Lesson Progress:', previousLessonProgress);
-        // Check if previous lesson is complete
-        if (!previousLessonProgress || !previousLessonProgress.is_completed) {
+        const prevModules = await moduleRepository.findWithAttachments(previousLesson.id);
+
+        const completedModules = prevModules.filter(m => moduleProgressMap.get(m.id)?.is_completed).length;
+        const totalModules = prevModules.length;
+
+        if (completedModules < totalModules) {
           isLocked = true;
         }
       }
