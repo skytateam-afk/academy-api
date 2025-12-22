@@ -485,10 +485,20 @@ const openApiSpec = {
                 type: 'object',
                 required: ['email', 'password'],
                 properties: {
+                  first_name: {
+                    type: 'string',
+                    example: 'John',
+                    description: 'User first name'
+                  },
+                  last_name: {
+                    type: 'string',
+                    example: 'Doe',
+                    description: 'User last name'
+                  },
                   email: {
                     type: 'string',
                     format: 'email',
-                    example: 'newuser@example.com',
+                    example: 'hello@example.com',
                     description: 'User email address'
                   },
                   password: {
@@ -518,6 +528,8 @@ const openApiSpec = {
                       properties: {
                         id: { type: 'string', format: 'uuid' },
                         username: { type: 'string', example: 'playful_panda_42' },
+                        first_name:{type:'string', example:'John'},
+                        last_name:{type:'string', example:'Doe'},
                         email: { type: 'string', format: 'email' },
                         role: { type: 'string', example: 'student' },
                         created_at: { type: 'string', format: 'date-time' }
@@ -553,6 +565,16 @@ const openApiSpec = {
                 type: 'object',
                 required: ['email', 'password'],
                 properties: {
+                  first_name: {
+                    type: 'string',
+                    example: 'John',
+                    description: 'User first name'
+                  },
+                  last_name: {
+                    type: 'string',
+                    example: 'Doe',
+                    description: 'User last name'
+                  },
                   email: {
                     type: 'string',
                     format: 'email',
@@ -585,6 +607,8 @@ const openApiSpec = {
                       properties: {
                         id: { type: 'string', format: 'uuid' },
                         username: { type: 'string', example: 'playful_panda_42' },
+                        first_name:{ type:'string', example:'John'},
+                        last_name:{ type:'string', example:'Doe'},
                         email: { type: 'string', format: 'email' },
                         role: { type: 'string', example: 'student' },
                         created_at: { type: 'string', format: 'date-time' }

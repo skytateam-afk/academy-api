@@ -44,7 +44,7 @@ class AuthController {
      * @access Public
      */
     async signup(req, res) {
-        const { email, password } = req.body;
+        const { email, first_name, last_name, password } = req.body;
         const ipAddress = req.ip || req.connection.remoteAddress;
 
         try {
@@ -103,6 +103,8 @@ class AuthController {
             const newUser = await userRepository.create({
                 username,
                 email,
+                first_name,
+                last_name,
                 password,
                 role_id: defaultRoleId
             });
@@ -110,13 +112,17 @@ class AuthController {
             logger.success('User signed up successfully', {
                 userId: newUser.id,
                 username: newUser.username,
-                email: newUser.email
+                email: newUser.email,
+                first_name: newUser.first_name,
+                last_name: newUser.last_name
             });
 
             logSecurityEvent('USER_SIGNUP', {
                 userId: newUser.id,
                 username: newUser.username,
                 email: newUser.email,
+                first_name: newUser.first_name,
+                last_name: newUser.last_name,
                 ip: ipAddress
             });
 
@@ -152,10 +158,7 @@ class AuthController {
                     userId: newUser.id,
                     error: emailError.message
                 });
-                // Don't block signup if email fails
             }
-            console.log(newUser)
-            // Return success without token - user must verify email first
             res.status(201).json({
                 success: true,
                 message: 'Account created successfully. Please check your email to verify your account before signing in.',
@@ -163,6 +166,8 @@ class AuthController {
                     id: newUser.id,
                     username: newUser.username,
                     email: newUser.email,
+                    first_name: newUser.first_name,
+                    last_name:newUser.last_name,
                     is_verified: false,
                     created_at: newUser.created_at
                 }
@@ -499,7 +504,7 @@ class AuthController {
      * @access Protected
      */
     async register(req, res) {
-        const { email, password } = req.body;
+        const { email, password, first_name, last_name } = req.body;
         const ipAddress = req.ip || req.connection.remoteAddress;
 
         try {
@@ -557,6 +562,8 @@ class AuthController {
             const newUser = await userRepository.create({
                 username,
                 email,
+                first_name,
+                last_name,
                 password,
                 role_id: defaultRoleId
             });
@@ -564,22 +571,28 @@ class AuthController {
             logger.success('User registered successfully', {
                 userId: newUser.id,
                 username: newUser.username,
+                first_name: newUser.first_name,
+                last_name: newUser.last_name,
                 registeredBy: req.user.username
             });
 
             logSecurityEvent('USER_REGISTERED', {
                 userId: newUser.id,
                 username: newUser.username,
+                first_name: newUser.first_name,
+                last_name: newUser.last_name,
                 registeredBy: req.user.userId,
                 ip: ipAddress
             });
-
+            
             res.status(201).json({
                 success: true,
                 message: 'User registered successfully',
                 user: {
                     id: newUser.id,
                     username: newUser.username,
+                    first_name: newUser.first_name,
+                    last_name: newUser.last_name,
                     email: newUser.email,
                     role: newUser.role,
                     created_at: newUser.created_at
