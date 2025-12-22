@@ -19,7 +19,7 @@ class EmailService {
     this.apiKey = process.env.USEPLUNK_API_KEY;
     this.apiUrl = 'https://api.useplunk.com/v1/send';
     this.fromEmail = process.env.EMAIL_FROM || 'noreply@topuniverse.org';
-    this.fromName = process.env.EMAIL_FROM_NAME || 'SchoolBox';
+    this.fromName = process.env.EMAIL_FROM_NAME || 'Skyta Academy';
     this.templatesPath = path.join(__dirname, '../templates/email');
   }
 
@@ -74,7 +74,7 @@ class EmailService {
       baseTemplate = baseTemplate.replace('{{content}}', contentTemplate);
 
       // Replace remaining base template variables
-      baseTemplate = baseTemplate.replace('{{subject}}', variables.subject || 'SchoolBox');
+      baseTemplate = baseTemplate.replace('{{subject}}', variables.subject || 'Skyta Academy');
       baseTemplate = baseTemplate.replace('{{year}}', new Date().getFullYear());
 
       return baseTemplate;
@@ -159,7 +159,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Welcome to SchoolBox',
+      subject: 'Welcome to Skyta Academy',
       template: 'welcome',
       variables: {
         username,
@@ -188,7 +188,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Your SchoolBox Account Has Been Created',
+      subject: 'Your Skyta Academy Account Has Been Created',
       template: 'account-created',
       variables: {
         username,
@@ -216,7 +216,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Verify Your Email - SchoolBox',
+      subject: 'Verify Your Email - Skyta Academy',
       template: 'otp',
       variables: {
         username,
@@ -239,9 +239,9 @@ class EmailService {
     const { email, otp_code, purpose = 'email_verification' } = otpData;
 
     const subjects = {
-      email_verification: 'Verify Your Email - SchoolBox',
-      password_reset: 'Password Reset Code - SchoolBox',
-      login: 'Your Login Code - SchoolBox',
+      email_verification: 'Verify Your Email - Skyta Academy',
+      password_reset: 'Password Reset Code - Skyta Academy',
+      login: 'Your Login Code - Skyta Academy',
     };
 
     return this.sendEmail({
@@ -269,7 +269,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'MFA Verification Code - SchoolBox',
+      subject: 'MFA Verification Code - Skyta Academy',
       template: 'otp',
       variables: {
         username,
@@ -293,12 +293,12 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Your Login Code - SchoolBox',
+      subject: 'Your Login Code - Skyta Academy',
       template: 'otp-login',
       variables: {
         otpCode,
         expiresIn,
-        institutionName: 'SchoolBox',
+        institutionName: 'Skyta Academy',
       },
     });
   }
@@ -320,7 +320,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Password Reset Request - SchoolBox',
+      subject: 'Password Reset Request - Skyta Academy',
       template: 'password-reset',
       variables: {
         username,
@@ -344,7 +344,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: `Enrolled in ${courseName} - SchoolBox`,
+      subject: `Enrolled in ${courseName} - Skyta Academy`,
       template: 'welcome',
       variables: {
         courseName,
@@ -365,7 +365,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Password Changed - SchoolBox',
+      subject: 'Password Changed - Skyta Academy',
       template: 'notification',
       variables: {
         title: 'Password Changed Successfully',
@@ -392,7 +392,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Role Updated - SchoolBox',
+      subject: 'Role Updated - Skyta Academy',
       template: 'notification',
       variables: {
         title: 'Role Updated',
@@ -419,7 +419,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'New Permission Granted - SchoolBox',
+      subject: 'New Permission Granted - Skyta Academy',
       template: 'notification',
       variables: {
         title: 'New Permission Granted',
@@ -443,7 +443,7 @@ class EmailService {
   async sendAccountStatusChangedEmail(userData) {
     const { email, username, isActive } = userData;
 
-    const subject = isActive ? 'Account Activated - SchoolBox' : 'Account Deactivated - SchoolBox';
+    const subject = isActive ? 'Account Activated - Skyta Academy' : 'Account Deactivated - Skyta Academy';
     const title = isActive ? 'Account Activated' : 'Account Deactivated';
     const message = isActive
       ? 'Your account has been activated. You can now access the platform.'
@@ -487,7 +487,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Payment Successful - SchoolBox',
+      subject: 'Payment Successful - Skyta Academy',
       template: 'notification',
       variables: {
         title: 'Payment Successful',
@@ -518,7 +518,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Payment Failed - SchoolBox',
+      subject: 'Payment Failed - Skyta Academy',
       template: 'notification',
       variables: {
         title: 'Payment Failed',
@@ -553,7 +553,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Refund Processed - SchoolBox',
+      subject: 'Refund Processed - Skyta Academy',
       template: 'notification',
       variables: {
         title: 'Refund Processed',
@@ -581,7 +581,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: `Course Published: ${courseName} - SchoolBox`,
+      subject: `Course Published: ${courseName} - Skyta Academy`,
       template: 'notification',
       variables: {
         title: 'Course Now Available',
@@ -607,7 +607,7 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: `New Lesson Added: ${lessonTitle} - SchoolBox`,
+      subject: `New Lesson Added: ${lessonTitle} - Skyta Academy`,
       template: 'notification',
       variables: {
         title: 'New Lesson Available',
@@ -635,12 +635,12 @@ class EmailService {
 
     return this.sendEmail({
       to: email,
-      subject: 'Account Deleted - SchoolBox',
+      subject: 'Account Deleted - Skyta Academy',
       template: 'notification',
       variables: {
         title: 'Account Deleted',
         username,
-        message: 'Your account has been successfully deleted from SchoolBox.',
+        message: 'Your account has been successfully deleted from Skyta Academy.',
         details: [
           { label: 'Username', value: username },
           { label: 'Email', value: email },
@@ -684,7 +684,7 @@ class EmailService {
 
     return this.sendEmail({
       to: recipientEmail,
-      subject: `${sharerName} shared "${documentTitle}" with you - SchoolBox`,
+      subject: `${sharerName} shared "${documentTitle}" with you - Skyta Academy`,
       template: 'document-shared',
       variables: {
         documentTitle,

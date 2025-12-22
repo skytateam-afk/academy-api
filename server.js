@@ -95,7 +95,7 @@ app.get('/api/public/branding', async (req, res) => {
         const brandingData = {
             success: true,
             data: {
-                institution_name: result?.organization_name || 'SchoolBox Admin',
+                institution_name: result?.organization_name || 'Skyta Academy Admin',
                 logo_url: result?.logo_url || null,
                 logo_dark_url: result?.logo_dark_url || null
             }
@@ -109,7 +109,7 @@ app.get('/api/public/branding', async (req, res) => {
         res.json({
             success: true,
             data: {
-                institution_name: 'SchoolBox Admin',
+                institution_name: 'Skyta Academy Admin',
                 logo_url: null,
                 logo_dark_url: null
             }
@@ -201,7 +201,7 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`Attempting to start server on port ${PORT}...`);
     const server = app.listen(PORT, () => {
         console.log(`✅ Server successfully listening on port ${PORT}`);
-        console.log(`🚀 SchoolBox API running on http://localhost:${PORT}`);
+        console.log(`🚀 Skyta Academy API running on http://localhost:${PORT}`);
         console.log(`📚 API Documentation: http://localhost:${PORT}/docs`);
         console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
         console.log(`🔐 Initialize database: npm run db:setup`);
