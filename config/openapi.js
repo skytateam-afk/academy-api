@@ -528,8 +528,8 @@ const openApiSpec = {
                       properties: {
                         id: { type: 'string', format: 'uuid' },
                         username: { type: 'string', example: 'playful_panda_42' },
-                        first_name:{type:'string', example:'John'},
-                        last_name:{type:'string', example:'Doe'},
+                        first_name: { type: 'string', example: 'John' },
+                        last_name: { type: 'string', example: 'Doe' },
                         email: { type: 'string', format: 'email' },
                         role: { type: 'string', example: 'student' },
                         created_at: { type: 'string', format: 'date-time' }
@@ -607,8 +607,8 @@ const openApiSpec = {
                       properties: {
                         id: { type: 'string', format: 'uuid' },
                         username: { type: 'string', example: 'playful_panda_42' },
-                        first_name:{ type:'string', example:'John'},
-                        last_name:{ type:'string', example:'Doe'},
+                        first_name: { type: 'string', example: 'John' },
+                        last_name: { type: 'string', example: 'Doe' },
                         email: { type: 'string', format: 'email' },
                         role: { type: 'string', example: 'student' },
                         created_at: { type: 'string', format: 'date-time' }
@@ -707,6 +707,85 @@ const openApiSpec = {
           },
           '401': {
             description: 'Invalid credentials',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/auth/google': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Login or register using Google',
+        description: 'Authenticate a user using Google ID token. Creates a new account if the user does not already exist.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['token'],
+                properties: {
+                  token: {
+                    type: 'string',
+                    description: 'Google ID token obtained from Google OAuth',
+                    example: 'eyJhbGciOiJSUzI1NiIsImtpZCI6Ij...'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Google login successful',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    token: {
+                      type: 'string',
+                      description: 'JWT access token'
+                    },
+                    user: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        username: { type: 'string' },
+                        email: { type: 'string', format: 'email' },
+                        role: { type: 'string' },
+                        avatar_url: { type: 'string', nullable: true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Google authentication failed',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '403': {
+            description: 'Public registration is disabled',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error',
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/Error' }
@@ -887,6 +966,179 @@ const openApiSpec = {
           },
           '404': {
             description: 'User not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/auth/profile': {
+      put: {
+        tags: ['Authentication'],
+        summary: 'Update current user profile',
+        description: 'Update the authenticated user\'s profile information. Only provided fields will be updated.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  username: {
+                    type: 'string',
+                    example: 'john_doe'
+                  },
+                  email: {
+                    type: 'string',
+                    format: 'email',
+                    example: 'john@example.com'
+                  },
+                  first_name: {
+                    type: 'string',
+                    example: 'John',
+                    nullable: true
+                  },
+                  last_name: {
+                    type: 'string',
+                    example: 'Doe',
+                    nullable: true
+                  },
+                  bio: {
+                    type: 'string',
+                    example: 'Backend developer',
+                    nullable: true
+                  },
+                  phone: {
+                    type: 'string',
+                    example: '+2348012345678',
+                    nullable: true
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Profile updated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    user: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        username: { type: 'string' },
+                        email: { type: 'string', format: 'email' },
+                        first_name: { type: 'string', nullable: true },
+                        last_name: { type: 'string', nullable: true },
+                        bio: { type: 'string', nullable: true },
+                        phone: { type: 'string', nullable: true },
+                        role: { type: 'string' },
+                        avatar_url: { type: 'string', nullable: true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Validation error or email/username already in use',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/auth/avatar': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Upload or update user avatar',
+        description: 'Upload a new avatar image for the authenticated user. Replaces the existing avatar if one already exists.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['avatar'],
+                properties: {
+                  avatar: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'Avatar image file (jpg, png, webp, etc.)'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Avatar uploaded successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    avatar_url: {
+                      type: 'string',
+                      description: 'Public URL of the uploaded avatar'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'No image file provided',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error',
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/Error' }
@@ -1171,6 +1423,305 @@ const openApiSpec = {
         }
       }
     },
+    '/api/auth/verify-email': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Verify user email address',
+        description: 'Verify a user’s email address using a 6-digit OTP sent to their email during registration.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['email', 'otp'],
+                properties: {
+                  email: {
+                    type: 'string',
+                    format: 'email',
+                    example: 'user@example.com'
+                  },
+                  otp: {
+                    type: 'string',
+                    description: '6-digit email verification code',
+                    example: '123456'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Email verified successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    user: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        username: { type: 'string' },
+                        email: { type: 'string', format: 'email' },
+                        is_verified: { type: 'boolean', example: true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Invalid request or OTP format',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '401': {
+            description: 'Invalid or expired OTP',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '404': {
+            description: 'User not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/auth/resend-verification': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Resend email verification code',
+        description: 'Resend a new email verification OTP to a user who has not yet verified their email address.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['email'],
+                properties: {
+                  email: {
+                    type: 'string',
+                    format: 'email',
+                    example: 'user@example.com'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Verification code resent successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    remainingAttempts: {
+                      type: 'integer',
+                      description: 'Remaining resend attempts for the current 24-hour window',
+                      example: 3
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Invalid request or email already verified',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '404': {
+            description: 'User not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '429': {
+            description: 'Resend attempt limit exceeded or rate limit hit',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Failed to send verification email',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/auth/debug-otp': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Debug OTP lookup (temporary endpoint)',
+        description: 'Temporarily fetches OTP information for a given email, code, and type. **For debugging/testing only**. Not for production use.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['email', 'code', 'type'],
+                properties: {
+                  email: {
+                    type: 'string',
+                    format: 'email',
+                    example: 'user@example.com'
+                  },
+                  code: {
+                    type: 'string',
+                    description: 'OTP code to lookup',
+                    example: '123456'
+                  },
+                  type: {
+                    type: 'string',
+                    description: 'Type of OTP (e.g., "email_verification", "mfa")',
+                    example: 'email_verification'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Debug OTP lookup successful',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    debug: {
+                      type: 'object',
+                      description: 'Debug information about the OTP',
+                      example: {
+                        email: 'user@example.com',
+                        code: '123456',
+                        type: 'email_verification',
+                        createdAt: '2025-12-23T10:00:00Z',
+                        expiresAt: '2025-12-23T10:10:00Z',
+                        isUsed: false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Missing required fields (email, code, or type)',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error during debug OTP lookup',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/auth/reset-password-token/{token}': {
+      get: {
+        tags: ['Authentication'],
+        summary: 'Validate password reset token',
+        description: 'Validate a password reset token and redirect the user to the frontend reset password page if valid. Redirects to login page with an error if invalid or expired.',
+        parameters: [
+          {
+            name: 'token',
+            in: 'path',
+            required: true,
+            description: 'Password reset token received via email',
+            schema: {
+              type: 'string'
+            }
+          }
+        ],
+        responses: {
+          '302': {
+            description: 'Redirect to frontend reset password page (valid token) or login page (invalid/expired token)',
+            headers: {
+              Location: {
+                description: 'Frontend redirect URL',
+                schema: {
+                  type: 'string',
+                  example: 'https://frontend.app/reset-password?token=abc123'
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Invalid or expired reset token (redirects to login page with error)',
+            headers: {
+              Location: {
+                description: 'Redirect URL with error query parameter',
+                schema: {
+                  type: 'string',
+                  example: 'https://frontend.app/login?error=expired_reset_token'
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error (redirects to login page with error)',
+            headers: {
+              Location: {
+                description: 'Redirect URL with error query parameter',
+                schema: {
+                  type: 'string',
+                  example: 'https://frontend.app/login?error=server_error'
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     '/api/users': {
       get: {
         tags: ['Users'],
@@ -1319,8 +1870,8 @@ const openApiSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  firstName: { type: 'string', example: 'John' },
-                  lastName: { type: 'string', example: 'Doe' },
+                  first_name: { type: 'string', example: 'John' },
+                  last_name: { type: 'string', example: 'Doe' },
                   bio: { type: 'string', example: 'Software developer and tech enthusiast' },
                   phone: { type: 'string', example: '+1234567890' },
                   dateOfBirth: { type: 'string', format: 'date', example: '1990-01-15' }
@@ -1774,6 +2325,242 @@ const openApiSpec = {
         }
       }
     },
+    '/api/auth/cover-photo': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Upload or update user cover photo',
+        description: 'Upload a new cover photo image for the authenticated user. Replaces the existing cover photo if one already exists.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['cover_photo'],
+                properties: {
+                  cover_photo: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'Cover photo image file (jpg, png, webp, etc.)'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Cover photo uploaded successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    cover_photo_url: {
+                      type: 'string',
+                      description: 'Public URL of the uploaded cover photo'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'No image file provided',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/auth/request-mfa': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Request MFA verification code',
+        description: 'Send a new MFA verification code to the user’s email if MFA is enabled for the account.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['email'],
+                properties: {
+                  email: {
+                    type: 'string',
+                    format: 'email',
+                    example: 'user@example.com'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'MFA code sent successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Invalid request or MFA not enabled',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '404': {
+            description: 'User not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '429': {
+            description: 'Too many MFA requests',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Failed to send MFA code',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/auth/verify-mfa': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Verify MFA code and complete login',
+        description: 'Verify MFA code using a temporary MFA token and complete user authentication.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['mfaToken', 'code'],
+                properties: {
+                  mfaToken: {
+                    type: 'string',
+                    description: 'Temporary MFA token generated during login',
+                    example: 'a9f3c2d4e8f1...'
+                  },
+                  code: {
+                    type: 'string',
+                    description: '6-digit MFA verification code',
+                    example: '123456'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'MFA verification successful',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    token: {
+                      type: 'string',
+                      description: 'JWT access token'
+                    },
+                    user: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string', format: 'uuid' },
+                        username: { type: 'string' },
+                        email: { type: 'string', format: 'email' },
+                        role: { type: 'string' },
+                        message: { type: 'string', example: 'logged in via MFA' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Invalid request or MFA code format',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '401': {
+            description: 'Invalid or expired MFA token/code',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '404': {
+            description: 'User not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+
     '/api/roles': {
       get: {
         tags: ['Roles'],

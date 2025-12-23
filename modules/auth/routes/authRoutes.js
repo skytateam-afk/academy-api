@@ -55,10 +55,10 @@ router.post('/request-mfa', authController.requestMFA);
 router.post('/verify-mfa', authController.verifyMFA);
 
 // Verify email with OTP (public)
-router.post('/verify-email', authController.verifyEmail);
+router.post('/verify-email', authController.verifyEmail);//1
 
 // Resend email verification OTP (public)
-router.post('/resend-verification', authController.resendVerification);
+router.post('/resend-verification', authController.resendVerification);//2
 
 // Forgot password (public)
 router.post('/forgot-password', authController.forgotPassword);
@@ -76,6 +76,6 @@ router.get('/settings', authenticateToken, authController.getSettings);
 router.put('/settings', authenticateToken, authController.updateSettings);
 
 // Debug OTP lookup (temporary debugging endpoint)
-router.post('/debug-otp', authController.debugOTP);
+router.post('/debug-otp', authController.debugOTP); //5
 
 module.exports = router;
