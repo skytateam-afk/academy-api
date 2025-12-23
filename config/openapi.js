@@ -2560,7 +2560,576 @@ const openApiSpec = {
         }
       }
     },
-
+    "/api/xp/profile": {
+      "get": {
+        "tags": ["XP"],
+        "summary": "Get current user's XP profile",
+        "description": "Retrieve the authenticated user's XP profile, including total XP, level, progress, and achievements.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "XP profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "totalXP": { "type": "integer", "example": 1500 },
+                        "level": { "type": "integer", "example": 5 },
+                        "progressToNextLevel": { "type": "integer", "example": 200 },
+                        "achievements": {
+                          "type": "array",
+                          "items": { "type": "string" },
+                          "example": ["First Login", "XP Milestone Level 5"]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/xp/history": {
+      "get": {
+        "tags": ["XP"],
+        "summary": "Get XP transaction history",
+        "description": "Retrieve the authenticated user's XP transaction history with optional pagination.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 }, "description": "Max number of items to return" },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "default": 0 }, "description": "Pagination offset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "XP history retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "activity": { "type": "string", "example": "Completed Quiz" },
+                          "xpEarned": { "type": "integer", "example": 50 },
+                          "timestamp": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/xp/leaderboard": {
+      "get": {
+        "tags": ["XP"],
+        "summary": "Get XP leaderboard",
+        "description": "Retrieve the global XP leaderboard with pagination.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 }, "description": "Number of users to return" },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "default": 0 }, "description": "Pagination offset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Leaderboard retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "username": { "type": "string", "example": "johndoe" },
+                          "totalXP": { "type": "integer", "example": 1500 },
+                          "level": { "type": "integer", "example": 5 }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": { "limit": { "type": "integer", "example": 20 }, "offset": { "type": "integer", "example": 0 } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/xp/levels": {
+      "get": {
+        "tags": ["XP"],
+        "summary": "Get all XP levels/badges",
+        "description": "Retrieve all XP levels and badges.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "XP levels retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string", "example": "1" },
+                          "level": { "type": "integer", "example": 5 },
+                          "name": { "type": "string", "example": "Intermediate" },
+                          "xpRequired": { "type": "integer", "example": 1000 },
+                          "isActive": { "type": "boolean", "example": true },
+                          "badgeUrl": { "type": "string", "example": "https://cdn.example.com/badges/5.png" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "post": {
+        "tags": ["XP"],
+        "summary": "Create new XP level (admin only)",
+        "description": "Create a new XP level. Admin only.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "integer", "example": 6 },
+                  "name": { "type": "string", "example": "Advanced" },
+                  "xpRequired": { "type": "integer", "example": 1200 },
+                  "isActive": { "type": "boolean", "example": true }
+                },
+                "required": ["level", "name", "xpRequired"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "XP level created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "example": "6" },
+                        "level": { "type": "integer", "example": 6 },
+                        "name": { "type": "string", "example": "Advanced" },
+                        "xpRequired": { "type": "integer", "example": 1200 },
+                        "isActive": { "type": "boolean", "example": true }
+                      }
+                    },
+                    "message": { "type": "string", "example": "XP level created successfully" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid input", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/xp/levels/{id}": {
+      "put": {
+        "tags": ["XP"],
+        "summary": "Update XP level (admin only)",
+        "description": "Update an existing XP level.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "ID of the XP level" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "level": { "type": "integer", "example": 6 },
+                  "name": { "type": "string", "example": "Advanced" },
+                  "xpRequired": { "type": "integer", "example": 1200 },
+                  "isActive": { "type": "boolean", "example": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "XP level updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "example": "6" },
+                        "level": { "type": "integer", "example": 6 },
+                        "name": { "type": "string", "example": "Advanced" },
+                        "xpRequired": { "type": "integer", "example": 1200 },
+                        "isActive": { "type": "boolean", "example": true }
+                      }
+                    },
+                    "message": { "type": "string", "example": "XP level updated successfully" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid input", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["XP"],
+        "summary": "Delete XP level (admin only)",
+        "description": "Delete an XP level by ID.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "ID of the XP level" }],
+        "responses": {
+          "200": {
+            "description": "XP level deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "XP level deleted successfully" }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "patch": {
+        "tags": ["XP"],
+        "summary": "Toggle XP level active status (admin only)",
+        "description": "Enable or disable an XP level by ID.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "ID of the XP level" }],
+        "responses": {
+          "200": {
+            "description": "XP level status toggled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string", "example": "6" },
+                        "level": { "type": "integer", "example": 6 },
+                        "name": { "type": "string", "example": "Advanced" },
+                        "xpRequired": { "type": "integer", "example": 1200 },
+                        "isActive": { "type": "boolean", "example": true }
+                      }
+                    },
+                    "message": { "type": "string", "example": "XP level status updated successfully" }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/xp/levels/badge": {
+      "post": {
+        "tags": ["XP"],
+        "summary": "Upload badge image for XP level (admin only)",
+        "description": "Upload a badge image file for an XP level. Admin only.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "badge": { "type": "string", "format": "binary", "description": "Badge image file" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Badge image uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "data": { "type": "object", "properties": { "badge_image_url": { "type": "string", "example": "https://cdn.example.com/xp/badges/6.png" } } },
+                    "message": { "type": "string", "example": "Badge image uploaded successfully" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "No file uploaded", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+  "/api/xp/activities": {
+    "get": {
+      "tags": ["XP Activities"],
+      "summary": "Get all XP activities",
+      "description": "Retrieve all XP activities with statistics (total, active, inactive, average XP). Admin only.",
+      "security": [{ "bearerAuth": [] }],
+      "responses": {
+        "200": {
+          "description": "XP activities retrieved successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": { "type": "boolean", "example": true },
+                  "activities": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer", "example": 1 },
+                        "activity_type": { "type": "string", "example": "PostComment" },
+                        "xp_value": { "type": "integer", "example": 50 },
+                        "description": { "type": "string", "example": "XP awarded for posting a comment" },
+                        "is_active": { "type": "boolean", "example": true },
+                        "created_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" },
+                        "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" }
+                      }
+                    }
+                  },
+                  "stats": {
+                    "type": "object",
+                    "properties": {
+                      "total": { "type": "integer", "example": 10 },
+                      "active": { "type": "integer", "example": 8 },
+                      "inactive": { "type": "integer", "example": 2 },
+                      "average": { "type": "integer", "example": 45 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+      }
+    },
+    "post": {
+      "tags": ["XP Activities"],
+      "summary": "Create new XP activity",
+      "description": "Add a new XP activity. Admin only.",
+      "security": [{ "bearerAuth": [] }],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["activity_type", "xp_value"],
+              "properties": {
+                "activity_type": { "type": "string", "example": "PostComment" },
+                "xp_value": { "type": "integer", "example": 50 },
+                "description": { "type": "string", "example": "XP awarded for posting a comment" },
+                "is_active": { "type": "boolean", "example": true }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "XP activity created successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": { "type": "boolean", "example": true },
+                  "activity": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer", "example": 1 },
+                      "activity_type": { "type": "string", "example": "PostComment" },
+                      "xp_value": { "type": "integer", "example": 50 },
+                      "description": { "type": "string", "example": "XP awarded for posting a comment" },
+                      "is_active": { "type": "boolean", "example": true },
+                      "created_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" },
+                      "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": { "description": "Validation error or duplicate activity", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+        "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+      }
+    }
+  },
+  "/api/xp/activities/{id}": {
+    "put": {
+      "tags": ["XP Activities"],
+      "summary": "Update XP activity",
+      "description": "Update an existing XP activity. Admin only.",
+      "security": [{ "bearerAuth": [] }],
+      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 }, "description": "XP activity ID" }],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": ["activity_type", "xp_value"],
+              "properties": {
+                "activity_type": { "type": "string", "example": "PostCommentUpdated" },
+                "xp_value": { "type": "integer", "example": 60 },
+                "description": { "type": "string", "example": "Updated description" },
+                "is_active": { "type": "boolean", "example": true }
+              }
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": {
+          "description": "XP activity updated successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": { "type": "boolean", "example": true },
+                  "activity": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer", "example": 1 },
+                      "activity_type": { "type": "string", "example": "PostCommentUpdated" },
+                      "xp_value": { "type": "integer", "example": 60 },
+                      "description": { "type": "string", "example": "Updated description" },
+                      "is_active": { "type": "boolean", "example": true },
+                      "created_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" },
+                      "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:30:00Z" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": { "description": "Validation error or duplicate activity", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+        "404": { "description": "Activity not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+        "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+      }
+    },
+    "delete": {
+      "tags": ["XP Activities"],
+      "summary": "Delete XP activity",
+      "description": "Delete an XP activity by ID. Admin only.",
+      "security": [{ "bearerAuth": [] }],
+      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 }, "description": "XP activity ID" }],
+      "responses": {
+        "200": {
+          "description": "XP activity deleted successfully",
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "XP activity deleted successfully" } } }
+            }
+          }
+        },
+        "404": { "description": "Activity not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+        "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+      }
+    },
+    "patch": {
+      "tags": ["XP Activities"],
+      "summary": "Toggle XP activity active/inactive",
+      "description": "Switch the is_active status of an XP activity. Admin only.",
+      "security": [{ "bearerAuth": [] }],
+      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 }, "description": "XP activity ID" }],
+      "responses": {
+        "200": {
+          "description": "XP activity status updated successfully",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": { "type": "boolean", "example": true },
+                  "activity": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer", "example": 1 },
+                      "activity_type": { "type": "string", "example": "PostComment" },
+                      "xp_value": { "type": "integer", "example": 50 },
+                      "description": { "type": "string", "example": "XP awarded for posting a comment" },
+                      "is_active": { "type": "boolean", "example": false },
+                      "created_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" },
+                      "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:30:00Z" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "404": { "description": "Activity not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+        "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+      }
+    }
+  },
     '/api/roles': {
       get: {
         tags: ['Roles'],
