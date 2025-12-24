@@ -1722,6 +1722,231 @@ const openApiSpec = {
         }
       }
     },
+    // ============= DASHBOARD ===========
+    '/api/dashboard/stats': {
+      get: {
+        tags: ['Dashboard'],
+        summary: 'Get dashboard statistics',
+        description: 'Retrieve aggregated statistics, charts, and recent activity for admin dashboard',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Dashboard statistics retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    data: {
+                      stats: {
+                        users: {
+                          total: 1200,
+                          newThisMonth: 45,
+                          growth: 12.5,
+                          byRole: [
+                            {
+                              role_id: 1,
+                              role_name: 'Admin',
+                              description: 'System administrators',
+                              count: 3
+                            },
+                            {
+                              role_id: 2,
+                              role_name: 'Student',
+                              description: 'Platform learners',
+                              count: 1197
+                            }
+                          ]
+                        },
+                        courses: {
+                          total: 86,
+                          published: 70,
+                          draft: 16,
+                          newThisMonth: 4
+                        },
+                        enrollments: {
+                          total: 4300,
+                          newThisMonth: 210,
+                          growth: 8.3
+                        }
+                      },
+                      charts: {
+                        userGrowth: [
+                          { month: 'Aug 2024', count: 120 },
+                          { month: 'Sep 2024', count: 180 }
+                        ],
+                        userSignups: [
+                          { date: '2025-01-01', signups: 12 }
+                        ],
+                        topCourses: [
+                          {
+                            id: 4,
+                            title: 'NestJS Bootcamp',
+                            enrollment_count: 520
+                          }
+                        ],
+                        coursesByCategory: [
+                          { category: 'Programming', count: 24 }
+                        ]
+                      },
+                      recentActivity: {
+                        enrollments: [
+                          {
+                            id: 91,
+                            created_at: '2025-01-10T09:20:00.000Z',
+                            username: 'johndoe',
+                            email: 'john@example.com',
+                            course_title: 'NestJS Bootcamp'
+                          }
+                        ],
+                        users: [
+                          {
+                            id: 32,
+                            username: 'janedoe',
+                            email: 'jane@example.com',
+                            created_at: '2025-01-09T14:30:00.000Z'
+                          }
+                        ],
+                        courses: [
+                          {
+                            id: 12,
+                            title: 'Advanced SQL',
+                            is_published: true,
+                            created_at: '2024-12-01T10:00:00.000Z',
+                            updated_at: '2025-01-08T12:00:00.000Z'
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Internal server error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/dashboard/analytics': {
+      get: {
+        tags: ['Dashboard'],
+        summary: 'Get comprehensive analytics data',
+        description: 'Retrieve deep analytics across users, courses, revenue, engagement, and performance',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Analytics data retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    data: {
+                      userAnalytics: {
+                        registrations: {
+                          monthly: [
+                            { month: 'Jan 2025', registrations: 210, period: '2025-01-01T00:00:00.000Z' }
+                          ],
+                          total: 210
+                        },
+                        activityLevels: [
+                          { activity_level: 'Active', count: 520 }
+                        ],
+                        roleDistribution: [
+                          { role: 'Student', count: 1100, percentage: 91.7 }
+                        ],
+                        retention: {
+                          total_users: 300,
+                          returning_users: 190,
+                          retention_rate: 63.3
+                        }
+                      },
+                      courseAnalytics: {
+                        coursePerformance: [],
+                        learningProgression: [],
+                        lessonEngagement: [],
+                        assessmentPerformance: [],
+                        categoryPopularity: []
+                      },
+                      revenueAnalytics: {
+                        revenueTrends: [],
+                        revenueByCourse: [],
+                        paymentMethods: [],
+                        totalRevenue: 15420,
+                        totalTransactions: 340
+                      },
+                      engagementAnalytics: {
+                        dailyActiveUsers: [],
+                        peakHours: [],
+                        featureUsage: [],
+                        sessionDuration: {
+                          avg_session_duration: 14.5,
+                          median_session_duration: 12.3,
+                          max_session_duration: 92.1,
+                          total_sessions: 842
+                        }
+                      },
+                      performanceAnalytics: {
+                        errorRates: [],
+                        responseTimes: {
+                          avg_response_time: 180,
+                          min_response_time: 20,
+                          max_response_time: 920,
+                          p95_response_time: 410,
+                          total_requests: 1400
+                        },
+                        dbPerformance: [],
+                        systemHealth: {
+                          status: 'healthy',
+                          uptime: 123456,
+                          memoryUsage: {},
+                          nodeVersion: 'v18.19.0'
+                        }
+                      },
+                      updatedAt: '2025-01-10T12:00:00.000Z'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Internal server error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
     '/api/users': {
       get: {
         tags: ['Users'],
@@ -4553,6 +4778,1769 @@ const openApiSpec = {
         }
       }
     },
+    '/api/courses/{id}/self-enroll': {
+      post: {
+        tags: ['Courses'],
+        summary: 'Self-enroll in course',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '201': {
+            description: 'Enrollment successful',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Successfully enrolled in course' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        courseId: { type: 'string', format: 'uuid' },
+                        userId: { type: 'string', format: 'uuid' },
+                        enrolledAt: { type: 'string', format: 'date-time' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } }
+          },
+          '404': {
+            description: 'Course not found',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } }
+          }
+        }
+      }
+    },
+
+    '/api/courses/{id}/enroll': {
+      post: {
+        tags: ['Courses'],
+        summary: 'Enroll user in course (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['userId'],
+                properties: {
+                  userId: { type: 'string', format: 'uuid' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'User enrolled successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        courseId: { type: 'string', format: 'uuid' },
+                        userId: { type: 'string', format: 'uuid' },
+                        enrolledAt: { type: 'string', format: 'date-time' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/courses/{id}/enrollments': {
+      get: {
+        tags: ['Courses'],
+        summary: 'Get course enrollments',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Enrollments retrieved',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          userId: { type: 'string', format: 'uuid' },
+                          enrolledAt: { type: 'string', format: 'date-time' },
+                          progress: { type: 'number' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/courses/{id}/enrollment-trends': {
+      get: {
+        tags: ['Courses'],
+        summary: 'Get enrollment trends',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Enrollment trends',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          date: { type: 'string', format: 'date' },
+                          count: { type: 'integer' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/courses/{id}/enrollments/{userId}': {
+      delete: {
+        tags: ['Courses'],
+        summary: 'Unenroll user from course',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          { name: 'userId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'User unenrolled',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/courses/{id}/reviews': {
+      get: {
+        tags: ['Courses'],
+        summary: 'Get course reviews',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Course reviews',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          rating: { type: 'integer' },
+                          review: { type: 'string' },
+                          createdAt: { type: 'string', format: 'date-time' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/courses/{id}/reviews/my': {
+      get: {
+        tags: ['Courses'],
+        summary: 'Get my course review',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'User review',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        rating: { type: 'integer' },
+                        review: { type: 'string' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/courses/{id}/reviews': {
+      post: {
+        tags: ['Courses'],
+        summary: 'Submit or update review',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['rating'],
+                properties: {
+                  rating: { type: 'integer', minimum: 1, maximum: 5 },
+                  review: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Review saved',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/courses/my-courses/enrolled': {
+      get: {
+        tags: ['Courses'],
+        summary: 'Get my enrolled courses',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Enrolled courses',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          courseId: { type: 'string', format: 'uuid' },
+                          title: { type: 'string' },
+                          progress: { type: 'number' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/courses/{id}/enrollment-status': {
+      get: {
+        tags: ['Courses'],
+        summary: 'Get enrollment status',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Enrollment status',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        enrolled: { type: 'boolean' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/courses/{id}/progress': {
+      get: {
+        tags: ['Courses'],
+        summary: 'Get course progress',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Course progress',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        percentage: { type: 'number' },
+                        completedLessons: { type: 'integer' },
+                        totalLessons: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    // ============ DOCUMENT ==============
+    // ============= DOCUMENTS (FULL) ============
+    '/api/documents/shared/{token}': {
+      get: {
+        tags: ['Document Sharing'],
+        summary: 'Get shared document (public)',
+        parameters: [
+          { name: 'token', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'password', in: 'query', schema: { type: 'string' } },
+          { name: 'email', in: 'query', schema: { type: 'string', format: 'email' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Shared document details',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  document: {
+                    id: 'doc-uuid',
+                    title: 'Proposal.pdf',
+                    file_url: 'https://.../proposal.pdf',
+                    size: 234567,
+                    mime_type: 'application/pdf',
+                    created_at: '2025-01-10T10:00:00.000Z'
+                  },
+                  share: {
+                    id: 'share-uuid',
+                    permission_level: 'download',
+                    expires_at: '2025-02-01T00:00:00.000Z',
+                    max_downloads: 5,
+                    download_count: 1,
+                    requires_password: false
+                  }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '410': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/shared/{token}/download': {
+      get: {
+        tags: ['Document Sharing'],
+        summary: 'Download shared document (public)',
+        parameters: [
+          { name: 'token', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'password', in: 'query', schema: { type: 'string' } },
+          { name: 'email', in: 'query', schema: { type: 'string', format: 'email' } }
+        ],
+        responses: {
+          '302': { description: 'Redirect to file URL' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '410': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    // Conditional auth applies for the rest (token query OR header)
+    '/api/documents/folders': {
+      post: {
+        tags: ['Documents', 'Folders'],
+        summary: 'Create folder',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name'],
+                properties: {
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  parent_folder_id: { type: 'string', nullable: true }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Folder created',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  folder: {
+                    id: 'folder-uuid',
+                    name: 'Project Docs',
+                    description: 'Files for project',
+                    parentFolderId: null,
+                    created_at: '2025-01-10T10:05:00.000Z'
+                  }
+                }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      },
+
+      get: {
+        tags: ['Documents', 'Folders'],
+        summary: 'Get folder tree',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Folder tree retrieved',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  folders: [
+                    { id: 'f1', name: 'Root', parentFolderId: null, children: [] }
+                  ]
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/folders/{id}/path': {
+      get: {
+        tags: ['Documents', 'Folders'],
+        summary: 'Get folder path (breadcrumb)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': {
+            description: 'Folder path returned',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  path: [
+                    { id: 'root', name: 'Root' },
+                    { id: 'f1', name: 'Project Docs' }
+                  ]
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/folders/{id}': {
+      delete: {
+        tags: ['Documents', 'Folders'],
+        summary: 'Delete folder',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': {
+            description: 'Folder deleted',
+            content: {
+              'application/json': {
+                example: { success: true, message: 'Folder deleted successfully' }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/upload': {
+      post: {
+        tags: ['Documents'],
+        summary: 'Upload document',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['file'],
+                properties: {
+                  file: { type: 'string', format: 'binary' },
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  folder_id: { type: 'string', nullable: true },
+                  tags: { type: 'string', description: 'JSON string array' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Document uploaded',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  document: {
+                    id: 'doc-uuid',
+                    title: 'Proposal.pdf',
+                    file_url: 'https://.../proposal.pdf',
+                    size: 234567,
+                    mime_type: 'application/pdf',
+                    folder_id: 'folder-uuid',
+                    tags: ['proposal', 'client'],
+                    created_at: '2025-01-10T10:10:00.000Z',
+                    uploaded_by: 'user-uuid'
+                  }
+                }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '422': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/contents': {
+      get: {
+        tags: ['Documents'],
+        summary: 'Get folder contents (folders + documents)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'folder_id', in: 'query', schema: { type: 'string', nullable: true } },
+          { name: 'page', in: 'query', schema: { type: 'integer' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer' } },
+          { name: 'sort_by', in: 'query', schema: { type: 'string' } },
+          { name: 'sort_order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'] } }
+        ],
+        responses: {
+          '200': {
+            description: 'Folder contents returned',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  items: [
+                    { type: 'folder', id: 'f1', name: 'Project Docs' },
+                    { type: 'document', id: 'd1', title: 'Spec.pdf' }
+                  ],
+                  pagination: { page: 1, limit: 100, total: 2 }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents': {
+      get: {
+        tags: ['Documents'],
+        summary: 'Get user documents (list)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer' } },
+          { name: 'folder_id', in: 'query', schema: { type: 'string', nullable: true } },
+          { name: 'file_type', in: 'query', schema: { type: 'string' } },
+          { name: 'search', in: 'query', schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Documents list',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  documents: [
+                    {
+                      id: 'doc-uuid',
+                      title: 'Proposal.pdf',
+                      file_url: 'https://.../proposal.pdf',
+                      created_at: '2025-01-10T10:10:00.000Z'
+                    }
+                  ],
+                  pagination: { page: 1, limit: 20, total: 1 }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/search': {
+      get: {
+        tags: ['Documents'],
+        summary: 'Search documents',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'q', in: 'query', schema: { type: 'string' } },
+          { name: 'file_type', in: 'query', schema: { type: 'string' } },
+          { name: 'tags', in: 'query', schema: { type: 'string' } },
+          { name: 'folder_id', in: 'query', schema: { type: 'string' } },
+          { name: 'date_from', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'date_to', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'page', in: 'query', schema: { type: 'integer' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Search results',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  documents: [
+                    { id: 'd1', title: 'Spec.pdf', created_at: '2025-01-05T09:00:00.000Z' }
+                  ],
+                  pagination: { page: 1, limit: 20, total: 1 }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/shared-with-me': {
+      get: {
+        tags: ['Documents', 'Sharing'],
+        summary: 'Get documents shared with the authenticated user',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Shared documents returned',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  documents: [
+                    { id: 'd2', title: 'SharedNote.docx', shared_by: 'user-uuid', permission: 'view' }
+                  ]
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/storage': {
+      get: {
+        tags: ['Documents'],
+        summary: 'Get storage statistics for user',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Storage stats',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  storage: {
+                    totalBytes: 1073741824,
+                    usedBytes: 123456789,
+                    quotaBytes: 1073741824
+                  }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    // ============= TRASH / BULK ACTIONS ============
+    '/api/documents/trash': {
+      get: {
+        tags: ['Documents', 'Trash'],
+        summary: 'Get trash (deleted documents)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Trash items retrieved',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  documents: [
+                    { id: 'd3', title: 'Old.docx', deleted_at: '2025-01-01T12:00:00.000Z' }
+                  ],
+                  pagination: { page: 1, limit: 20, total: 1 }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/trash/empty': {
+      delete: {
+        tags: ['Documents', 'Trash'],
+        summary: 'Empty trash (permanently delete all)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Trash emptied',
+            content: {
+              'application/json': {
+                example: { success: true, message: '3 document(s) permanently deleted from trash' }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/bulk-delete': {
+      post: {
+        tags: ['Documents', 'Bulk'],
+        summary: 'Bulk delete documents (move to trash)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { type: 'object', properties: { documentIds: { type: 'array', items: { type: 'string' } } } }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Bulk delete completed',
+            content: {
+              'application/json': {
+                example: { success: true, message: '5 document(s) moved to trash successfully' }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/bulk-restore': {
+      post: {
+        tags: ['Documents', 'Bulk'],
+        summary: 'Bulk restore documents from trash',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { type: 'object', properties: { documentIds: { type: 'array', items: { type: 'string' } } } }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Bulk restore completed',
+            content: {
+              'application/json': {
+                example: { success: true, message: '5 document(s) restored successfully' }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/bulk-permanent-delete': {
+      post: {
+        tags: ['Documents', 'Bulk'],
+        summary: 'Bulk permanently delete documents',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { type: 'object', properties: { documentIds: { type: 'array', items: { type: 'string' } } } }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Bulk permanent delete completed',
+            content: {
+              'application/json': {
+                example: { success: true, message: '5 document(s) permanently deleted' }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    // ============= SINGLE DOCUMENT ROUTES ============
+    '/api/documents/{id}': {
+      get: {
+        tags: ['Documents'],
+        summary: 'Get document by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': {
+            description: 'Document retrieved',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  document: {
+                    id: 'doc-uuid',
+                    title: 'Proposal.pdf',
+                    file_url: 'https://.../proposal.pdf',
+                    created_at: '2025-01-10T10:10:00.000Z'
+                  }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      },
+
+      patch: {
+        tags: ['Documents'],
+        summary: 'Update document metadata',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  folder_id: { type: 'string', nullable: true },
+                  tags: { type: 'array', items: { type: 'string' } }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Document updated',
+            content: {
+              'application/json': {
+                example: { success: true, document: { id: 'doc-uuid', title: 'Updated title' } }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      },
+
+      delete: {
+        tags: ['Documents'],
+        summary: 'Delete document (move to trash)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Document moved to trash', content: { 'application/json': { example: { success: true, message: 'Document moved to trash successfully' } } } },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/{id}/download': {
+      get: {
+        tags: ['Documents'],
+        summary: 'Download a document (supports query token)',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'token', in: 'query', schema: { type: 'string' } }
+        ],
+        responses: {
+          '302': { description: 'Redirect to file URL' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/{id}/restore': {
+      post: {
+        tags: ['Documents', 'Trash'],
+        summary: 'Restore document from trash',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Document restored', content: { 'application/json': { example: { success: true, message: 'Document restored successfully' } } } },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/{id}/permanent': {
+      delete: {
+        tags: ['Documents'],
+        summary: 'Permanently delete a document',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Document permanently deleted', content: { 'application/json': { example: { success: true, message: 'Document permanently deleted' } } } },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    // ============= SHARING ============
+    '/api/documents/{documentId}/share': {
+      post: {
+        tags: ['Document Sharing'],
+        summary: 'Create share link / share with user',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'documentId', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  share_type: { type: 'string', enum: ['link', 'user'] },
+                  shared_with_user_id: { type: 'string' },
+                  recipient_email: { type: 'string', format: 'email' },
+                  permission_level: { type: 'string', enum: ['view', 'download'] },
+                  password: { type: 'string' },
+                  expires_at: { type: 'string', format: 'date-time' },
+                  max_downloads: { type: 'integer' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Share created',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  share: {
+                    id: 'share-uuid',
+                    document_id: 'doc-uuid',
+                    permission_level: 'download',
+                    access_token: 'abcdef12345',
+                    share_url: 'https://yourhost/shared/abcdef12345'
+                  }
+                }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/{documentId}/shares': {
+      get: {
+        tags: ['Document Sharing'],
+        summary: 'Get shares for a document',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'documentId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': {
+            description: 'Document shares',
+            content: {
+              'application/json': {
+                example: {
+                  shares: [
+                    { id: 's1', shared_by: 'user-uuid', permission_level: 'view', created_at: '2025-01-09T08:00:00.000Z' }
+                  ]
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/shares/{shareId}': {
+      delete: {
+        tags: ['Document Sharing'],
+        summary: 'Delete a share',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'shareId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': {
+            description: 'Share deleted',
+            content: {
+              'application/json': {
+                example: { message: 'Share deleted successfully' }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/documents/shares/created': {
+      get: {
+        tags: ['Document Sharing'],
+        summary: 'Get shares created by current user',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Created shares returned',
+            content: {
+              'application/json': {
+                example: {
+                  shares: [
+                    { id: 's1', document_id: 'doc-uuid', access_token: 'abcdef', created_at: '2025-01-09T08:00:00.000Z' }
+                  ]
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    // ============= ADMIN ============
+    '/api/documents/quota': {
+      post: {
+        tags: ['Documents', 'Admin'],
+        summary: 'Update user storage quota (admin)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['userId', 'quotaBytes'],
+                properties: {
+                  userId: { type: 'string' },
+                  quotaBytes: { type: 'integer' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'User quota updated',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'User quota updated successfully',
+                  storage: { userId: 'user-uuid', quotaBytes: 1073741824, usedBytes: 12345678 }
+                }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+    // ============= JOBS ============
+    // ============= JOBS (JS literal, same style as earlier) ============
+
+    '/api/jobs': {
+      get: {
+        tags: ['Jobs'],
+        summary: 'List active public jobs',
+        description: 'Returns paginated list of active jobs (public)',
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer' }, example: 1 },
+          { name: 'limit', in: 'query', schema: { type: 'integer' }, example: 20 },
+          { name: 'search', in: 'query', schema: { type: 'string' } },
+          { name: 'location', in: 'query', schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of active jobs',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    data: {
+                      jobs: [
+                        {
+                          id: 'job-uuid',
+                          title: 'Backend Engineer',
+                          company: 'Acme Ltd',
+                          location: 'Remote',
+                          is_active: true,
+                          posted_at: '2025-01-10T10:00:00.000Z'
+                        }
+                      ],
+                      pagination: { page: 1, limit: 20, total: 1, totalPages: 1 }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/jobs/{id}': {
+      get: {
+        tags: ['Jobs'],
+        summary: 'Get job detail',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Job details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    data: {
+                      id: 'job-uuid',
+                      title: 'Backend Engineer',
+                      description: 'Job description here',
+                      company: 'Acme Ltd',
+                      location: 'Remote',
+                      is_active: true,
+                      posted_at: '2025-01-10T10:00:00.000Z'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/jobs/{id}/apply': {
+      post: {
+        tags: ['Jobs'],
+        summary: 'Apply for a job (public)',
+        description: 'Submit application with optional files (resume, cover_letter)',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  email: { type: 'string', format: 'email' },
+                  phone: { type: 'string' },
+                  resume: { type: 'string', format: 'binary' },
+                  cover_letter: { type: 'string', format: 'binary' },
+                  additional: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Application submitted successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    message: 'Application submitted successfully',
+                    data: {
+                      applicationId: 'app-uuid',
+                      jobId: 'job-uuid',
+                      applicantName: 'Jane Doe',
+                      submittedAt: '2025-01-10T11:00:00.000Z',
+                      status: 'submitted'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    // ============= User Job Profile ============
+    '/api/jobs/profile/me': {
+      get: {
+        tags: ['Job Profile'],
+        summary: "Get current user's job profile",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: "User job profile",
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    data: {
+                      userId: 'user-uuid',
+                      fullName: 'Jane Doe',
+                      headline: 'Fullstack Developer',
+                      resumeUrl: 'https://.../resume.pdf',
+                      skills: ['nodejs', 'postgres'],
+                      updatedAt: '2025-01-05T09:00:00.000Z'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      },
+
+      post: {
+        tags: ['Job Profile'],
+        summary: "Create or update current user's job profile",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  resume: { type: 'string', format: 'binary' },
+                  headline: { type: 'string' },
+                  skills: { type: 'string', description: 'comma separated or JSON' },
+                  bio: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Job profile saved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    message: 'Job profile saved successfully',
+                    data: {
+                      userId: 'user-uuid',
+                      resumeUrl: 'https://.../resume.pdf'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    // ============= Admin Jobs ============
+    '/api/admin/jobs': {
+      get: {
+        tags: ['Admin Jobs'],
+        summary: 'List all jobs (admin)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Admin list of jobs',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    data: {
+                      jobs: [{ id: 'job-uuid', title: 'Backend Engineer', is_active: true }],
+                      pagination: { page: 1, limit: 20, total: 1, totalPages: 1 }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      },
+
+      post: {
+        tags: ['Admin Jobs'],
+        summary: 'Create a new job (admin)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['title', 'company'],
+                properties: {
+                  title: { type: 'string' },
+                  company: { type: 'string' },
+                  description: { type: 'string' },
+                  location: { type: 'string' },
+                  company_logo: { type: 'string', format: 'binary' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Job created successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    data: {
+                      id: 'job-uuid',
+                      title: 'Backend Engineer',
+                      company: 'Acme Ltd',
+                      is_active: true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/admin/jobs/{id}': {
+      get: {
+        tags: ['Admin Jobs'],
+        summary: 'Get job (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': {
+            description: 'Job detail (admin)',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: { success: true, data: { id: 'job-uuid', title: 'Backend Engineer' } }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      },
+
+      put: {
+        tags: ['Admin Jobs'],
+        summary: 'Update a job (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' },
+                  company: { type: 'string' },
+                  description: { type: 'string' },
+                  company_logo: { type: 'string', format: 'binary' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Job updated successfully',
+            content: {
+              'application/json': {
+                schema: { type: 'object', example: { success: true, data: { id: 'job-uuid', title: 'Updated' } } }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      },
+
+      delete: {
+        tags: ['Admin Jobs'],
+        summary: 'Delete a job (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Job deleted successfully', content: { 'application/json': { example: { success: true, message: 'Job deleted successfully' } } } },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/admin/jobs/{id}/status': {
+      patch: {
+        tags: ['Admin Jobs'],
+        summary: 'Toggle job active/inactive status (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': {
+            description: 'Job status toggled',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    data: { id: 'job-uuid', is_active: true },
+                    message: 'Job activated'
+                  }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/admin/jobs/{id}/applications': {
+      get: {
+        tags: ['Admin Applications'],
+        summary: 'List job applications (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'page', in: 'query', schema: { type: 'integer' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Applications list',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  example: {
+                    success: true,
+                    data: {
+                      applications: [
+                        { id: 'app-uuid', applicant_name: 'Jane Doe', status: 'submitted', appliedAt: '2025-01-10T11:00:00.000Z' }
+                      ],
+                      pagination: { page: 1, limit: 20, total: 1, totalPages: 1 }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    // ============= Admin Application Management ============
+    '/api/admin/jobs/applications/{id}/status': {
+      patch: {
+        tags: ['Admin Applications'],
+        summary: 'Update application status (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { type: 'object', properties: { status: { type: 'string' } } } } }
+        },
+        responses: {
+          '200': {
+            description: 'Application status updated',
+            content: {
+              'application/json': {
+                schema: { type: 'object', example: { success: true, data: { id: 'app-uuid', status: 'interview' }, message: 'Application status updated to interview' } }
+              }
+            }
+          },
+          '400': { $ref: '#/components/schemas/Error' },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/admin/jobs/applications/{id}': {
+      delete: {
+        tags: ['Admin Applications'],
+        summary: 'Delete an application (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Application deleted successfully', content: { 'application/json': { example: { success: true, message: 'Application deleted successfully' } } } },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    // ============= Admin Job Profiles ============
+    '/api/admin/job-profiles': {
+      get: {
+        tags: ['Admin Job Profiles'],
+        summary: 'List all job profiles (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer' } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of job profiles',
+            content: {
+              'application/json': {
+                schema: { type: 'object', example: { success: true, data: { profiles: [], pagination: { page: 1, limit: 20, total: 0 } } } }
+              }
+            }
+          },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+
+    '/api/admin/job-profiles/{id}': {
+      delete: {
+        tags: ['Admin Job Profiles'],
+        summary: 'Delete a job profile (admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Job profile deleted', content: { 'application/json': { example: { success: true, message: 'Job profile deleted successfully' } } } },
+          '401': { $ref: '#/components/schemas/Error' },
+          '403': { $ref: '#/components/schemas/Error' },
+          '404': { $ref: '#/components/schemas/Error' },
+          '500': { $ref: '#/components/schemas/Error' }
+        }
+      }
+    },
+    // ============= CATEGORIES===========
     '/api/categories': {
       get: {
         tags: ['Categories'],

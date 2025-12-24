@@ -67,7 +67,7 @@ router.get('/', courseController.getAllCourses);
 router.get('/featured', courseController.getFeaturedCourses);
 
 // Get my enrolled courses (must come before /:id route)
-router.get('/my-courses/enrolled', authenticateToken, courseController.getMyEnrolledCourses);
+router.get('/my-courses/enrolled', authenticateToken, courseController.getMyEnrolledCourses);//9
 
 // Get course by slug (SEO-friendly URL)
 router.get('/slug/:slug', courseController.getCourseBySlug);
@@ -76,10 +76,10 @@ router.get('/slug/:slug', courseController.getCourseBySlug);
 router.get('/:id', courseController.getCourseById);
 
 // Get enrollment status for a course (requires authentication)
-router.get('/:id/enrollment-status', authenticateToken, courseController.getEnrollmentStatus);
+router.get('/:id/enrollment-status', authenticateToken, courseController.getEnrollmentStatus);//10
 
 // Get course progress for authenticated user
-router.get('/:id/progress', authenticateToken, courseController.getCourseProgress);
+router.get('/:id/progress', authenticateToken, courseController.getCourseProgress);//11
 
 // Get courses by instructor
 router.get('/instructor/:instructorId', courseController.getCoursesByInstructor);
@@ -150,7 +150,7 @@ router.post(
     '/:id/self-enroll',
     authenticateToken,
     courseController.selfEnroll
-);
+);//1
 
 // Enroll user in course (admin action)
 router.post(
@@ -158,7 +158,7 @@ router.post(
     authenticateToken,
     requirePermission('course.enroll'),
     courseController.enrollUser
-);
+);//2
 
 // Get course enrollments
 router.get(
@@ -166,7 +166,7 @@ router.get(
     authenticateToken,
     requirePermission('course.enroll'),
     courseController.getCourseEnrollments
-);
+);//3
 
 // Get enrollment trends for a course
 router.get(
@@ -174,7 +174,7 @@ router.get(
     authenticateToken,
     requirePermission('course.enroll'),
     courseController.getEnrollmentTrends
-);
+);//4
 
 // Unenroll user from course (admin action)
 router.delete(
@@ -182,15 +182,15 @@ router.delete(
     authenticateToken,
     requirePermission('course.enroll'),
     courseController.unenrollUser
-);
+);//5
 
 // Get course reviews (public)
-router.get('/:id/reviews', courseController.getCourseReviews);
+router.get('/:id/reviews', courseController.getCourseReviews); //6
 
 // Get user's own review for a course
-router.get('/:id/reviews/my', authenticateToken, courseController.getUserCourseReview);
+router.get('/:id/reviews/my', authenticateToken, courseController.getUserCourseReview);//7
 
 // Submit or update course review (authenticated users only)
-router.post('/:id/reviews', authenticateToken, courseController.submitCourseReview);
+router.post('/:id/reviews', authenticateToken, courseController.submitCourseReview);//8
 
 module.exports = router;
