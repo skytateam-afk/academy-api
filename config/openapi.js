@@ -11008,7 +11008,295 @@ const openApiSpec = {
         }
       }
     },
+    '/api/settings/institution/logo/{type}': {
+      delete: {
+        tags: ['Settings'],
+        summary: 'Delete institution logo',
+        description: 'Delete an institution logo by type (admin only).',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'type',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+            description: 'Logo type to delete (e.g. light, dark, favicon)'
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Logo deleted successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    data: {
+                      type: 'object',
+                      description: 'Updated institution settings'
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            $ref: '#/components/responses/Error'
+          },
+          '401': {
+            $ref: '#/components/responses/Error'
+          },
+          '403': {
+            $ref: '#/components/responses/Error'
+          },
+          '500': {
+            $ref: '#/components/responses/Error'
+          }
+        }
+      }
+    },
+    // ================= STAFF =================
+    '/api/staff': {
+      get: {
+        tags: ['Staff'],
+        summary: 'Get all staff members',
+        description: 'Retrieve staff members with pagination and filters',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'number' } },
+          { name: 'limit', in: 'query', schema: { type: 'number' } },
+          { name: 'department', in: 'query', schema: { type: 'string' } },
+          { name: 'employment_status', in: 'query', schema: { type: 'string' } },
+          { name: 'employment_type', in: 'query', schema: { type: 'string' } },
+          { name: 'search', in: 'query', schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Staff list retrieved successfully' },
+          '401': { $ref: '#/components/responses/Error' },
+          '403': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      },
+      post: {
+        tags: ['Staff'],
+        summary: 'Create staff member',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Staff' }
+            }
+          }
+        },
+        responses: {
+          '201': { description: 'Staff member created successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          '409': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
 
+    '/api/staff/generate-id': {
+      get: {
+        tags: ['Staff'],
+        summary: 'Generate staff ID',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Staff ID generated' },
+          '401': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/statistics/departments': {
+      get: {
+        tags: ['Staff'],
+        summary: 'Department statistics',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Department statistics retrieved' },
+          '401': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/statistics/employment': {
+      get: {
+        tags: ['Staff'],
+        summary: 'Employment statistics',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Employment statistics retrieved' },
+          '401': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/upcoming-reviews': {
+      get: {
+        tags: ['Staff'],
+        summary: 'Upcoming staff reviews',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'days', in: 'query', schema: { type: 'number' } }
+        ],
+        responses: {
+          '200': { description: 'Upcoming reviews retrieved' },
+          '401': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/export/csv': {
+      get: {
+        tags: ['Staff'],
+        summary: 'Export staff to CSV',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'department', in: 'query', schema: { type: 'string' } },
+          { name: 'employment_status', in: 'query', schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'CSV file generated' },
+          '401': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/department/{department}': {
+      get: {
+        tags: ['Staff'],
+        summary: 'Get staff by department',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'department', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Staff retrieved' },
+          '401': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/by-staff-id/{staffId}': {
+      get: {
+        tags: ['Staff'],
+        summary: 'Get staff by staff ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'staffId', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Staff retrieved' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/{id}': {
+      get: {
+        tags: ['Staff'],
+        summary: 'Get staff by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': { description: 'Staff retrieved' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      },
+      put: {
+        tags: ['Staff'],
+        summary: 'Update staff member',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Staff' }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Staff updated successfully' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      },
+      delete: {
+        tags: ['Staff'],
+        summary: 'Delete staff member',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Staff deleted successfully' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/{id}/status': {
+      patch: {
+        tags: ['Staff'],
+        summary: 'Update employment status',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  status: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Status updated successfully' },
+          '400': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/{id}/custom-fields': {
+      patch: {
+        tags: ['Staff'],
+        summary: 'Update custom fields',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Custom fields updated' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/{id}/metadata': {
+      patch: {
+        tags: ['Staff'],
+        summary: 'Update metadata',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Metadata updated' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/staff/bulk-update': {
+      post: {
+        tags: ['Staff'],
+        summary: 'Bulk update staff',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Staff updated successfully' },
+          '400': { $ref: '#/components/responses/Error' }
+        }
+      }
+    }
+    ,
     // ==================== PROMOTIONS ====================
 
     '/api/promotions': {
@@ -11900,6 +12188,743 @@ const openApiSpec = {
           '400': { description: 'Validation error or student already in target classroom', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '404': { description: 'Target classroom or student not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
           '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+    // ================= SUBSCRIPTION =================
+    '/api/subscription/tiers': {
+      get: {
+        tags: ['Subscription'],
+        summary: 'Get all subscription tiers',
+        description: 'Retrieve all subscription tiers with optional pagination, search, and sorting',
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'number', example: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'number', example: 50 } },
+          { name: 'isActive', in: 'query', schema: { type: 'boolean', example: true } },
+          { name: 'search', in: 'query', schema: { type: 'string', example: 'premium' } },
+          { name: 'sortBy', in: 'query', schema: { type: 'string', example: 'sort_order' } },
+          { name: 'sortOrder', in: 'query', schema: { type: 'string', example: 'asc' } }
+        ],
+        responses: {
+          '200': { description: 'Subscription tiers retrieved successfully' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      },
+      post: {
+        tags: ['Subscription'],
+        summary: 'Create a subscription tier',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/SubscriptionTier' },
+              example: {
+                name: 'Premium Plan',
+                slug: 'premium-plan',
+                description: 'Full access to all features',
+                price: 49.99,
+                currency: 'USD',
+                billingCycleMonths: 1,
+                features: ['Feature 1', 'Feature 2'],
+                maxUsers: -1,
+                isPopular: true,
+                sortOrder: 0
+              }
+            }
+          }
+        },
+        responses: {
+          '201': { description: 'Subscription tier created successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          '409': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/tiers/{id}': {
+      get: {
+        tags: ['Subscription'],
+        summary: 'Get subscription tier by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-here' } }
+        ],
+        responses: {
+          '200': { description: 'Subscription tier retrieved successfully' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      },
+      put: {
+        tags: ['Subscription'],
+        summary: 'Update subscription tier',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-here' } }
+        ],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/SubscriptionTierUpdate' },
+              example: { price: 59.99, isPopular: false }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Subscription tier updated successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          '404': { $ref: '#/components/responses/Error' },
+          '409': { $ref: '#/components/responses/Error' }
+        }
+      },
+      delete: {
+        tags: ['Subscription'],
+        summary: 'Delete subscription tier',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-here' } }
+        ],
+        responses: {
+          '200': { description: 'Subscription tier deleted successfully' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/tiers/slug/{slug}': {
+      get: {
+        tags: ['Subscription'],
+        summary: 'Get subscription tier by slug',
+        parameters: [
+          { name: 'slug', in: 'path', required: true, schema: { type: 'string', example: 'premium-plan' } }
+        ],
+        responses: {
+          '200': { description: 'Subscription tier retrieved successfully' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/tiers/{id}/toggle': {
+      patch: {
+        tags: ['Subscription'],
+        summary: 'Toggle subscription tier active status',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-here' } }
+        ],
+        responses: {
+          '200': { description: 'Subscription tier active status toggled' },
+          '400': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/tiers/reorder': {
+      patch: {
+        tags: ['Subscription'],
+        summary: 'Reorder subscription tiers',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: { type: 'object', additionalProperties: { type: 'number' } },
+              example: { 'uuid-tier1': 0, 'uuid-tier2': 1 }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Subscription tiers reordered successfully' },
+          '400': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/subscribe': {
+      post: {
+        tags: ['Subscription'],
+        summary: 'Subscribe current user to a tier',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/SubscribeRequest' },
+              example: { tierId: 'uuid-here', paymentProvider: 'manual' }
+            }
+          }
+        },
+        responses: {
+          '201': { description: 'User subscribed successfully' },
+          '409': { $ref: '#/components/responses/Error' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/my-subscriptions': {
+      get: {
+        tags: ['Subscription'],
+        summary: 'Get subscriptions of the current user',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'number', example: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'number', example: 10 } },
+          { name: 'status', in: 'query', schema: { type: 'string', example: 'active' } }
+        ],
+        responses: {
+          '200': { description: 'Subscriptions retrieved successfully' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/my-active-subscription': {
+      get: {
+        tags: ['Subscription'],
+        summary: 'Get active subscription of the current user',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Active subscription retrieved' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/cancel-subscription': {
+      patch: {
+        tags: ['Subscription'],
+        summary: 'Cancel current user subscription',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/CancelSubscription' },
+              example: { reason: 'No longer needed' }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Subscription cancelled successfully' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/subscriptions': {
+      get: {
+        tags: ['Subscription'],
+        summary: 'Get all subscriptions (Admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'number', example: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'number', example: 50 } },
+          { name: 'status', in: 'query', schema: { type: 'string', example: 'active' } },
+          { name: 'userId', in: 'query', schema: { type: 'string', example: 'uuid-here' } },
+          { name: 'tierId', in: 'query', schema: { type: 'string', example: 'uuid-here' } }
+        ],
+        responses: {
+          '200': { description: 'Subscriptions retrieved successfully' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/subscriptions/{id}': {
+      get: {
+        tags: ['Subscription'],
+        summary: 'Get subscription by ID (Admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-here' } }
+        ],
+        responses: {
+          '200': { description: 'Subscription retrieved successfully' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      },
+      patch: {
+        tags: ['Subscription'],
+        summary: 'Update subscription (Admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-here' } }
+        ],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/SubscriptionUpdate' },
+              example: { status: 'cancelled', confirmed: true }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Subscription updated successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      },
+      post: {
+        tags: ['Subscription'],
+        summary: 'Cancel subscription (Admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-here' } }
+        ],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/CancelSubscription' },
+              example: { reason: 'Violation', confirmed: true }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Subscription cancelled successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/subscription/stats': {
+      get: {
+        tags: ['Subscription'],
+        summary: 'Get subscription statistics (Admin)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Subscription statistics retrieved successfully' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+    // ================= TAG MANAGEMENT =================
+    '/api/tags': {
+      get: {
+        tags: ['Tags'],
+        summary: 'Get all tags',
+        description: 'Retrieve tags with optional search, filtering by key/type/category, and pagination',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'search', in: 'query', schema: { type: 'string', example: 'urgent' } },
+          { name: 'tag_key', in: 'query', schema: { type: 'string', example: 'priority' } },
+          { name: 'tag_type', in: 'query', schema: { type: 'string', example: 'system' } },
+          { name: 'category_id', in: 'query', schema: { type: 'string', example: 'uuid-category' } },
+          { name: 'page', in: 'query', schema: { type: 'number', example: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'number', example: 100 } }
+        ],
+        responses: {
+          '200': {
+            description: 'Tags retrieved successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  data: [
+                    { id: 'uuid1', tag_key: 'priority', tag_value: 'high', tag_type: 'system', category_id: 'uuid-cat1' },
+                    { id: 'uuid2', tag_key: 'status', tag_value: 'open', tag_type: 'custom', category_id: 'uuid-cat2' }
+                  ],
+                  pagination: { page: 1, limit: 100 }
+                }
+              }
+            }
+          },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      },
+      post: {
+        tags: ['Tags'],
+        summary: 'Create a new tag',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Tag' },
+              example: {
+                tag_key: 'priority',
+                tag_value: 'urgent',
+                description: 'Tasks that need immediate attention',
+                tag_type: 'custom',
+                category_id: 'uuid-category'
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Tag created successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Tag created successfully',
+                  data: { id: 'uuid-tag1', tag_key: 'priority', tag_value: 'urgent' }
+                }
+              }
+            }
+          },
+          '400': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/tags/:id': {
+      get: {
+        tags: ['Tags'],
+        summary: 'Get tag by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-tag1' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Tag retrieved successfully',
+            content: {
+              'application/json': {
+                example: { success: true, data: { id: 'uuid-tag1', tag_key: 'priority', tag_value: 'urgent' } }
+              }
+            }
+          },
+          '404': {
+            description: 'Tag not found',
+            content: { 'application/json': { example: { success: false, message: 'Tag not found' } } }
+          }
+        }
+      },
+      patch: {
+        tags: ['Tags'],
+        summary: 'Update a tag',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-tag1' } }
+        ],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/TagUpdate' },
+              example: { description: 'Updated description', tag_type: 'system', category_id: 'uuid-cat2' }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Tag updated successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Tag updated successfully',
+                  data: { id: 'uuid-tag1', tag_key: 'priority', tag_value: 'urgent', description: 'Updated description' }
+                }
+              }
+            }
+          },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      },
+      delete: {
+        tags: ['Tags'],
+        summary: 'Delete a tag',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-tag1' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Tag deleted successfully',
+            content: { 'application/json': { example: { success: true, message: 'Tag deleted successfully' } } }
+          },
+          '404': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/tags/keys': {
+      get: {
+        tags: ['Tags'],
+        summary: 'Get all tag keys',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Tag keys retrieved successfully',
+            content: { 'application/json': { example: { success: true, data: ['priority', 'status', 'type'] } } }
+          }
+        }
+      }
+    },
+
+    '/api/tags/keys/:key/values': {
+      get: {
+        tags: ['Tags'],
+        summary: 'Get tag values for a key',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'key', in: 'path', required: true, schema: { type: 'string', example: 'priority' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Tag values retrieved successfully',
+            content: { 'application/json': { example: { success: true, data: ['low', 'medium', 'high', 'urgent'] } } }
+          }
+        }
+      }
+    },
+
+    '/api/tags/categories': {
+      get: {
+        tags: ['Tags'],
+        summary: 'Get all tag categories',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Categories retrieved successfully',
+            content: { 'application/json': { example: { success: true, data: [{ id: 'uuid-cat1', name: 'Priority' }] } } }
+          }
+        }
+      }
+    },
+
+    '/api/tags/resources': {
+      post: {
+        tags: ['Tags'],
+        summary: 'Tag a resource',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/TagResource' },
+              example: {
+                resource_type: 'task',
+                resource_id: 'uuid-task1',
+                tag_key: 'priority',
+                tag_value: 'high',
+                tag_description: 'High priority task',
+                tag_type: 'custom',
+                category_id: 'uuid-cat1'
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Resource tagged successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Resource tagged successfully',
+                  data: { id: 'uuid-tag-resource1', resource_type: 'task', tag_key: 'priority', tag_value: 'high' }
+                }
+              }
+            }
+          },
+          '400': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/tags/resources/:resource_type/:resource_id': {
+      get: {
+        tags: ['Tags'],
+        summary: 'Get tags for a resource',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'resource_type', in: 'path', required: true, schema: { type: 'string', example: 'task' } },
+          { name: 'resource_id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-task1' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Tags retrieved for resource',
+            content: {
+              'application/json': {
+                example: { success: true, data: [{ tag_key: 'priority', tag_value: 'high' }] }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/tags/resources/:resource_type/:resource_id/:tag_id': {
+      delete: {
+        tags: ['Tags'],
+        summary: 'Untag a resource',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'resource_type', in: 'path', required: true, schema: { type: 'string', example: 'task' } },
+          { name: 'resource_id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-task1' } },
+          { name: 'tag_id', in: 'path', required: true, schema: { type: 'string', example: 'uuid-tag1' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Resource untagged successfully',
+            content: { 'application/json': { example: { success: true, message: 'Resource untagged successfully' } } }
+          }
+        }
+      }
+    },
+
+    '/api/tags/search': {
+      post: {
+        tags: ['Tags'],
+        summary: 'Search resources by tags',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/SearchResourcesByTags' },
+              example: {
+                resource_type: 'task',
+                tags: [{ tag_key: 'priority', tag_value: 'high' }],
+                match_type: 'all'
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Resources found by tags',
+            content: {
+              'application/json': {
+                example: { success: true, data: ['uuid-task1', 'uuid-task2'], count: 2 }
+              }
+            }
+          },
+          '400': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/tags/bulk': {
+      post: {
+        tags: ['Tags'],
+        summary: 'Bulk tag resources',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/BulkTagResources' },
+              example: {
+                resources: [{ resource_type: 'task', resource_id: 'uuid-task1' }],
+                tags: [{ tag_key: 'priority', tag_value: 'high' }]
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Resources bulk tagged successfully',
+            content: {
+              'application/json': {
+                example: { success: true, message: 'Successfully tagged 1 resource-tag combinations', data: { count: 1 } }
+              }
+            }
+          },
+          '400': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+    // ================= PERSONALISATION =================
+    '/api/personalisation/preferences': {
+      get: {
+        tags: ['Personalisation'],
+        summary: 'Get user preferences',
+        description: 'Retrieve the preferences for the authenticated user',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'User preferences retrieved successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  data: {
+                    theme: 'dark',
+                    notifications: { email: true, sms: false },
+                    language: 'en'
+                  }
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Failed to fetch preferences',
+            content: {
+              'application/json': {
+                example: {
+                  success: false,
+                  error: 'Failed to fetch preferences'
+                }
+              }
+            }
+          }
+        }
+      },
+      put: {
+        tags: ['Personalisation'],
+        summary: 'Update user preferences',
+        description: 'Update the preferences for the authenticated user',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  theme: { type: 'string', example: 'light' },
+                  notifications: {
+                    type: 'object',
+                    properties: {
+                      email: { type: 'boolean', example: true },
+                      sms: { type: 'boolean', example: false }
+                    }
+                  },
+                  language: { type: 'string', example: 'fr' }
+                }
+              },
+              example: {
+                theme: 'light',
+                notifications: { email: true, sms: true },
+                language: 'fr'
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Preferences updated successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Preferences updated successfully',
+                  data: {
+                    theme: 'light',
+                    notifications: { email: true, sms: true },
+                    language: 'fr'
+                  }
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Failed to update preferences',
+            content: {
+              'application/json': {
+                example: {
+                  success: false,
+                  error: 'Failed to update preferences'
+                }
+              }
+            }
+          }
         }
       }
     },
