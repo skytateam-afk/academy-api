@@ -15,21 +15,21 @@ router.use(authenticateToken);
  * @desc    Get all notifications for authenticated user
  * @access  Protected
  */
-router.get('/', notificationController.getNotifications);
+router.get('/', notificationController.getNotifications); //yes
 
 /**
  * @route   GET /api/notifications/unread/count
  * @desc    Get unread notification count
  * @access  Protected
  */
-router.get('/unread/count', notificationController.getUnreadCount);
+router.get('/unread/count', notificationController.getUnreadCount); //yes
 
 /**
  * @route   PATCH /api/notifications/read-all
  * @desc    Mark all notifications as read
  * @access  Protected
  */
-router.patch('/read-all', notificationController.markAllAsRead);
+router.patch('/read-all', notificationController.markAllAsRead); //yes
 
 /**
  * @route   PATCH /api/notifications/:id/read
@@ -50,13 +50,13 @@ router.patch('/:id/unread', notificationController.markAsUnread);
  * @desc    Delete a specific notification
  * @access  Protected
  */
-router.delete('/:id', notificationController.deleteNotification);
+router.delete('/:id', notificationController.deleteNotification);//yes
 
 /**
  * @route   DELETE /api/notifications
  * @desc    Delete all notifications
  * @access  Protected
  */
-router.delete('/', notificationController.deleteAllNotifications);
+router.delete('/', notificationController.deleteAllNotifications);//yes
 
 module.exports = router;

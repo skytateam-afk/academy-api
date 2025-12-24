@@ -273,7 +273,7 @@ router.patch(
   authenticate,
   checkPermission('lesson.update'),
   attachmentController.toggleDownloadableStatus
-);
+);//3
 
 /**
  * @route   GET /api/courses/:courseId/attachments/statistics

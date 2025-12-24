@@ -9152,7 +9152,67 @@ const openApiSpec = {
         }
       }
     },
-    '/api/notifications/mark-read': {
+    '/notifications/:id/read': {
+      patch: {
+        tags: ['Notifications'],
+        summary: 'Mark notification as read',
+        description: 'Mark a specific notification as read (Protected)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Notification ID' }
+        ],
+        responses: {
+          200: {
+            description: 'Notification marked as read successfully',
+            content: { 'application/json': { example: { success: true, data: {} } } }
+          },
+          401: {
+            description: 'Unauthorized',
+            content: { 'application/json': { $ref: '#/components/schemas/Error' } }
+          },
+          404: {
+            description: 'Notification not found',
+            content: { 'application/json': { $ref: '#/components/schemas/Error' } }
+          },
+          500: {
+            description: 'Failed to mark notification as read',
+            content: { 'application/json': { $ref: '#/components/schemas/Error' } }
+          }
+        }
+      }
+    },
+
+    '/notifications/:id/unread': {
+      patch: {
+        tags: ['Notifications'],
+        summary: 'Mark notification as unread',
+        description: 'Mark a specific notification as unread (Protected)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Notification ID' }
+        ],
+        responses: {
+          200: {
+            description: 'Notification marked as unread successfully',
+            content: { 'application/json': { example: { success: true, data: {} } } }
+          },
+          401: {
+            description: 'Unauthorized',
+            content: { 'application/json': { $ref: '#/components/schemas/Error' } }
+          },
+          404: {
+            description: 'Notification not found',
+            content: { 'application/json': { $ref: '#/components/schemas/Error' } }
+          },
+          500: {
+            description: 'Failed to mark notification as unread',
+            content: { 'application/json': { $ref: '#/components/schemas/Error' } }
+          }
+        }
+      }
+    },
+
+    '/api/notifications/read-all': {
       post: {
         tags: ['Notifications'],
         summary: 'Mark notifications as read',
@@ -9207,7 +9267,7 @@ const openApiSpec = {
         }
       }
     },
-    '/api/notifications/unread-count': {
+    '/api/notifications/unread/count': {
       get: {
         tags: ['Notifications'],
         summary: 'Get unread notification count',
@@ -9236,7 +9296,7 @@ const openApiSpec = {
         }
       }
     },
-    '/api/notifications/bulk-delete': {
+    '/api/notifications': {
       delete: {
         tags: ['Notifications'],
         summary: 'Bulk delete notifications',
@@ -10031,7 +10091,217 @@ const openApiSpec = {
         }
       }
     },
+    // ===== Menu Management =====
+    '/menu/items': {
+      get: {
+        tags: ['Menu Management'],
+        summary: 'List all menu items',
+        description: 'Retrieve all menu items with pagination (Admin only)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer' }, description: 'Page number', required: false },
+          { name: 'limit', in: 'query', schema: { type: 'integer' }, description: 'Number of items per page', required: false }
+        ],
+        responses: {
+          200: { description: 'Menu items retrieved successfully', content: { 'application/json': { example: { success: true, data: [] } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      },
+      post: {
+        tags: ['Menu Management'],
+        summary: 'Create a new menu item',
+        description: 'Create a menu item (Admin only)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  userType: { type: 'string' },
+                  isActive: { type: 'boolean' }
+                },
+                required: ['name', 'userType']
+              }
+            }
+          }
+        },
+        responses: {
+          201: { description: 'Menu item created', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu item created successfully' } } } },
+          400: { description: 'Bad request', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
 
+    '/menu/items/:id': {
+      get: {
+        tags: ['Menu Management'],
+        summary: 'Get single menu item',
+        description: 'Retrieve a single menu item by ID (Admin only)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          200: { description: 'Menu item retrieved', content: { 'application/json': { example: { success: true, data: {} } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          404: { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      },
+      put: {
+        tags: ['Menu Management'],
+        summary: 'Update menu item',
+        description: 'Update a menu item by ID (Admin only)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { type: 'object' } } }
+        },
+        responses: {
+          200: { description: 'Menu item updated', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu item updated successfully' } } } },
+          400: { description: 'Bad request', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          404: { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      },
+      delete: {
+        tags: ['Menu Management'],
+        summary: 'Delete menu item',
+        description: 'Delete a menu item by ID (Admin only)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          200: { description: 'Menu item deleted', content: { 'application/json': { example: { success: true, message: 'Menu item deleted successfully' } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          404: { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
+    '/menu/items/:id/toggle': {
+      patch: {
+        tags: ['Menu Management'],
+        summary: 'Toggle menu item status',
+        description: 'Activate or deactivate a menu item (Admin only)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          200: { description: 'Menu status toggled', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu activated/deactivated successfully' } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
+    '/menu/menus/:userType': {
+      get: {
+        tags: ['Menu Management'],
+        summary: 'Get menus by user type',
+        description: 'Retrieve menus accessible by a specific user type (Public)',
+        parameters: [{ name: 'userType', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          200: { description: 'Menus retrieved', content: { 'application/json': { example: { success: true, data: [] } } } },
+          404: { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
+    '/menu/user-types': {
+      get: {
+        tags: ['Menu Management'],
+        summary: 'Get available user types',
+        description: 'Retrieve all user types (Admin only)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: 'User types retrieved', content: { 'application/json': { example: { success: true, data: [] } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
+    // ===== Legacy Menu Visibility =====
+    '/menu/all': {
+      get: {
+        tags: ['Menu Visibility (Legacy)'],
+        summary: 'Get all menu settings',
+        description: 'Retrieve all menu settings (Admin only)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: 'All menu settings retrieved', content: { 'application/json': { example: { success: true, data: [] } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
+    '/menu/:id': {
+      put: {
+        tags: ['Menu Visibility (Legacy)'],
+        summary: 'Update menu visibility',
+        description: 'Update menu visibility settings for a menu item (Admin only)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object' } } } },
+        responses: {
+          200: { description: 'Menu visibility updated', content: { 'application/json': { example: { success: true, message: 'Menu visibility updated' } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      },
+      delete: {
+        tags: ['Menu Visibility (Legacy)'],
+        summary: 'Delete menu item (legacy)',
+        description: 'Delete a menu item (Admin only, legacy)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          200: { description: 'Menu item deleted', content: { 'application/json': { example: { success: true, message: 'Menu item deleted successfully' } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
+    '/menu/bulk/:userType': {
+      post: {
+        tags: ['Menu Visibility (Legacy)'],
+        summary: 'Bulk update menus for a user type',
+        description: 'Update multiple menu items visibility for a user type (Admin only)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'userType', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } } },
+        responses: {
+          200: { description: 'Bulk menu update successful', content: { 'application/json': { example: { success: true, message: 'Menus updated successfully' } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
+    '/menu/': {
+      post: {
+        tags: ['Menu Visibility (Legacy)'],
+        summary: 'Add a menu item',
+        description: 'Add a new menu item (Admin only, legacy)',
+        security: [{ bearerAuth: [] }],
+        requestBody: { required: true, content: { 'application/json': { schema: { type: 'object' } } } },
+        responses: {
+          201: { description: 'Menu item added', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu item created successfully' } } } },
+          400: { description: 'Bad request', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
     '/api/settings/institution': {
       get: {
         tags: ['Settings'],

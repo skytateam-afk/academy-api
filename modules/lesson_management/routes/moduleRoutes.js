@@ -215,7 +215,7 @@ router.post(
   authenticate,
   checkCourseEnrollment,
   quizController.submitQuiz
-);
+);//1
 
 /**
  * @route   GET /api/modules/:moduleId/quiz-attempts
@@ -227,7 +227,7 @@ router.get(
   authenticate,
   checkCourseEnrollment,
   quizController.getQuizAttempts
-);
+);//2
 
 // ============================================
 // Progress Tracking Routes
@@ -243,7 +243,7 @@ router.post(
   authenticate,
   checkCourseEnrollment,
   progressController.completeModule
-);
+);//3
 
 /**
  * @route   PUT /api/modules/:moduleId/progress
@@ -255,7 +255,7 @@ router.put(
   authenticate,
   checkCourseEnrollment,
   progressController.updateVideoProgress
-);
+);//4
 
 /**
  * @route   GET /api/modules/:moduleId/progress
@@ -267,7 +267,7 @@ router.get(
   authenticate,
   checkCourseEnrollment,
   progressController.getModuleProgress
-);
+);//5
 
 /**
  * @route   GET /api/courses/:courseId/progress
@@ -279,7 +279,7 @@ router.get(
   authenticate,
   checkCourseEnrollment,
   progressController.getCourseProgress
-);
+);//
 
 // ============================================
 // Module Attachment Routes
