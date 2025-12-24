@@ -6540,6 +6540,165 @@ const openApiSpec = {
         }
       }
     },
+    // ======PARENTS MANAGEMENT===========
+    '/parents': {
+      get: {
+        tags: ['Parents'],
+        summary: 'Get all parents',
+        description: 'Retrieve a paginated list of all parents (Protected)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer' }, description: 'Page number' },
+          { name: 'limit', in: 'query', schema: { type: 'integer' }, description: 'Number of items per page' },
+          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Search term for parent name or email' },
+          { name: 'sort_by', in: 'query', schema: { type: 'string' }, description: 'Field to sort by' },
+          { name: 'sort_order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'] }, description: 'Sort order' }
+        ],
+        responses: {
+          200: { description: 'Parents fetched successfully', content: { 'application/json': { example: { success: true, data: [] } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          500: { description: 'Failed to fetch parents', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      },
+      post: {
+        tags: ['Parents'],
+        summary: 'Create a new parent',
+        description: 'Create a new parent with required details (Protected)',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  first_name: { type: 'string' },
+                  last_name: { type: 'string' },
+                  email: { type: 'string' },
+                  phone: { type: 'string' },
+                  address: { type: 'string' }
+                },
+                required: ['first_name', 'last_name', 'email']
+              }
+            }
+          }
+        },
+        responses: {
+          201: { description: 'Parent created successfully', content: { 'application/json': { example: { success: true, data: {}, message: 'Parent created successfully' } } } },
+          400: { description: 'Validation failed', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
+    '/parents/:id': {
+      get: {
+        tags: ['Parents'],
+        summary: 'Get parent by ID',
+        description: 'Retrieve a single parent by its ID (Protected)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Parent ID' }],
+        responses: {
+          200: { description: 'Parent fetched successfully', content: { 'application/json': { example: { success: true, parent: {} } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          404: { description: 'Parent not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          500: { description: 'Failed to fetch parent', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      },
+      put: {
+        tags: ['Parents'],
+        summary: 'Update parent',
+        description: 'Update parent details (Protected)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Parent ID' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  first_name: { type: 'string' },
+                  last_name: { type: 'string' },
+                  email: { type: 'string' },
+                  phone: { type: 'string' },
+                  address: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          200: { description: 'Parent updated successfully', content: { 'application/json': { example: { success: true, parent: {}, message: 'Parent updated successfully' } } } },
+          400: { description: 'Validation failed', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      },
+      delete: {
+        tags: ['Parents'],
+        summary: 'Delete parent',
+        description: 'Delete a parent by ID (Protected)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Parent ID' }],
+        responses: {
+          200: { description: 'Parent deleted successfully', content: { 'application/json': { example: { success: true, message: 'Parent deleted successfully' } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          404: { description: 'Parent not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          500: { description: 'Failed to delete parent', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
+    '/parents/:id/students': {
+      get: {
+        tags: ['Parents'],
+        summary: 'Get students for a parent',
+        description: 'Retrieve paginated list of students assigned to a parent (Protected)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Parent ID' },
+          { name: 'page', in: 'query', schema: { type: 'integer' }, description: 'Page number' },
+          { name: 'limit', in: 'query', schema: { type: 'integer' }, description: 'Number of items per page' }
+        ],
+        responses: {
+          200: { description: 'Students fetched successfully', content: { 'application/json': { example: { success: true, data: [] } } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          500: { description: 'Failed to fetch students', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      },
+      post: {
+        tags: ['Parents'],
+        summary: 'Add student to parent',
+        description: 'Assign a student to a parent (Protected)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Parent ID' }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { type: 'object', properties: { student_id: { type: 'string' } }, required: ['student_id'] } } }
+        },
+        responses: {
+          200: { description: 'Student added successfully', content: { 'application/json': { example: { success: true, student: {}, message: 'Student added to parent successfully' } } } },
+          400: { description: 'Validation failed', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
+    '/parents/students/:studentId': {
+      delete: {
+        tags: ['Parents'],
+        summary: 'Remove student from parent',
+        description: 'Remove a student from parent assignment (Protected)',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'studentId', in: 'path', required: true, schema: { type: 'string' }, description: 'Student ID' }],
+        responses: {
+          200: { description: 'Student removed successfully', content: { 'application/json': { example: { success: true, student: {}, message: 'Student removed from parent successfully' } } } },
+          400: { description: 'Failed to remove student', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+        }
+      }
+    },
+
     // ============= CATEGORIES===========
     '/api/categories': {
       get: {
