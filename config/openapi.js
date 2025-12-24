@@ -2919,24 +2919,85 @@ const openApiSpec = {
         }
       }
     },
-  "/api/xp/activities": {
-    "get": {
-      "tags": ["XP Activities"],
-      "summary": "Get all XP activities",
-      "description": "Retrieve all XP activities with statistics (total, active, inactive, average XP). Admin only.",
-      "security": [{ "bearerAuth": [] }],
-      "responses": {
-        "200": {
-          "description": "XP activities retrieved successfully",
+    "/api/xp/activities": {
+      "get": {
+        "tags": ["XP Activities"],
+        "summary": "Get all XP activities",
+        "description": "Retrieve all XP activities with statistics (total, active, inactive, average XP). Admin only.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "XP activities retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "activities": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer", "example": 1 },
+                          "activity_type": { "type": "string", "example": "PostComment" },
+                          "xp_value": { "type": "integer", "example": 50 },
+                          "description": { "type": "string", "example": "XP awarded for posting a comment" },
+                          "is_active": { "type": "boolean", "example": true },
+                          "created_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" },
+                          "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" }
+                        }
+                      }
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "total": { "type": "integer", "example": 10 },
+                        "active": { "type": "integer", "example": 8 },
+                        "inactive": { "type": "integer", "example": 2 },
+                        "average": { "type": "integer", "example": 45 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "post": {
+        "tags": ["XP Activities"],
+        "summary": "Create new XP activity",
+        "description": "Add a new XP activity. Admin only.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["activity_type", "xp_value"],
                 "properties": {
-                  "success": { "type": "boolean", "example": true },
-                  "activities": {
-                    "type": "array",
-                    "items": {
+                  "activity_type": { "type": "string", "example": "PostComment" },
+                  "xp_value": { "type": "integer", "example": 50 },
+                  "description": { "type": "string", "example": "XP awarded for posting a comment" },
+                  "is_active": { "type": "boolean", "example": true }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "XP activity created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "activity": {
                       "type": "object",
                       "properties": {
                         "id": { "type": "integer", "example": 1 },
@@ -2948,188 +3009,127 @@ const openApiSpec = {
                         "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" }
                       }
                     }
-                  },
-                  "stats": {
-                    "type": "object",
-                    "properties": {
-                      "total": { "type": "integer", "example": 10 },
-                      "active": { "type": "integer", "example": 8 },
-                      "inactive": { "type": "integer", "example": 2 },
-                      "average": { "type": "integer", "example": 45 }
-                    }
                   }
+                }
+              }
+            }
+          },
+          "400": { "description": "Validation error or duplicate activity", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/api/xp/activities/{id}": {
+      "put": {
+        "tags": ["XP Activities"],
+        "summary": "Update XP activity",
+        "description": "Update an existing XP activity. Admin only.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 }, "description": "XP activity ID" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["activity_type", "xp_value"],
+                "properties": {
+                  "activity_type": { "type": "string", "example": "PostCommentUpdated" },
+                  "xp_value": { "type": "integer", "example": 60 },
+                  "description": { "type": "string", "example": "Updated description" },
+                  "is_active": { "type": "boolean", "example": true }
                 }
               }
             }
           }
         },
-        "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-      }
-    },
-    "post": {
-      "tags": ["XP Activities"],
-      "summary": "Create new XP activity",
-      "description": "Add a new XP activity. Admin only.",
-      "security": [{ "bearerAuth": [] }],
-      "requestBody": {
-        "required": true,
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "required": ["activity_type", "xp_value"],
-              "properties": {
-                "activity_type": { "type": "string", "example": "PostComment" },
-                "xp_value": { "type": "integer", "example": 50 },
-                "description": { "type": "string", "example": "XP awarded for posting a comment" },
-                "is_active": { "type": "boolean", "example": true }
+        "responses": {
+          "200": {
+            "description": "XP activity updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "activity": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer", "example": 1 },
+                        "activity_type": { "type": "string", "example": "PostCommentUpdated" },
+                        "xp_value": { "type": "integer", "example": 60 },
+                        "description": { "type": "string", "example": "Updated description" },
+                        "is_active": { "type": "boolean", "example": true },
+                        "created_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" },
+                        "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:30:00Z" }
+                      }
+                    }
+                  }
+                }
               }
             }
-          }
+          },
+          "400": { "description": "Validation error or duplicate activity", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Activity not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       },
-      "responses": {
-        "201": {
-          "description": "XP activity created successfully",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "success": { "type": "boolean", "example": true },
-                  "activity": {
-                    "type": "object",
-                    "properties": {
-                      "id": { "type": "integer", "example": 1 },
-                      "activity_type": { "type": "string", "example": "PostComment" },
-                      "xp_value": { "type": "integer", "example": 50 },
-                      "description": { "type": "string", "example": "XP awarded for posting a comment" },
-                      "is_active": { "type": "boolean", "example": true },
-                      "created_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" },
-                      "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" }
-                    }
-                  }
-                }
+      "delete": {
+        "tags": ["XP Activities"],
+        "summary": "Delete XP activity",
+        "description": "Delete an XP activity by ID. Admin only.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 }, "description": "XP activity ID" }],
+        "responses": {
+          "200": {
+            "description": "XP activity deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "XP activity deleted successfully" } } }
               }
             }
-          }
-        },
-        "400": { "description": "Validation error or duplicate activity", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-        "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-      }
-    }
-  },
-  "/api/xp/activities/{id}": {
-    "put": {
-      "tags": ["XP Activities"],
-      "summary": "Update XP activity",
-      "description": "Update an existing XP activity. Admin only.",
-      "security": [{ "bearerAuth": [] }],
-      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 }, "description": "XP activity ID" }],
-      "requestBody": {
-        "required": true,
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "required": ["activity_type", "xp_value"],
-              "properties": {
-                "activity_type": { "type": "string", "example": "PostCommentUpdated" },
-                "xp_value": { "type": "integer", "example": 60 },
-                "description": { "type": "string", "example": "Updated description" },
-                "is_active": { "type": "boolean", "example": true }
-              }
-            }
-          }
+          },
+          "404": { "description": "Activity not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
         }
       },
-      "responses": {
-        "200": {
-          "description": "XP activity updated successfully",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "success": { "type": "boolean", "example": true },
-                  "activity": {
-                    "type": "object",
-                    "properties": {
-                      "id": { "type": "integer", "example": 1 },
-                      "activity_type": { "type": "string", "example": "PostCommentUpdated" },
-                      "xp_value": { "type": "integer", "example": 60 },
-                      "description": { "type": "string", "example": "Updated description" },
-                      "is_active": { "type": "boolean", "example": true },
-                      "created_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" },
-                      "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:30:00Z" }
+      "patch": {
+        "tags": ["XP Activities"],
+        "summary": "Toggle XP activity active/inactive",
+        "description": "Switch the is_active status of an XP activity. Admin only.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 }, "description": "XP activity ID" }],
+        "responses": {
+          "200": {
+            "description": "XP activity status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "activity": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer", "example": 1 },
+                        "activity_type": { "type": "string", "example": "PostComment" },
+                        "xp_value": { "type": "integer", "example": 50 },
+                        "description": { "type": "string", "example": "XP awarded for posting a comment" },
+                        "is_active": { "type": "boolean", "example": false },
+                        "created_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" },
+                        "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:30:00Z" }
+                      }
                     }
                   }
                 }
               }
             }
-          }
-        },
-        "400": { "description": "Validation error or duplicate activity", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-        "404": { "description": "Activity not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-        "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+          },
+          "404": { "description": "Activity not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
       }
     },
-    "delete": {
-      "tags": ["XP Activities"],
-      "summary": "Delete XP activity",
-      "description": "Delete an XP activity by ID. Admin only.",
-      "security": [{ "bearerAuth": [] }],
-      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 }, "description": "XP activity ID" }],
-      "responses": {
-        "200": {
-          "description": "XP activity deleted successfully",
-          "content": {
-            "application/json": {
-              "schema": { "type": "object", "properties": { "success": { "type": "boolean", "example": true }, "message": { "type": "string", "example": "XP activity deleted successfully" } } }
-            }
-          }
-        },
-        "404": { "description": "Activity not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-        "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-      }
-    },
-    "patch": {
-      "tags": ["XP Activities"],
-      "summary": "Toggle XP activity active/inactive",
-      "description": "Switch the is_active status of an XP activity. Admin only.",
-      "security": [{ "bearerAuth": [] }],
-      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "example": 1 }, "description": "XP activity ID" }],
-      "responses": {
-        "200": {
-          "description": "XP activity status updated successfully",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "success": { "type": "boolean", "example": true },
-                  "activity": {
-                    "type": "object",
-                    "properties": {
-                      "id": { "type": "integer", "example": 1 },
-                      "activity_type": { "type": "string", "example": "PostComment" },
-                      "xp_value": { "type": "integer", "example": 50 },
-                      "description": { "type": "string", "example": "XP awarded for posting a comment" },
-                      "is_active": { "type": "boolean", "example": false },
-                      "created_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:00:00Z" },
-                      "updated_at": { "type": "string", "format": "date-time", "example": "2025-12-23T12:30:00Z" }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "404": { "description": "Activity not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
-        "500": { "description": "Server error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
-      }
-    }
-  },
     '/api/roles': {
       get: {
         tags: ['Roles'],
@@ -8578,9 +8578,1022 @@ const openApiSpec = {
         }
       }
     },
+    // ================== CLASSROOM MANAGEMENT ==================
+    '/api/classrooms': {
+      post: {
+        tags: ['Classrooms'],
+        summary: 'Create a new classroom',
+        description: 'Create a new classroom. Requires classroom.create permission.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name', 'code', 'level', 'academic_year'],
+                properties: {
+                  name: { type: 'string', example: 'JSS 1A', description: 'Classroom name' },
+                  code: { type: 'string', example: 'JSS1A', description: 'Unique classroom code' },
+                  level: { type: 'string', example: 'jss1', description: 'Classroom level' },
+                  type: { type: 'string', example: 'secondary', description: 'Classroom type' },
+                  section: { type: 'string', example: 'A', description: 'Classroom section' },
+                  capacity: { type: 'integer', example: 30, description: 'Maximum number of students' },
+                  academic_year: { type: 'integer', example: 2025, description: 'Academic year' },
+                  academic_term: { type: 'string', example: 'First Term', description: 'Academic term' },
+                  class_teacher_id: { type: 'string', format: 'uuid', description: 'Class teacher UUID' },
+                  room_number: { type: 'string', description: 'Room number' },
+                  description: { type: 'string', description: 'Classroom description' },
+                  is_active: { type: 'boolean', example: true, description: 'Whether the classroom is active' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Classroom created successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    message: { type: 'string', example: 'Classroom created successfully' },
+                    data: { type: 'object' }
+                  }
+                }
+              }
+            }
+          },
+          '400': { description: 'Validation error or duplicate code', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      },
+      get: {
+        tags: ['Classrooms'],
+        summary: 'Get all classrooms',
+        description: 'Retrieve all classrooms with optional filters, pagination, and sorting.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Search by name or code' },
+          { name: 'level', in: 'query', schema: { type: 'string' }, description: 'Filter by level' },
+          { name: 'type', in: 'query', schema: { type: 'string' }, description: 'Filter by type' },
+          { name: 'academic_year', in: 'query', schema: { type: 'integer' }, description: 'Filter by academic year' },
+          { name: 'academic_term', in: 'query', schema: { type: 'string' }, description: 'Filter by academic term' },
+          { name: 'is_active', in: 'query', schema: { type: 'boolean' }, description: 'Filter by active status' },
+          { name: 'class_teacher_id', in: 'query', schema: { type: 'string', format: 'uuid' }, description: 'Filter by class teacher ID' },
+          { name: 'page', in: 'query', schema: { type: 'integer' }, description: 'Pagination page' },
+          { name: 'limit', in: 'query', schema: { type: 'integer' }, description: 'Pagination limit' },
+          { name: 'sort_by', in: 'query', schema: { type: 'string' }, description: 'Sort field' },
+          { name: 'sort_order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'] }, description: 'Sort order' }
+        ],
+        responses: {
+          '200': {
+            description: 'Classrooms retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    message: { type: 'string', example: 'Classrooms retrieved successfully' },
+                    total: { type: 'integer' },
+                    page: { type: 'integer' },
+                    limit: { type: 'integer' },
+                    data: { type: 'array', items: { type: 'object' } }
+                  }
+                }
+              }
+            }
+          },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
 
+    '/api/classrooms/my-classroom': {
+      get: {
+        tags: ['Classrooms'],
+        summary: 'Get current student\'s classroom',
+        description: 'Retrieve the classroom information for the authenticated student.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Classroom retrieved successfully',
+            content: {
+              'application/json': {
+                schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'object' } } }
+              }
+            }
+          },
+          '404': {
+            description: 'Student not assigned to any classroom',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } }
+          },
+          '500': {
+            description: 'Server error',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } }
+          }
+        }
+      }
+    },
+
+    '/api/classrooms/{id}': {
+      get: {
+        tags: ['Classrooms'],
+        summary: 'Get classroom by ID',
+        description: 'Retrieve a classroom by its ID.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' }],
+        responses: {
+          '200': { description: 'Classroom retrieved', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'object' } } } } } },
+          '404': { description: 'Classroom not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      },
+      put: {
+        tags: ['Classrooms'],
+        summary: 'Update classroom',
+        description: 'Update classroom information. Only provided fields are updated.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  code: { type: 'string' },
+                  level: { type: 'string' },
+                  type: { type: 'string' },
+                  section: { type: 'string' },
+                  capacity: { type: 'integer' },
+                  academic_year: { type: 'integer' },
+                  academic_term: { type: 'string' },
+                  class_teacher_id: { type: 'string', format: 'uuid' },
+                  room_number: { type: 'string' },
+                  description: { type: 'string' },
+                  is_active: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Classroom updated', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'object' } } } } } },
+          '400': { description: 'Validation error or duplicate code', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Classroom not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      },
+      delete: {
+        tags: ['Classrooms'],
+        summary: 'Delete classroom',
+        description: 'Delete a classroom if it has no assigned students.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' }],
+        responses: {
+          '200': { description: 'Classroom deleted successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' } } } } } },
+          '400': { description: 'Cannot delete classroom with students', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Classroom not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+    '/api/classrooms/{id}/students': {
+      post: {
+        tags: ['Classrooms'],
+        summary: 'Assign a student to a classroom',
+        description: 'Assign a student to a classroom. Requires classroom.assign_students permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['student_id'],
+                properties: {
+                  student_id: { type: 'string', format: 'uuid', description: 'Student UUID' },
+                  enrollment_number: { type: 'string', description: 'Enrollment number' },
+                  roll_number: { type: 'integer', description: 'Roll number' },
+                  notes: { type: 'string', description: 'Optional notes' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': { description: 'Student assigned successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'object' } } } } } },
+          '400': { description: 'Validation error, duplicate assignment, or capacity exceeded', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Classroom not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      },
+      get: {
+        tags: ['Classrooms'],
+        summary: 'Get all students in a classroom',
+        description: 'Retrieve all students assigned to a classroom. Requires classroom.read permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' },
+          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Search by student name' },
+          { name: 'status', in: 'query', schema: { type: 'string' }, description: 'Filter by assignment status' },
+          { name: 'sort_by', in: 'query', schema: { type: 'string' }, description: 'Sort field' },
+          { name: 'sort_order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'] }, description: 'Sort order' }
+        ],
+        responses: {
+          '200': { description: 'Classroom students retrieved successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'array', items: { type: 'object' } } } } } } },
+          '404': { description: 'Classroom not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/classrooms/{id}/students/bulk': {
+      post: {
+        tags: ['Classrooms'],
+        summary: 'Bulk assign students to a classroom',
+        description: 'Assign multiple students to a classroom at once. Requires classroom.assign_students permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['students'],
+                properties: {
+                  students: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      required: ['student_id'],
+                      properties: {
+                        student_id: { type: 'string', format: 'uuid' },
+                        enrollment_number: { type: 'string' },
+                        roll_number: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': { description: 'Students assigned successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'array', items: { type: 'object' } } } } } } },
+          '400': { description: 'Validation error, duplicate assignment, or capacity exceeded', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Classroom not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/classrooms/{id}/students/{studentId}': {
+      delete: {
+        tags: ['Classrooms'],
+        summary: 'Remove a student from a classroom',
+        description: 'Remove a student from a classroom. Requires classroom.assign_students permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' },
+          { name: 'studentId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' }, description: 'Student UUID' }
+        ],
+        responses: {
+          '200': { description: 'Student removed successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' } } } } } },
+          '404': { description: 'Classroom or student not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/classrooms/assignments/{assignmentId}': {
+      put: {
+        tags: ['Classrooms'],
+        summary: 'Update student assignment',
+        description: 'Update student assignment information such as roll number or enrollment number.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'assignmentId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' }, description: 'Assignment ID' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { type: 'object', properties: { roll_number: { type: 'integer' }, enrollment_number: { type: 'string' }, notes: { type: 'string' } } } }
+          }
+        },
+        responses: {
+          '200': { description: 'Assignment updated successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'object' } } } } } },
+          '404': { description: 'Assignment not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/classrooms/students/{studentId}/classroom': {
+      get: {
+        tags: ['Classrooms'],
+        summary: 'Get student\'s current classroom',
+        description: 'Retrieve the current classroom of a specific student. Requires classroom.read permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'studentId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' }, description: 'Student UUID' },
+          { name: 'academic_year', in: 'query', schema: { type: 'integer' }, description: 'Optional academic year' }
+        ],
+        responses: {
+          '200': { description: 'Student classroom retrieved', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'object' } } } } } },
+          '404': { description: 'Student not assigned to any classroom', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/classrooms/{id}/statistics': {
+      get: {
+        tags: ['Classrooms'],
+        summary: 'Get classroom statistics',
+        description: 'Retrieve statistics for a classroom, including student and teacher counts. Requires classroom.read permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' }],
+        responses: {
+          '200': { description: 'Classroom statistics retrieved', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'object' } } } } } },
+          '404': { description: 'Classroom not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/classrooms/{id}/teachers': {
+      post: {
+        tags: ['Classrooms'],
+        summary: 'Assign a teacher to a classroom',
+        description: 'Assign a teacher to a classroom. Requires classroom.assign_teachers permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { type: 'object', required: ['teacher_id'], properties: { teacher_id: { type: 'string', format: 'uuid' }, is_primary: { type: 'boolean' }, notes: { type: 'string' } } } }
+          }
+        },
+        responses: {
+          '201': { description: 'Teacher assigned successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'object' } } } } } },
+          '400': { description: 'Validation error or duplicate assignment', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Classroom not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      },
+      get: {
+        tags: ['Classrooms'],
+        summary: 'Get all teachers in a classroom',
+        description: 'Retrieve all teachers assigned to a classroom. Requires classroom.read permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' },
+          { name: 'search', in: 'query', schema: { type: 'string' } },
+          { name: 'status', in: 'query', schema: { type: 'string' } },
+          { name: 'is_primary', in: 'query', schema: { type: 'boolean' } },
+          { name: 'sort_by', in: 'query', schema: { type: 'string' } },
+          { name: 'sort_order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'] } }
+        ],
+        responses: {
+          '200': { description: 'Teachers retrieved successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'array', items: { type: 'object' } } } } } } },
+          '404': { description: 'Classroom not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/classrooms/{id}/teachers/bulk': {
+      post: {
+        tags: ['Classrooms'],
+        summary: 'Bulk assign teachers to a classroom',
+        description: 'Assign multiple teachers to a classroom at once. Requires classroom.assign_teachers permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['teachers'],
+                properties: {
+                  teachers: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      required: ['teacher_id'],
+                      properties: {
+                        teacher_id: { type: 'string', format: 'uuid' },
+                        is_primary: { type: 'boolean' },
+                        notes: { type: 'string' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': { description: 'Teachers assigned successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'array', items: { type: 'object' } } } } } } },
+          '400': { description: 'Validation error or duplicate assignment', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Classroom not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/classrooms/{id}/teachers/{teacherId}': {
+      delete: {
+        tags: ['Classrooms'],
+        summary: 'Remove a teacher from a classroom',
+        description: 'Remove a teacher assignment. Requires classroom.assign_teachers permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Classroom ID' },
+          { name: 'teacherId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' }, description: 'Teacher UUID' }
+        ],
+        responses: {
+          '200': { description: 'Teacher removed successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' } } } } } },
+          '404': { description: 'Classroom or teacher not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/classrooms/students/{studentId}/transfer': {
+      post: {
+        tags: ['Classrooms'],
+        summary: 'Transfer or promote a student to a new classroom',
+        description: 'Transfer or promote a student to another classroom. Requires classroom.assign_students permission.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'studentId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' }, description: 'Student UUID' }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['student_id', 'id'],
+                properties: {
+                  student_id: { type: 'string', format: 'uuid' },
+                  id: { type: 'integer', description: 'Target classroom ID' },
+                  reason: { type: 'string', enum: ['transfer', 'promotion'] },
+                  enrollment_number: { type: 'string' },
+                  roll_number: { type: 'integer' },
+                  notes: { type: 'string' },
+                  transfer_notes: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': { description: 'Student transferred successfully', content: { 'application/json': { schema: { type: 'object', properties: { message: { type: 'string' }, data: { type: 'object' }, previous_classroom: { type: 'object' } } } } } },
+          '400': { description: 'Validation error or student already in target classroom', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Target classroom or student not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+    // ===================CONTACT MANAGEMENT ==============
+    '/api/contact/submit': {
+      post: {
+        tags: ['Contact'],
+        summary: 'Submit contact form',
+        description: 'Submit a contact form with name, email, phone, subject, and message. Public endpoint.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name', 'email', 'subject', 'message'],
+                properties: {
+                  name: {
+                    type: 'string',
+                    example: 'John Doe',
+                    description: 'Full name of the person contacting'
+                  },
+                  email: {
+                    type: 'string',
+                    format: 'email',
+                    example: 'john@example.com',
+                    description: 'Email address of the person contacting'
+                  },
+                  phone: {
+                    type: 'string',
+                    example: '+1234567890',
+                    description: 'Optional phone number'
+                  },
+                  subject: {
+                    type: 'string',
+                    example: 'Support Request',
+                    description: 'Subject of the message'
+                  },
+                  message: {
+                    type: 'string',
+                    example: 'I need help with my account.',
+                    description: 'Message content'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Contact form submitted successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Thank you for contacting us! We will get back to you soon.' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer', example: 1 },
+                        created_at: { type: 'string', format: 'date-time', example: '2025-12-24T12:00:00Z' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Failed to submit contact form',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/contact/statistics': {
+      get: {
+        tags: ['Contact'],
+        summary: 'Get contact statistics',
+        description: 'Retrieve statistics about contact submissions. Admin access required.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Statistics retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: { type: 'object' } // Can be detailed further with fields like total_submissions, read_count, unread_count
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } }
+          },
+          '500': {
+            description: 'Server error',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } }
+          }
+        }
+      }
+    },
+
+    '/api/contact/submissions': {
+      get: {
+        tags: ['Contact'],
+        summary: 'List all contact submissions',
+        description: 'Retrieve a paginated list of contact submissions. Admin access required.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 }, description: 'Page number' },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 }, description: 'Number of items per page' },
+          { name: 'status', in: 'query', schema: { type: 'string' }, description: 'Filter by status' },
+          { name: 'query', in: 'query', schema: { type: 'string' }, description: 'Search query' },
+          { name: 'sortBy', in: 'query', schema: { type: 'string', default: 'created_at' }, description: 'Sort field' },
+          { name: 'sortOrder', in: 'query', schema: { type: 'string', default: 'DESC' }, description: 'Sort order' }
+        ],
+        responses: {
+          '200': {
+            description: 'Submissions retrieved successfully',
+            content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean', example: true }, data: { type: 'array', items: { type: 'object' } } } } } }
+          },
+          '401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/contact/submissions/{id}': {
+      get: {
+        tags: ['Contact'],
+        summary: 'Get single contact submission',
+        description: 'Retrieve a specific contact submission by ID. Admin access required.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Submission ID' }
+        ],
+        responses: {
+          '200': { description: 'Submission retrieved', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean', example: true }, data: { type: 'object' } } } } } },
+          '401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      },
+      put: {
+        tags: ['Contact'],
+        summary: 'Update contact submission',
+        description: 'Update status and admin notes of a contact submission. Admin access required.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Submission ID' }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  status: { type: 'string', example: 'read', description: 'Status of submission' },
+                  admin_notes: { type: 'string', example: 'Followed up', description: 'Admin notes' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Submission updated', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean', example: true }, message: { type: 'string', example: 'Contact submission updated successfully' }, data: { type: 'object' } } } } } },
+          '401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      },
+      delete: {
+        tags: ['Contact'],
+        summary: 'Delete contact submission',
+        description: 'Delete a contact submission by ID. Admin access required.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Submission ID' }
+        ],
+        responses: {
+          '200': { description: 'Submission deleted', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean', example: true }, message: { type: 'string', example: 'Contact submission deleted successfully' } } } } } },
+          '401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/contact/submissions/{id}/read': {
+      patch: {
+        tags: ['Contact'],
+        summary: 'Mark submission as read',
+        description: 'Set submission status to read. Admin access required.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Submission ID' }
+        ],
+        responses: {
+          '200': { description: 'Marked as read', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean', example: true }, message: { type: 'string', example: 'Marked as read' }, data: { type: 'object' } } } } } },
+          '401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+
+    '/api/contact/submissions/{id}/unread': {
+      patch: {
+        tags: ['Contact'],
+        summary: 'Mark submission as unread',
+        description: 'Set submission status to unread. Admin access required.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'integer' }, description: 'Submission ID' }
+        ],
+        responses: {
+          '200': { description: 'Marked as unread', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean', example: true }, message: { type: 'string', example: 'Marked as unread' }, data: { type: 'object' } } } } } },
+          '401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '500': { description: 'Server error', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+        }
+      }
+    },
+    // =================== CERTIFICATES ====================
+    '/api/courses/{courseId}/certificate': {
+      post: {
+        tags: ['Certificates'],
+        summary: 'Generate certificate for a course',
+        description: 'Generates a certificate if the course is fully completed. Returns existing certificate if already generated.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'courseId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' }
+          }
+        ],
+        responses: {
+          '201': {
+            description: 'Certificate generated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Certificate generated successfully' },
+                    certificate: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        user_id: { type: 'string' },
+                        course_id: { type: 'string' },
+                        certificate_number: { type: 'string' },
+                        certificate_data: { type: 'object' },
+                        issued_at: { type: 'string', format: 'date-time' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '200': {
+            description: 'Certificate already exists',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Certificate already exists' },
+                    certificate: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        user_id: { type: 'string' },
+                        course_id: { type: 'string' },
+                        certificate_number: { type: 'string' },
+                        certificate_data: { type: 'object' },
+                        issued_at: { type: 'string', format: 'date-time' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Course not completed or certificates disabled',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      },
+
+      get: {
+        tags: ['Certificates'],
+        summary: 'Get certificate for current user and course',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'courseId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Certificate retrieved',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    certificate: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        user_id: { type: 'string' },
+                        course_id: { type: 'string' },
+                        certificate_number: { type: 'string' },
+                        certificate_data: { type: 'object' },
+                        issued_at: { type: 'string', format: 'date-time' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '404': {
+            description: 'Certificate not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/courses/{courseId}/certificate/eligibility': {
+      get: {
+        tags: ['Certificates'],
+        summary: 'Check certificate eligibility',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'courseId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Eligibility status',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    eligible: { type: 'boolean' },
+                    has_certificate: { type: 'boolean' },
+                    completion_percentage: { type: 'number', example: 100 },
+                    completed_modules: { type: 'integer', example: 10 },
+                    total_modules: { type: 'integer', example: 10 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/my-certificates': {
+      get: {
+        tags: ['Certificates'],
+        summary: 'Get certificates for current user',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'User certificates',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    certificates: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string' },
+                          certificate_number: { type: 'string' },
+                          course_title: { type: 'string' },
+                          course_description: { type: 'string' },
+                          thumbnail_url: { type: 'string' },
+                          issued_at: { type: 'string', format: 'date-time' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/users/{userId}/certificates': {
+      get: {
+        tags: ['Certificates'],
+        summary: 'Get certificates by user ID',
+        parameters: [
+          {
+            name: 'userId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'User certificates',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    certificates: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string' },
+                          certificate_number: { type: 'string' },
+                          course_title: { type: 'string' },
+                          course_description: { type: 'string' },
+                          thumbnail_url: { type: 'string' },
+                          issued_at: { type: 'string', format: 'date-time' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '404': {
+            description: 'User not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/verify/{certificateNumber}': {
+      get: {
+        tags: ['Certificates'],
+        summary: 'Verify certificate',
+        parameters: [
+          {
+            name: 'certificateNumber',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Certificate verified',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    valid: { type: 'boolean', example: true },
+                    certificate: {
+                      type: 'object',
+                      properties: {
+                        certificate_number: { type: 'string' },
+                        issued_at: { type: 'string', format: 'date-time' },
+                        student_name: { type: 'string' },
+                        course_title: { type: 'string' },
+                        certificate_data: { type: 'object' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '404': {
+            description: 'Certificate not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
     // ==================== ANNOUNCEMENTS ====================
-
     '/api/announcements': {
       get: {
         tags: ['Announcements'],
