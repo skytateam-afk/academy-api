@@ -6555,9 +6555,9 @@ const openApiSpec = {
           { name: 'sort_order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'] }, description: 'Sort order' }
         ],
         responses: {
-          200: { description: 'Parents fetched successfully', content: { 'application/json': { example: { success: true, data: [] } } } },
+          '200': { description: 'Parents fetched successfully', content: { 'application/json': { example: { success: true, data: [] } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
-          500: { description: 'Failed to fetch parents', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+          '500': { description: 'Failed to fetch parents', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       },
       post: {
@@ -6584,8 +6584,8 @@ const openApiSpec = {
           }
         },
         responses: {
-          201: { description: 'Parent created successfully', content: { 'application/json': { example: { success: true, data: {}, message: 'Parent created successfully' } } } },
-          400: { description: 'Validation failed', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          '201': { description: 'Parent created successfully', content: { 'application/json': { example: { success: true, data: {}, message: 'Parent created successfully' } } } },
+          '400': { description: 'Validation failed', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       }
@@ -6599,10 +6599,10 @@ const openApiSpec = {
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Parent ID' }],
         responses: {
-          200: { description: 'Parent fetched successfully', content: { 'application/json': { example: { success: true, parent: {} } } } },
+          '200': { description: 'Parent fetched successfully', content: { 'application/json': { example: { success: true, parent: {} } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
-          404: { description: 'Parent not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
-          500: { description: 'Failed to fetch parent', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+          '404': { description: 'Parent not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          '500': { description: 'Failed to fetch parent', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       },
       put: {
@@ -6629,8 +6629,8 @@ const openApiSpec = {
           }
         },
         responses: {
-          200: { description: 'Parent updated successfully', content: { 'application/json': { example: { success: true, parent: {}, message: 'Parent updated successfully' } } } },
-          400: { description: 'Validation failed', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          '200': { description: 'Parent updated successfully', content: { 'application/json': { example: { success: true, parent: {}, message: 'Parent updated successfully' } } } },
+          '400': { description: 'Validation failed', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       },
@@ -6641,10 +6641,10 @@ const openApiSpec = {
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Parent ID' }],
         responses: {
-          200: { description: 'Parent deleted successfully', content: { 'application/json': { example: { success: true, message: 'Parent deleted successfully' } } } },
+          '200': { description: 'Parent deleted successfully', content: { 'application/json': { example: { success: true, message: 'Parent deleted successfully' } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
-          404: { description: 'Parent not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
-          500: { description: 'Failed to delete parent', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+          '404': { description: 'Parent not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          '500': { description: 'Failed to delete parent', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       }
     },
@@ -6661,9 +6661,9 @@ const openApiSpec = {
           { name: 'limit', in: 'query', schema: { type: 'integer' }, description: 'Number of items per page' }
         ],
         responses: {
-          200: { description: 'Students fetched successfully', content: { 'application/json': { example: { success: true, data: [] } } } },
+          '200': { description: 'Students fetched successfully', content: { 'application/json': { example: { success: true, data: [] } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
-          500: { description: 'Failed to fetch students', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+          '500': { description: 'Failed to fetch students', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       },
       post: {
@@ -6677,8 +6677,8 @@ const openApiSpec = {
           content: { 'application/json': { schema: { type: 'object', properties: { student_id: { type: 'string' } }, required: ['student_id'] } } }
         },
         responses: {
-          200: { description: 'Student added successfully', content: { 'application/json': { example: { success: true, student: {}, message: 'Student added to parent successfully' } } } },
-          400: { description: 'Validation failed', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          '200': { description: 'Student added successfully', content: { 'application/json': { example: { success: true, student: {}, message: 'Student added to parent successfully' } } } },
+          '400': { description: 'Validation failed', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       }
@@ -6692,8 +6692,8 @@ const openApiSpec = {
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'studentId', in: 'path', required: true, schema: { type: 'string' }, description: 'Student ID' }],
         responses: {
-          200: { description: 'Student removed successfully', content: { 'application/json': { example: { success: true, student: {}, message: 'Student removed from parent successfully' } } } },
-          400: { description: 'Failed to remove student', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          '200': { description: 'Student removed successfully', content: { 'application/json': { example: { success: true, student: {}, message: 'Student removed from parent successfully' } } } },
+          '400': { description: 'Failed to remove student', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       }
@@ -6985,6 +6985,294 @@ const openApiSpec = {
               }
             }
           }
+        }
+      }
+    },
+    // ============= RESULTS =============
+
+    '/api/results/batches': {
+      post: {
+        tags: ['Results'],
+        summary: 'Create result batch',
+        description: 'Create a new result batch',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: [
+                  'batchName',
+                  'classroomId',
+                  'academicYear',
+                  'term',
+                  'gradingScaleId',
+                  'subjectGroupId'
+                ],
+                properties: {
+                  batchName: { type: 'string' },
+                  classroomId: { type: 'string' },
+                  academicYear: { type: 'string' },
+                  term: { type: 'string' },
+                  gradingScaleId: { type: 'string' },
+                  subjectGroupId: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': { description: 'Batch created successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          401: { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      },
+      get: {
+        tags: ['Results'],
+        summary: 'Get all result batches',
+        description: 'Retrieve all result batches with filters',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'classroomId', in: 'query', schema: { type: 'string' } },
+          { name: 'academicYear', in: 'query', schema: { type: 'string' } },
+          { name: 'term', in: 'query', schema: { type: 'string' } },
+          { name: 'status', in: 'query', schema: { type: 'string' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer' } },
+          { name: 'offset', in: 'query', schema: { type: 'integer' } }
+        ],
+        responses: {
+          '200': { description: 'Batches fetched successfully' },
+          401: { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/results/batches/:batchId': {
+      get: {
+        tags: ['Results'],
+        summary: 'Get batch by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'batchId', in: 'path', required: true }
+        ],
+        responses: {
+          '200': { description: 'Batch fetched successfully' },
+          '404': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      },
+      put: {
+        tags: ['Results'],
+        summary: 'Update result batch',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'batchId', in: 'path', required: true }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: [
+                  'batchName',
+                  'classroomId',
+                  'academicYear',
+                  'term',
+                  'gradingScaleId',
+                  'subjectGroupId'
+                ]
+              }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Batch updated successfully' },
+          '404': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      },
+      delete: {
+        tags: ['Results'],
+        summary: 'Delete result batch',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'batchId', in: 'path', required: true }
+        ],
+        responses: {
+          '200': { description: 'Batch deleted successfully' },
+          '404': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/results/batches/:batchId/upload': {
+      post: {
+        tags: ['Results'],
+        summary: 'Upload batch CSV',
+        description: 'Upload and process CSV results for a batch',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'batchId', in: 'path', required: true }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  csv: { type: 'string', format: 'binary' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'CSV processed successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/results/batches/:batchId/publish': {
+      post: {
+        tags: ['Results'],
+        summary: 'Publish batch results',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'batchId', in: 'path', required: true }
+        ],
+        responses: {
+          '200': { description: 'Batch published successfully' },
+          '404': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/results/batches/:batchId/status': {
+      patch: {
+        tags: ['Results'],
+        summary: 'Update batch status',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'batchId', in: 'path', required: true }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['status'],
+                properties: {
+                  status: {
+                    type: 'string',
+                    enum: ['draft', 'processing', 'completed', 'published', 'failed']
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Batch status updated successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          '404': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/results/batches/:batchId/results': {
+      get: {
+        tags: ['Results'],
+        summary: 'Get batch results',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'batchId', in: 'path', required: true }
+        ],
+        responses: {
+          '200': { description: 'Batch results fetched successfully' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/results/subjects': {
+      get: {
+        tags: ['Results'],
+        summary: 'Get all subjects',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'search', in: 'query', schema: { type: 'string' } },
+          { name: 'category', in: 'query', schema: { type: 'string' } },
+          { name: 'isActive', in: 'query', schema: { type: 'boolean' } }
+        ],
+        responses: {
+          '200': { description: 'Subjects fetched successfully' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      },
+      post: {
+        tags: ['Results'],
+        summary: 'Create subject',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '201': { description: 'Subject created successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          '409': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/results/grading-scales': {
+      get: {
+        tags: ['Results'],
+        summary: 'Get grading scales',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Grading scales fetched successfully' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      },
+      post: {
+        tags: ['Results'],
+        summary: 'Create grading scale',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '201': { description: 'Grading scale created successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      }
+    },
+
+    '/api/results/subject-groups': {
+      post: {
+        tags: ['Results'],
+        summary: 'Create subject group',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '201': { description: 'Subject group created successfully' },
+          '400': { $ref: '#/components/responses/Error' },
+          '500': { $ref: '#/components/responses/Error' }
+        }
+      },
+      get: {
+        tags: ['Results'],
+        summary: 'Get all subject groups',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'Subject groups fetched successfully' },
+          '500': { $ref: '#/components/responses/Error' }
         }
       }
     },
@@ -9321,7 +9609,7 @@ const openApiSpec = {
           { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Notification ID' }
         ],
         responses: {
-          200: {
+          '200': {
             description: 'Notification marked as read successfully',
             content: { 'application/json': { example: { success: true, data: {} } } }
           },
@@ -9329,11 +9617,11 @@ const openApiSpec = {
             description: 'Unauthorized',
             content: { 'application/json': { $ref: '#/components/schemas/Error' } }
           },
-          404: {
+          '404': {
             description: 'Notification not found',
             content: { 'application/json': { $ref: '#/components/schemas/Error' } }
           },
-          500: {
+          '500': {
             description: 'Failed to mark notification as read',
             content: { 'application/json': { $ref: '#/components/schemas/Error' } }
           }
@@ -9351,7 +9639,7 @@ const openApiSpec = {
           { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Notification ID' }
         ],
         responses: {
-          200: {
+          '200': {
             description: 'Notification marked as unread successfully',
             content: { 'application/json': { example: { success: true, data: {} } } }
           },
@@ -9359,11 +9647,11 @@ const openApiSpec = {
             description: 'Unauthorized',
             content: { 'application/json': { $ref: '#/components/schemas/Error' } }
           },
-          404: {
+          '404': {
             description: 'Notification not found',
             content: { 'application/json': { $ref: '#/components/schemas/Error' } }
           },
-          500: {
+          '500': {
             description: 'Failed to mark notification as unread',
             content: { 'application/json': { $ref: '#/components/schemas/Error' } }
           }
@@ -10182,7 +10470,145 @@ const openApiSpec = {
         }
       }
     },
+    // ============= SEARCH =================
+    '/api/search': {
+      get: {
+        tags: ['Search'],
+        summary: 'Unified search across multiple modules',
+        description: 'Search across multiple modules using a single query.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'q',
+            in: 'query',
+            required: true,
+            schema: { type: 'string' },
+            description: 'Search query text'
+          },
+          {
+            name: 'modules',
+            in: 'query',
+            required: false,
+            schema: { type: 'string' },
+            description: 'Comma-separated list of modules to search (e.g. users,courses)'
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            required: false,
+            schema: {
+              type: 'integer',
+              default: 5
+            },
+            description: 'Maximum results per module'
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Search results retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    query: { type: 'string' },
+                    totalResults: { type: 'integer' },
+                    results: {
+                      type: 'object',
+                      additionalProperties: {
+                        type: 'array',
+                        items: { type: 'object' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            $ref: '#/components/responses/Error'
+          },
+          '401': {
+            $ref: '#/components/responses/Error'
+          },
+          '500': {
+            $ref: '#/components/responses/Error'
+          }
+        }
+      }
+    },
 
+    '/api/search/tags': {
+      get: {
+        tags: ['Search'],
+        summary: 'Tag-based search across modules',
+        description: 'Search across modules using a tag. Restricted to admin, staff, and teachers.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'tag',
+            in: 'query',
+            required: true,
+            schema: { type: 'string' },
+            description: 'Tag to search for'
+          },
+          {
+            name: 'modules',
+            in: 'query',
+            required: false,
+            schema: { type: 'string' },
+            description: 'Comma-separated list of modules to search'
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            required: false,
+            schema: {
+              type: 'integer',
+              default: 10
+            },
+            description: 'Maximum results per module'
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Tag search results retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    tag: { type: 'string' },
+                    totalResults: { type: 'integer' },
+                    results: {
+                      type: 'object',
+                      additionalProperties: {
+                        type: 'array',
+                        items: { type: 'object' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            $ref: '#/components/responses/Error'
+          },
+          '401': {
+            $ref: '#/components/responses/Error'
+          },
+          '403': {
+            $ref: '#/components/responses/Error'
+          },
+          '500': {
+            $ref: '#/components/responses/Error'
+          }
+        }
+      }
+    },
     // ==================== SETTINGS ====================
 
     '/api/settings': {
@@ -10262,7 +10688,7 @@ const openApiSpec = {
           { name: 'limit', in: 'query', schema: { type: 'integer' }, description: 'Number of items per page', required: false }
         ],
         responses: {
-          200: { description: 'Menu items retrieved successfully', content: { 'application/json': { example: { success: true, data: [] } } } },
+          '200': { description: 'Menu items retrieved successfully', content: { 'application/json': { example: { success: true, data: [] } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
@@ -10290,8 +10716,8 @@ const openApiSpec = {
           }
         },
         responses: {
-          201: { description: 'Menu item created', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu item created successfully' } } } },
-          400: { description: 'Bad request', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          '201': { description: 'Menu item created', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu item created successfully' } } } },
+          '400': { description: 'Bad request', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
@@ -10306,10 +10732,10 @@ const openApiSpec = {
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
-          200: { description: 'Menu item retrieved', content: { 'application/json': { example: { success: true, data: {} } } } },
+          '200': { description: 'Menu item retrieved', content: { 'application/json': { example: { success: true, data: {} } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
-          404: { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+          '404': { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       },
       put: {
@@ -10323,11 +10749,11 @@ const openApiSpec = {
           content: { 'application/json': { schema: { type: 'object' } } }
         },
         responses: {
-          200: { description: 'Menu item updated', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu item updated successfully' } } } },
-          400: { description: 'Bad request', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          '200': { description: 'Menu item updated', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu item updated successfully' } } } },
+          '400': { description: 'Bad request', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
-          404: { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+          '404': { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       },
       delete: {
@@ -10337,10 +10763,10 @@ const openApiSpec = {
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
-          200: { description: 'Menu item deleted', content: { 'application/json': { example: { success: true, message: 'Menu item deleted successfully' } } } },
+          '200': { description: 'Menu item deleted', content: { 'application/json': { example: { success: true, message: 'Menu item deleted successfully' } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
-          404: { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+          '404': { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       }
     },
@@ -10353,7 +10779,7 @@ const openApiSpec = {
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
-          200: { description: 'Menu status toggled', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu activated/deactivated successfully' } } } },
+          '200': { description: 'Menu status toggled', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu activated/deactivated successfully' } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
@@ -10367,8 +10793,8 @@ const openApiSpec = {
         description: 'Retrieve menus accessible by a specific user type (Public)',
         parameters: [{ name: 'userType', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
-          200: { description: 'Menus retrieved', content: { 'application/json': { example: { success: true, data: [] } } } },
-          404: { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
+          '200': { description: 'Menus retrieved', content: { 'application/json': { example: { success: true, data: [] } } } },
+          '404': { description: 'Not found', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
       }
     },
@@ -10380,7 +10806,7 @@ const openApiSpec = {
         description: 'Retrieve all user types (Admin only)',
         security: [{ bearerAuth: [] }],
         responses: {
-          200: { description: 'User types retrieved', content: { 'application/json': { example: { success: true, data: [] } } } },
+          '200': { description: 'User types retrieved', content: { 'application/json': { example: { success: true, data: [] } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
@@ -10395,7 +10821,7 @@ const openApiSpec = {
         description: 'Retrieve all menu settings (Admin only)',
         security: [{ bearerAuth: [] }],
         responses: {
-          200: { description: 'All menu settings retrieved', content: { 'application/json': { example: { success: true, data: [] } } } },
+          '200': { description: 'All menu settings retrieved', content: { 'application/json': { example: { success: true, data: [] } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
@@ -10411,7 +10837,7 @@ const openApiSpec = {
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         requestBody: { required: true, content: { 'application/json': { schema: { type: 'object' } } } },
         responses: {
-          200: { description: 'Menu visibility updated', content: { 'application/json': { example: { success: true, message: 'Menu visibility updated' } } } },
+          '200': { description: 'Menu visibility updated', content: { 'application/json': { example: { success: true, message: 'Menu visibility updated' } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
@@ -10423,7 +10849,7 @@ const openApiSpec = {
         security: [{ bearerAuth: [] }],
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: {
-          200: { description: 'Menu item deleted', content: { 'application/json': { example: { success: true, message: 'Menu item deleted successfully' } } } },
+          '200': { description: 'Menu item deleted', content: { 'application/json': { example: { success: true, message: 'Menu item deleted successfully' } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
@@ -10439,7 +10865,7 @@ const openApiSpec = {
         parameters: [{ name: 'userType', in: 'path', required: true, schema: { type: 'string' } }],
         requestBody: { required: true, content: { 'application/json': { schema: { type: 'array', items: { type: 'object' } } } } },
         responses: {
-          200: { description: 'Bulk menu update successful', content: { 'application/json': { example: { success: true, message: 'Menus updated successfully' } } } },
+          '200': { description: 'Bulk menu update successful', content: { 'application/json': { example: { success: true, message: 'Menus updated successfully' } } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
@@ -10454,8 +10880,8 @@ const openApiSpec = {
         security: [{ bearerAuth: [] }],
         requestBody: { required: true, content: { 'application/json': { schema: { type: 'object' } } } },
         responses: {
-          201: { description: 'Menu item added', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu item created successfully' } } } },
-          400: { description: 'Bad request', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
+          '201': { description: 'Menu item added', content: { 'application/json': { example: { success: true, data: {}, message: 'Menu item created successfully' } } } },
+          '400': { description: 'Bad request', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           401: { description: 'Unauthorized', content: { 'application/json': { $ref: '#/components/schemas/Error' } } },
           403: { description: 'Forbidden', content: { 'application/json': { $ref: '#/components/schemas/Error' } } }
         }
