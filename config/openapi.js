@@ -13045,290 +13045,290 @@ const openApiSpec = {
       }
     },
     // ================= WISHLIST =================
-'/api/wishlist': {
-  post: {
-    tags: ['Wishlist'],
-    summary: 'Add item to wishlist',
-    description: 'Add a course, library item, or shop product to the authenticated user\'s wishlist',
-    security: [{ bearerAuth: [] }],
-    requestBody: {
-      required: true,
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              item_type: { type: 'string', enum: ['course', 'library_item', 'shop_product'], example: 'course' },
-              item_id: { type: 'string', example: '1234' },
-              notes: { type: 'string', example: 'Must review this later' }
-            },
-            required: ['item_type', 'item_id']
+    '/api/wishlist': {
+      post: {
+        tags: ['Wishlist'],
+        summary: 'Add item to wishlist',
+        description: 'Add a course, library item, or shop product to the authenticated user\'s wishlist',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  item_type: { type: 'string', enum: ['course', 'library_item', 'shop_product'], example: 'course' },
+                  item_id: { type: 'string', example: '1234' },
+                  notes: { type: 'string', example: 'Must review this later' }
+                },
+                required: ['item_type', 'item_id']
+              }
+            }
           }
-        }
-      }
-    },
-    responses: {
-      '201': {
-        description: 'Item added to wishlist',
-        content: {
-          'application/json': {
-            example: {
-              success: true,
-              message: 'Item added to wishlist',
-              data: {
-                id: 'abcd-1234',
-                user_id: '550e8400-e29b-41d4-a716-446655440000',
-                item_type: 'course',
-                item_id: '1234',
-                notes: 'Must review this later',
-                created_at: '2025-12-24T12:00:00.000Z'
+        },
+        responses: {
+          '201': {
+            description: 'Item added to wishlist',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Item added to wishlist',
+                  data: {
+                    id: 'abcd-1234',
+                    user_id: '550e8400-e29b-41d4-a716-446655440000',
+                    item_type: 'course',
+                    item_id: '1234',
+                    notes: 'Must review this later',
+                    created_at: '2025-12-24T12:00:00.000Z'
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Invalid item or already exists',
+            content: {
+              'application/json': {
+                example: {
+                  success: false,
+                  message: 'Item is already in your wishlist'
+                }
               }
             }
           }
         }
       },
-      '400': {
-        description: 'Invalid item or already exists',
-        content: {
-          'application/json': {
-            example: {
-              success: false,
-              message: 'Item is already in your wishlist'
+      post_toggle: {
+        path: '/api/wishlist/toggle',
+        tags: ['Wishlist'],
+        summary: 'Toggle item in wishlist',
+        description: 'Add item if not present, remove if already in wishlist',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  item_type: { type: 'string', enum: ['course', 'library_item', 'shop_product'], example: 'course' },
+                  item_id: { type: 'string', example: '1234' }
+                },
+                required: ['item_type', 'item_id']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Item toggled successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Item added to wishlist',
+                  in_wishlist: true
+                }
+              }
             }
           }
         }
-      }
-    }
-  },
-  post_toggle: {
-    path: '/api/wishlist/toggle',
-    tags: ['Wishlist'],
-    summary: 'Toggle item in wishlist',
-    description: 'Add item if not present, remove if already in wishlist',
-    security: [{ bearerAuth: [] }],
-    requestBody: {
-      required: true,
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              item_type: { type: 'string', enum: ['course', 'library_item', 'shop_product'], example: 'course' },
-              item_id: { type: 'string', example: '1234' }
-            },
-            required: ['item_type', 'item_id']
-          }
-        }
-      }
-    },
-    responses: {
-      '200': {
-        description: 'Item toggled successfully',
-        content: {
-          'application/json': {
-            example: {
-              success: true,
-              message: 'Item added to wishlist',
-              in_wishlist: true
+      },
+      get: {
+        tags: ['Wishlist'],
+        summary: 'Get user wishlist with details',
+        description: 'Retrieve the authenticated user\'s wishlist with courses, library items, and shop products',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'item_type', in: 'query', schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } }
+        ],
+        responses: {
+          '200': {
+            description: 'Wishlist retrieved successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  data: {
+                    courses: [{ id: 'c1', title: 'Course 1' }],
+                    library_items: [{ id: 'l1', title: 'Library Item 1' }],
+                    shop_products: [{ id: 'p1', name: 'Product 1' }],
+                    counts: {
+                      total: 3,
+                      courses: 1,
+                      library_items: 1,
+                      shop_products: 1
+                    }
+                  }
+                }
+              }
             }
           }
         }
-      }
-    }
-  },
-  get: {
-    tags: ['Wishlist'],
-    summary: 'Get user wishlist with details',
-    description: 'Retrieve the authenticated user\'s wishlist with courses, library items, and shop products',
-    security: [{ bearerAuth: [] }],
-    parameters: [
-      { name: 'item_type', in: 'query', schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } }
-    ],
-    responses: {
-      '200': {
-        description: 'Wishlist retrieved successfully',
-        content: {
-          'application/json': {
-            example: {
-              success: true,
-              data: {
-                courses: [{ id: 'c1', title: 'Course 1' }],
-                library_items: [{ id: 'l1', title: 'Library Item 1' }],
-                shop_products: [{ id: 'p1', name: 'Product 1' }],
-                counts: {
-                  total: 3,
-                  courses: 1,
-                  library_items: 1,
-                  shop_products: 1
+      },
+      get_count: {
+        path: '/api/wishlist/count',
+        tags: ['Wishlist'],
+        summary: 'Get wishlist count',
+        description: 'Get count of items in user wishlist, optionally filtered by type',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'item_type', in: 'query', schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } }
+        ],
+        responses: {
+          '200': {
+            description: 'Wishlist count retrieved successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  data: {
+                    count: 3
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      get_check: {
+        path: '/api/wishlist/check/{item_type}/{item_id}',
+        tags: ['Wishlist'],
+        summary: 'Check if item is in wishlist',
+        description: 'Returns whether a given item is in the authenticated user\'s wishlist',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'item_type', in: 'path', required: true, schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } },
+          { name: 'item_id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Wishlist status retrieved',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  data: {
+                    in_wishlist: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      delete_item: {
+        path: '/api/wishlist/{item_type}/{item_id}',
+        tags: ['Wishlist'],
+        summary: 'Remove item from wishlist',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'item_type', in: 'path', required: true, schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } },
+          { name: 'item_id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Item removed from wishlist',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Item removed from wishlist'
+                }
+              }
+            }
+          },
+          '404': {
+            description: 'Item not found in wishlist',
+            content: {
+              'application/json': {
+                example: {
+                  success: false,
+                  message: 'Item not found in wishlist'
+                }
+              }
+            }
+          }
+        }
+      },
+      delete_clear: {
+        path: '/api/wishlist',
+        tags: ['Wishlist'],
+        summary: 'Clear wishlist',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'item_type', in: 'query', schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } }
+        ],
+        responses: {
+          '200': {
+            description: 'Wishlist cleared successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Wishlist cleared successfully'
+                }
+              }
+            }
+          }
+        }
+      },
+      patch_notes: {
+        path: '/api/wishlist/{item_type}/{item_id}/notes',
+        tags: ['Wishlist'],
+        summary: 'Update wishlist item notes',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'item_type', in: 'path', required: true, schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } },
+          { name: 'item_id', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  notes: { type: 'string', example: 'Updated notes for this wishlist item' }
+                },
+                required: ['notes']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Notes updated successfully',
+            content: {
+              'application/json': {
+                example: {
+                  success: true,
+                  message: 'Notes updated successfully',
+                  data: {
+                    item_type: 'course',
+                    item_id: '1234',
+                    notes: 'Updated notes for this wishlist item'
+                  }
+                }
+              }
+            }
+          },
+          '404': {
+            description: 'Item not found in wishlist',
+            content: {
+              'application/json': {
+                example: {
+                  success: false,
+                  message: 'Item not found in wishlist'
                 }
               }
             }
           }
         }
       }
-    }
-  },
-  get_count: {
-    path: '/api/wishlist/count',
-    tags: ['Wishlist'],
-    summary: 'Get wishlist count',
-    description: 'Get count of items in user wishlist, optionally filtered by type',
-    security: [{ bearerAuth: [] }],
-    parameters: [
-      { name: 'item_type', in: 'query', schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } }
-    ],
-    responses: {
-      '200': {
-        description: 'Wishlist count retrieved successfully',
-        content: {
-          'application/json': {
-            example: {
-              success: true,
-              data: {
-                count: 3
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  get_check: {
-    path: '/api/wishlist/check/{item_type}/{item_id}',
-    tags: ['Wishlist'],
-    summary: 'Check if item is in wishlist',
-    description: 'Returns whether a given item is in the authenticated user\'s wishlist',
-    security: [{ bearerAuth: [] }],
-    parameters: [
-      { name: 'item_type', in: 'path', required: true, schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } },
-      { name: 'item_id', in: 'path', required: true, schema: { type: 'string' } }
-    ],
-    responses: {
-      '200': {
-        description: 'Wishlist status retrieved',
-        content: {
-          'application/json': {
-            example: {
-              success: true,
-              data: {
-                in_wishlist: true
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  delete_item: {
-    path: '/api/wishlist/{item_type}/{item_id}',
-    tags: ['Wishlist'],
-    summary: 'Remove item from wishlist',
-    security: [{ bearerAuth: [] }],
-    parameters: [
-      { name: 'item_type', in: 'path', required: true, schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } },
-      { name: 'item_id', in: 'path', required: true, schema: { type: 'string' } }
-    ],
-    responses: {
-      '200': {
-        description: 'Item removed from wishlist',
-        content: {
-          'application/json': {
-            example: {
-              success: true,
-              message: 'Item removed from wishlist'
-            }
-          }
-        }
-      },
-      '404': {
-        description: 'Item not found in wishlist',
-        content: {
-          'application/json': {
-            example: {
-              success: false,
-              message: 'Item not found in wishlist'
-            }
-          }
-        }
-      }
-    }
-  },
-  delete_clear: {
-    path: '/api/wishlist',
-    tags: ['Wishlist'],
-    summary: 'Clear wishlist',
-    security: [{ bearerAuth: [] }],
-    parameters: [
-      { name: 'item_type', in: 'query', schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } }
-    ],
-    responses: {
-      '200': {
-        description: 'Wishlist cleared successfully',
-        content: {
-          'application/json': {
-            example: {
-              success: true,
-              message: 'Wishlist cleared successfully'
-            }
-          }
-        }
-      }
-    }
-  },
-  patch_notes: {
-    path: '/api/wishlist/{item_type}/{item_id}/notes',
-    tags: ['Wishlist'],
-    summary: 'Update wishlist item notes',
-    security: [{ bearerAuth: [] }],
-    parameters: [
-      { name: 'item_type', in: 'path', required: true, schema: { type: 'string', enum: ['course', 'library_item', 'shop_product'] } },
-      { name: 'item_id', in: 'path', required: true, schema: { type: 'string' } }
-    ],
-    requestBody: {
-      required: true,
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              notes: { type: 'string', example: 'Updated notes for this wishlist item' }
-            },
-            required: ['notes']
-          }
-        }
-      }
     },
-    responses: {
-      '200': {
-        description: 'Notes updated successfully',
-        content: {
-          'application/json': {
-            example: {
-              success: true,
-              message: 'Notes updated successfully',
-              data: {
-                item_type: 'course',
-                item_id: '1234',
-                notes: 'Updated notes for this wishlist item'
-              }
-            }
-          }
-        }
-      },
-      '404': {
-        description: 'Item not found in wishlist',
-        content: {
-          'application/json': {
-            example: {
-              success: false,
-              message: 'Item not found in wishlist'
-            }
-          }
-        }
-      }
-    }
-  }
-},
     // ===================CONTACT MANAGEMENT ==============
     '/api/contact/submit': {
       post: {

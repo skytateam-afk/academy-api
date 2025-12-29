@@ -157,51 +157,52 @@ class UserXP {
      * @param {string} description - Transaction description
      * @param {object} metadata - Additional metadata
      */
-    static async addXP(userId, amount, activityType, referenceId = null, referenceType = null, description = null, metadata = null) {
-        const trx = await knex.transaction();
+    static async addXP(
+        userId,
+        amount,
+        activityType,
+        referenceId = null,
+        referenceType = null,
+        description = null,
+        metadata = null
+    ) {
+        return knex.transaction(async trx => {
+            // 1️⃣ Ensure user XP row exists
+            const [userXP] = await trx('user_xp')
+                .insert({
+                    user_id: userId,
+                    total_xp: Math.max(0, amount),
+                    current_level: 1,
+                    xp_to_next_level: 100
+                })
+                .onConflict('user_id')
+                .merge({
+                    total_xp: trx.raw('GREATEST(user_xp.total_xp + ?, 0)', [amount]),
+                    updated_at: trx.fn.now()
+                })
+                .returning('*');
 
-        try {
-            // Get or create user XP record
-            let userXP = await trx('user_xp')
-                .where('user_id', userId)
-                .first();
+            // 2️⃣ Recalculate level AFTER XP update
+            const newLevel = this.calculateLevel(userXP.total_xp);
+            const xpToNextLevel = this.getXPToNextLevel(newLevel, userXP.total_xp);
 
-            if (!userXP) {
-                const [created] = await trx('user_xp')
-                    .insert({
-                        user_id: userId,
-                        total_xp: 0,
-                        current_level: 1,
-                        xp_to_next_level: 100
-                    })
-                    .returning('*');
-                userXP = created;
-            }
-
-            // Calculate new total XP (ensure it doesn't go below 0)
-            const newTotalXP = Math.max(0, userXP.total_xp + amount);
-            const newLevel = this.calculateLevel(newTotalXP);
-            const xpToNextLevel = this.getXPToNextLevel(newLevel, newTotalXP);
-
-            // Update user XP
+            // 3️⃣ Update derived fields (level info)
             await trx('user_xp')
                 .where('user_id', userId)
                 .update({
-                    total_xp: newTotalXP,
                     current_level: newLevel,
-                    xp_to_next_level: xpToNextLevel,
-                    updated_at: knex.fn.now()
+                    xp_to_next_level: xpToNextLevel
                 });
 
-            // Also update users table for quick access
+            // 4️⃣ Optional: keep users table in sync (if you really need it)
             await trx('users')
                 .where('id', userId)
                 .update({
-                    total_xp: newTotalXP,
+                    total_xp: userXP.total_xp,
                     current_level: newLevel
                 });
 
-            // Create transaction record
+            // 5️⃣ Insert XP transaction (history only)
             const [transaction] = await trx('xp_transactions')
                 .insert({
                     user_id: userId,
@@ -210,30 +211,22 @@ class UserXP {
                     reference_id: referenceId,
                     reference_type: referenceType,
                     description: description || `${activityType}: ${amount > 0 ? '+' : ''}${amount} XP`,
-                    metadata: metadata ? JSON.stringify(metadata) : null
+                    metadata: metadata ? JSON.stringify(metadata) : null,
+                    created_at: trx.fn.now()
                 })
                 .returning('*');
-
-            await trx.commit();
-
-            logger.info(`XP transaction: User ${userId} ${amount > 0 ? 'earned' : 'lost'} ${Math.abs(amount)} XP for ${activityType}`);
 
             return {
                 transaction,
                 userXP: {
-                    total_xp: newTotalXP,
+                    total_xp: userXP.total_xp,
                     current_level: newLevel,
-                    xp_to_next_level: xpToNextLevel,
-                    previous_level: userXP.current_level,
-                    level_up: newLevel > userXP.current_level
+                    xp_to_next_level: xpToNextLevel
                 }
             };
-        } catch (error) {
-            await trx.rollback();
-            logger.error('Error adding XP:', error);
-            throw error;
-        }
+        });
     }
+
 
     /**
      * Get XP transaction history for a user
