@@ -130,7 +130,7 @@ class ProgressService {
                 logger.error(`Error processing side effects for module ${moduleId}:`, err);
                 console.error(`Error processing side effects for module ${moduleId}:`, err);
             });
-
+            console.log("completion,",completionSideEffect)
             console.log('=== ProgressService.completeModule SUCCESS ===');
             return {
                 success: true,
