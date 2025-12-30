@@ -190,7 +190,7 @@ class UserXP {
                     total_xp: newTotalXP,
                     current_level: newLevel,
                     xp_to_next_level: xpToNextLevel,
-                    updated_at: knex.fn.now()
+                    updated_at: Date.now()
                 });
 
             // Also update users table for quick access
