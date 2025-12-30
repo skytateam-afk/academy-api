@@ -126,7 +126,7 @@ class ProgressService {
             await trx.commit();
             console.log('Transaction committed successfully');
 
-           await this.handleCompletionSideEffects(userId, moduleId, lesson, data).catch(err => {
+           const completionSideEffect=await this.handleCompletionSideEffects(userId, moduleId, lesson, data).catch(err => {
                 logger.error(`Error processing side effects for module ${moduleId}:`, err);
                 console.error(`Error processing side effects for module ${moduleId}:`, err);
             });
@@ -134,7 +134,7 @@ class ProgressService {
             console.log('=== ProgressService.completeModule SUCCESS ===');
             return {
                 success: true,
-                data: progressData
+                data: {...progressData,...completionSideEffect}
             };
             
         } catch (error) {
