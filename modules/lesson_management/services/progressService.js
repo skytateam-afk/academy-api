@@ -134,7 +134,7 @@ class ProgressService {
             console.log('=== ProgressService.completeModule SUCCESS ===');
             return {
                 success: true,
-                data: {...progressData,...completionSideEffect.userXP}
+                data: {...progressData,...completionSideEffect}
             };
             
         } catch (error) {
