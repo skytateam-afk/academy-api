@@ -14,7 +14,7 @@ class XPService {
     static async awardVideoCompletionXP(userId, moduleId) {
         try {
             // Check if XP already awarded for this module
-            const alreadyAwarded = await UserXP.hasEarnedXPFor(userId, 'video_complete', moduleId);
+            const alreadyAwarded = await UserXP.hasEarnedXPFor(userId, 'video', moduleId);
             if (alreadyAwarded) {
                 logger.info(`XP already awarded for video module ${moduleId} to user ${userId}`);
                 return null;
@@ -22,7 +22,7 @@ class XPService {
 
             // Get XP value for video completion
             const activity = await knex('xp_activities')
-                .where({ activity_type: 'video_complete', is_active: true })
+                .where({ activity_type: 'video', is_active: true })
                 .first();
 
             if (!activity) {
@@ -34,7 +34,7 @@ class XPService {
             const result = await UserXP.addXP(
                 userId,
                 activity.xp_value,
-                'video_complete',
+                'video',
                 moduleId,
                 'module',
                 `Completed video module`,

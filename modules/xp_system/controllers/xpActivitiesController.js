@@ -16,10 +16,10 @@ const getXPActivities = async (req, res) => {
       .orderBy('activity_type', 'asc');
 
     // Calculate stats separately using raw queries to avoid GROUP BY issues
-    const [totalResult] = await knex.raw('SELECT COUNT(*) as count FROM xp_activities');
-    const [activeResult] = await knex.raw('SELECT COUNT(*) as count FROM xp_activities WHERE is_active = true');
-    const [inactiveResult] = await knex.raw('SELECT COUNT(*) as count FROM xp_activities WHERE is_active = false');
-    const [avgResult] = await knex.raw('SELECT AVG(xp_value) as average FROM xp_activities');
+    const totalResult = await knex.raw('SELECT COUNT(*) as count FROM xp_activities');
+    const activeResult = await knex.raw('SELECT COUNT(*) as count FROM xp_activities WHERE is_active = true');
+    const inactiveResult = await knex.raw('SELECT COUNT(*) as count FROM xp_activities WHERE is_active = false');
+    const avgResult = await knex.raw('SELECT AVG(xp_value) as average FROM xp_activities');
 
     res.json({
       success: true,

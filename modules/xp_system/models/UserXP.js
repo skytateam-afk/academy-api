@@ -150,7 +150,27 @@ class UserXP {
     /**
      * Add XP to user and create transaction
      * @param {UUID} userId - User ID
-     * @param {number} amount - XP amount (can be negative)
+     * @param {number} amount - XP amount (can 
+Transaction committed successfully
+=== handleCompletionSideEffects START ===
+userId: 71ff2a07-30ca-499b-b326-77b27fda44fe moduleId: 514341ee-851d-49bc-9905-5b8f98df8128 lessonId: c1bd9a6e-87d4-4edb-971a-b100eb9ea3b2 courseId: 9dcf815d-60eb-42e9-bb00-683d2b778f36       
+Updating lesson progress...
+Lesson progress updated
+Awarding video completion XP...
+[2025-12-30 22:07:56] info: [WARN] Video completion XP activity not found or inactive {"service":"open-lms-api"}
+Checking for certificate generation...
+=== checkAndGenerateCertificate START ===
+userId: 71ff2a07-30ca-499b-b326-77b27fda44fe courseId: 9dcf815d-60eb-42e9-bb00-683d2b778f36
+Certificate already exists: false
+Total published modules in course: 3
+Completed modules: 1 / 3
+Course not yet 100% complete, certificate not generated
+=== checkAndGenerateCertificate END ===
+Certificate check complete
+=== handleCompletionSideEffects SUCCESS ===
+completion, null
+=== ProgressService.completeModule SUCCESS ===
+be negative)
      * @param {string} activityType - Type of activity
      * @param {UUID} referenceId - Reference ID (module_id, quiz_id, etc.)
      * @param {string} referenceType - Reference type ('module', 'quiz', etc.)
@@ -165,7 +185,7 @@ class UserXP {
             let userXP = await trx('user_xp')
                 .where('user_id', userId)
                 .first();
-
+            console.log("checking",userXP)
             if (!userXP) {
                 const [created] = await trx('user_xp')
                     .insert({
@@ -177,7 +197,7 @@ class UserXP {
                     .returning('*');
                 userXP = created;
             }
-
+            console.log("checking second",userXP)
             // Calculate new total XP (ensure it doesn't go below 0)
             const newTotalXP = Math.max(0, userXP.total_xp + amount);
             const newLevel = this.calculateLevel(newTotalXP);
@@ -190,7 +210,7 @@ class UserXP {
                     total_xp: newTotalXP,
                     current_level: newLevel,
                     xp_to_next_level: xpToNextLevel,
-                    updated_at: Date.now()
+                    updated_at: new Date()
                 });
 
             // Also update users table for quick access
