@@ -8,8 +8,6 @@ const subscriptionController = require('../controllers/subscriptionController');
 const { authenticateToken } = require('../../../middleware/auth');
 const { requirePermission } = require('../../../middleware/rbac');
 
-console.log(' Subscription routes loaded with proper permissions');
-
 // ============================== PUBLIC TIER ROUTES ==============================
 
 // Get all subscription tiers (publicly readable for frontend)

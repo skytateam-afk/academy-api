@@ -18,7 +18,7 @@ class ProgressService {
     async completeModule(userId, moduleId, data = {}) {
         console.log('=== ProgressService.completeModule START ===');
         console.log('userId:', userId, 'moduleId:', moduleId, 'data:', JSON.stringify(data));
-        
+
         const trx = await knex.transaction();
 
         try {
@@ -120,24 +120,20 @@ class ProgressService {
             ]);
 
             console.log('Upsert result:', upsertResult.rows ? upsertResult.rows[0] : 'No rows returned');
-
-            
-
-           
             console.log('Transaction committed successfully');
-
-           const completionSideEffect=await this.handleCompletionSideEffects(userId, moduleId, lesson, data).catch(err => {
+            const completionSideEffect = await this.handleCompletionSideEffects(userId, moduleId, lesson, data).catch(err => {
                 logger.error(`Error processing side effects for module ${moduleId}:`, err);
                 console.error(`Error processing side effects for module ${moduleId}:`, err);
             });
-             await trx.commit();
-            console.log("completion,",completionSideEffect)
+            await trx.commit();
+            console.log("completion,", completionSideEffect)
             console.log('=== ProgressService.completeModule SUCCESS ===');
+            const userXP = completionSideEffect?.userXP || null;
             return {
                 success: true,
-                data: {...progressData,...completionSideEffect}
+                data: { ...progressData, ...userXP }
             };
-            
+
         } catch (error) {
             console.error('=== ProgressService.completeModule ERROR ===', error);
             await trx.rollback();
@@ -152,7 +148,7 @@ class ProgressService {
     async handleCompletionSideEffects(userId, moduleId, lesson, data) {
         console.log('=== handleCompletionSideEffects START ===');
         console.log('userId:', userId, 'moduleId:', moduleId, 'lessonId:', lesson.id, 'courseId:', lesson.course_id);
-        
+
         try {
             // 1. Update lesson progress
             console.log('Updating lesson progress...');
@@ -252,7 +248,7 @@ class ProgressService {
     async checkAndGenerateCertificate(userId, courseId) {
         console.log('=== checkAndGenerateCertificate START ===');
         console.log('userId:', userId, 'courseId:', courseId);
-        
+
         try {
             // Double check certificate doesn't exist
             const exists = await Certificate.exists(userId, courseId);

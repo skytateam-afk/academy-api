@@ -12308,7 +12308,7 @@ const openApiSpec = {
       }
     },
     // ================= SUBSCRIPTION =================
-    '/api/subscription/tiers': {
+    '/api/subscriptions/tiers': {
       get: {
         tags: ['Subscription'],
         summary: 'Get all subscription tiers',
@@ -12359,7 +12359,7 @@ const openApiSpec = {
       }
     },
 
-    '/api/subscription/tiers/{id}': {
+    '/api/subscriptions/tiers/{id}': {
       get: {
         tags: ['Subscription'],
         summary: 'Get subscription tier by ID',
@@ -12408,7 +12408,7 @@ const openApiSpec = {
       }
     },
 
-    '/api/subscription/tiers/slug/{slug}': {
+    '/api/subscriptions/tiers/slug/{slug}': {
       get: {
         tags: ['Subscription'],
         summary: 'Get subscription tier by slug',
@@ -12422,7 +12422,7 @@ const openApiSpec = {
       }
     },
 
-    '/api/subscription/tiers/{id}/toggle': {
+    '/api/subscriptions/tiers/{id}/toggle': {
       patch: {
         tags: ['Subscription'],
         summary: 'Toggle subscription tier active status',
@@ -12437,7 +12437,7 @@ const openApiSpec = {
       }
     },
 
-    '/api/subscription/tiers/reorder': {
+    '/api/subscriptions/tiers/reorder': {
       patch: {
         tags: ['Subscription'],
         summary: 'Reorder subscription tiers',
