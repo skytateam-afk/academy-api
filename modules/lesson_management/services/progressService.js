@@ -170,7 +170,7 @@ class ProgressService {
 
             if (!module) {
                 logger.warn(`Module ${moduleId} not found while awarding XP`);
-            } else if (!data.quizData && module.content_type !== 'quiz_pass') {
+            } else if (!data.quizData && module.content_type !== 'quiz') {
                 try {
                     console.log(`Awarding ${module.content_type} completion XP...`);
 
