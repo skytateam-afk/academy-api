@@ -125,6 +125,7 @@ class ProgressService {
                 logger.error(`Error processing side effects for module ${moduleId}:`, err);
                 console.error(`Error processing side effects for module ${moduleId}:`, err);
             });
+            console.log('Completion side effects processed:', completionSideEffect);
             await trx.commit();
             console.log("completion,", completionSideEffect)
             console.log('=== ProgressService.completeModule SUCCESS ===');
@@ -147,7 +148,12 @@ class ProgressService {
      */
     async handleCompletionSideEffects(userId, moduleId, lesson, data) {
         console.log('=== handleCompletionSideEffects START ===');
-        console.log('userId:', userId, 'moduleId:', moduleId, 'lessonId:', lesson.id, 'courseId:', lesson.course_id);
+        console.log(
+            'userId:', userId,
+            'moduleId:', moduleId,
+            'lessonId:', lesson.id,
+            'courseId:', lesson.course_id
+        );
 
         try {
             // 1. Update lesson progress
@@ -155,18 +161,32 @@ class ProgressService {
             await this.updateLessonProgress(userId, lesson.id, lesson.course_id);
             console.log('Lesson progress updated');
 
-            // 2. Award XP (if not quiz - quiz XP is handled separately in quizController currently)
-            // Refactor Note: Ideally quiz XP should be here too, but to minimize risk we keep current behavior
+            // 2. Award module XP (video / text / audio)
             let xpResult = null;
-            if (!data.quizData) {
+
+            // Fetch module to know its content type
+            const module = await knex('lesson_modules')
+                .where('id', moduleId)
+                .first();
+
+            if (!module) {
+                logger.warn(`Module ${moduleId} not found while awarding XP`);
+            } else if (!data.quizData && module.content_type !== 'quiz_pass') {
                 try {
-                    console.log('Awarding video completion XP...');
-                    xpResult = await XPService.awardVideoCompletionXP(userId, moduleId);
+                    console.log(`Awarding ${module.content_type} completion XP...`);
+
+                    xpResult = await XPService.awardModuleCompletionXP(
+                        userId,
+                        moduleId,
+                        module.content_type
+                    );
                 } catch (e) {
                     logger.error('Error awarding module XP:', e);
                 }
             } else {
-                console.log('Skipping XP award (quiz data present - handled by quizController)');
+                console.log(
+                    'Skipping XP award (quiz module or quiz data present - handled elsewhere)'
+                );
             }
 
             // 3. Check for course completion & generate certificate
@@ -176,6 +196,7 @@ class ProgressService {
 
             console.log('=== handleCompletionSideEffects SUCCESS ===');
             return xpResult;
+
         } catch (error) {
             console.error('=== handleCompletionSideEffects ERROR ===', error);
             throw error;

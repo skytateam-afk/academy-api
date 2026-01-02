@@ -11,39 +11,53 @@ class XPService {
     /**
      * Award XP for video completion
      */
-    static async awardVideoCompletionXP(userId, moduleId) {
+    static async awardModuleCompletionXP(userId, moduleId, contentType) {
         try {
-            // Check if XP already awarded for this module
-            const alreadyAwarded = await UserXP.hasEarnedXPFor(userId, 'video', moduleId);
-            if (alreadyAwarded) {
-                logger.info(`XP already awarded for video module ${moduleId} to user ${userId}`);
+            // Guard: unsupported types
+            const allowedTypes = ['video', 'text', 'audio'];
+            if (!allowedTypes.includes(contentType)) {
+                logger.warn(`XP not supported for content type: ${contentType}`);
                 return null;
             }
 
-            // Get XP value for video completion
+            // Prevent duplicate XP
+            const alreadyAwarded = await UserXP.hasEarnedXPFor(
+                userId,
+                contentType,
+                moduleId
+            );
+
+            if (alreadyAwarded) {
+                logger.info(`XP already awarded for ${contentType} module ${moduleId}`);
+                return null;
+            }
+
+            // Fetch XP configuration
             const activity = await knex('xp_activities')
-                .where({ activity_type: 'video', is_active: true })
+                .where({
+                    activity_type: contentType,
+                    is_active: true
+                })
                 .first();
 
             if (!activity) {
-                logger.warn('Video completion XP activity not found or inactive');
+                logger.warn(`${contentType} completion XP activity not found or inactive`);
                 return null;
             }
 
             // Award XP
-            const result = await UserXP.addXP(
+            return await UserXP.addXP(
                 userId,
                 activity.xp_value,
-                'video',
+                contentType,
                 moduleId,
                 'module',
-                `Completed video module`,
+                `Completed ${contentType} module`,
                 { module_id: moduleId }
             );
 
-            return result;
         } catch (error) {
-            logger.error('Error awarding video completion XP:', error);
+            logger.error(`Error awarding ${contentType} completion XP:`, error);
             throw error;
         }
     }
@@ -241,7 +255,7 @@ class XPService {
             const levels = await knex('xp_levels')
                 .where('is_active', true)
                 .orderBy('min_xp', 'asc');
-            
+
             // Calculate user's level from database
             const userLevel = this._calculateUserLevel(xpData.total_xp, levels);
             const nextLevel = this._getNextLevel(xpData.total_xp, levels);
@@ -280,12 +294,12 @@ class XPService {
     static async getLeaderboard(limit = 10, offset = 0) {
         try {
             const leaderboard = await UserXP.getLeaderboard(limit, offset);
-            
+
             // Get all XP levels for level calculation
             const levels = await knex('xp_levels')
                 .where('is_active', true)
                 .orderBy('min_xp', 'asc');
-            
+
             // Add level information to each user
             const leaderboardWithLevels = leaderboard.map(user => {
                 const userLevel = this._calculateUserLevel(user.total_xp, levels);
@@ -299,7 +313,7 @@ class XPService {
                     level_description: userLevel ? userLevel.description : null
                 };
             });
-            
+
             return leaderboardWithLevels;
         } catch (error) {
             logger.error('Error getting leaderboard with levels:', error);
@@ -330,9 +344,9 @@ class XPService {
             const levels = await knex('xp_levels')
                 .where('is_active', true)
                 .orderBy('min_xp', 'asc');
-            
+
             const userLevel = this._calculateUserLevel(xpData.total_xp, levels);
-            
+
             return {
                 ...xpData,
                 level: userLevel ? userLevel.level_number : 1,
@@ -354,7 +368,7 @@ class XPService {
      */
     static _calculateUserLevel(xp, levels) {
         if (!levels || levels.length === 0) return null;
-        
+
         // Find the appropriate level based on XP
         for (let i = levels.length - 1; i >= 0; i--) {
             const level = levels[i];
@@ -362,7 +376,7 @@ class XPService {
                 return level;
             }
         }
-        
+
         // Default to first level if no match
         return levels[0];
     }
@@ -373,7 +387,7 @@ class XPService {
     static _getNextLevel(xp, levels) {
         const currentLevel = this._calculateUserLevel(xp, levels);
         if (!currentLevel) return null;
-        
+
         // Find next level
         const nextLevel = levels.find(l => l.level_number === currentLevel.level_number + 1);
         return nextLevel ? {
@@ -390,11 +404,11 @@ class XPService {
     static _calculateLevelProgress(xp, levels) {
         const currentLevel = this._calculateUserLevel(xp, levels);
         if (!currentLevel || !currentLevel.max_xp) return 100; // Max level
-        
+
         const xpInCurrentLevel = xp - currentLevel.min_xp;
         const xpNeededForLevel = currentLevel.max_xp - currentLevel.min_xp + 1;
         const progress = Math.min(100, Math.round((xpInCurrentLevel / xpNeededForLevel) * 100));
-        
+
         return progress;
     }
 
@@ -418,7 +432,7 @@ class XPService {
                     metadata: levelData.metadata || null
                 })
                 .returning('*');
-            
+
             return newLevel;
         } catch (error) {
             logger.error('Error creating XP level:', error);
@@ -438,11 +452,11 @@ class XPService {
                     updated_at: knex.fn.now()
                 })
                 .returning('*');
-            
+
             if (!updatedLevel) {
                 throw new Error('XP level not found');
             }
-            
+
             return updatedLevel;
         } catch (error) {
             logger.error('Error updating XP level:', error);
@@ -458,11 +472,11 @@ class XPService {
             const deleted = await knex('xp_levels')
                 .where('id', id)
                 .delete();
-            
+
             if (!deleted) {
                 throw new Error('XP level not found');
             }
-            
+
             return true;
         } catch (error) {
             logger.error('Error deleting XP level:', error);
@@ -478,11 +492,11 @@ class XPService {
             const level = await knex('xp_levels')
                 .where('id', id)
                 .first();
-            
+
             if (!level) {
                 throw new Error('XP level not found');
             }
-            
+
             const [updatedLevel] = await knex('xp_levels')
                 .where('id', id)
                 .update({
@@ -490,7 +504,7 @@ class XPService {
                     updated_at: knex.fn.now()
                 })
                 .returning('*');
-            
+
             return updatedLevel;
         } catch (error) {
             logger.error('Error toggling XP level:', error);
