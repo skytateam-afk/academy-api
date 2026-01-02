@@ -13,12 +13,6 @@ class XPService {
      */
     static async awardModuleCompletionXP(userId, moduleId, contentType) {
         try {
-            // Guard: unsupported types
-            const allowedTypes = ['video', 'text', 'audio','text_file'];
-            if (!allowedTypes.includes(contentType)) {
-                logger.warn(`XP not supported for content type: ${contentType}`);
-                return null;
-            }
 
             // Prevent duplicate XP
             const alreadyAwarded = await UserXP.hasEarnedXPFor(

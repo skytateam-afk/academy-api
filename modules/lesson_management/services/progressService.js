@@ -129,10 +129,9 @@ class ProgressService {
             await trx.commit();
             console.log("completion,", completionSideEffect)
             console.log('=== ProgressService.completeModule SUCCESS ===');
-            const userXP = completionSideEffect?.userXP || null;
             return {
                 success: true,
-                data: { ...progressData, ...userXP }
+                data: {...progressData, ...completionSideEffect}
             };
 
         } catch (error) {
