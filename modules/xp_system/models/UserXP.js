@@ -319,7 +319,7 @@ be negative)
             currentDate -= 1000 * 60 * 60 * 24;
         }
 
-        return {streak};
+        return {streak:streak};
     }
 
     /**
