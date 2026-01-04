@@ -177,6 +177,18 @@ class XPService {
             throw error;
         }
     }
+    /**
+ * Get user's XP streak
+ */
+    static async getUserStreak(userId) {
+        try {
+            return await UserXP.getUserStreak(userId);
+        } catch (error) {
+            logger.error('Error getting user streak:', error);
+            throw error;
+        }
+    }
+
 
     /**
      * Award XP for course completion

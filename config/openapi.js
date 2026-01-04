@@ -3104,6 +3104,51 @@ const openApiSpec = {
         }
       }
     },
+    '/api/xp/streak': {
+      get: {
+        tags: ['XP'],
+        summary: 'Get user XP streak',
+        description: 'Returns the current XP streak for the authenticated user. The streak counts consecutive days with XP backwards from today or yesterday and breaks immediately on a missing day.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'User streak fetched successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        streak: { type: 'integer', example: 2, description: 'Number of consecutive days with XP' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/xp/levels/badge": {
       "post": {
         "tags": ["XP"],

@@ -27,6 +27,8 @@ router.get('/levels', xpController.getLevels);
 // Get user's level information
 router.get('/level', xpController.getUserLevel);
 
+router.get('/streak', xpController.getUserStreak);
+
 // Admin XP Level Management (admin only)
 router.post('/levels/badge', uploadImage.single('badge'), xpController.uploadBadgeImage);
 router.post('/levels', xpController.createLevel);
@@ -39,6 +41,7 @@ const xpActivitiesController = require('../controllers/xpActivitiesController');
 
 // XP Activities management routes
 router.get('/activities', xpActivitiesController.getXPActivities);
+
 router.post('/activities', xpActivitiesController.createXPActivity);
 router.put('/activities/:id', xpActivitiesController.updateXPActivity);
 router.delete('/activities/:id', xpActivitiesController.deleteXPActivity);

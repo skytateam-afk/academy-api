@@ -185,7 +185,7 @@ be negative)
             let userXP = await trx('user_xp')
                 .where('user_id', userId)
                 .first();
-            console.log("checking",userXP)
+            console.log("checking", userXP)
             if (!userXP) {
                 const [created] = await trx('user_xp')
                     .insert({
@@ -197,7 +197,7 @@ be negative)
                     .returning('*');
                 userXP = created;
             }
-            console.log("checking second",userXP)
+            console.log("checking second", userXP)
             // Calculate new total XP (ensure it doesn't go below 0)
             const newTotalXP = Math.max(0, userXP.total_xp + amount);
             const newLevel = this.calculateLevel(newTotalXP);
@@ -277,6 +277,49 @@ be negative)
                 total: parseInt(total.count)
             }
         };
+    }
+
+    /**
+ * Get user's current XP streak
+ * Normal streak logic (today OR yesterday anchored)
+ */
+    static async getUserStreak(userId) {
+        // 1. Fetch unique XP days (earned XP only)
+        const rows = await knex('xp_transactions')
+            .where('user_id', userId)
+            .andWhere('amount', '>', 0)
+            .select(knex.raw('DATE(created_at) as xp_date'))
+            .groupByRaw('DATE(created_at)')
+            .orderBy('xp_date', 'desc');
+        if (!rows.length) return 0;
+
+
+        // 2. Convert XP dates to local midnight timestamps
+        const xpDates = rows.map(r => {
+            const d = new Date(r.xp_date);
+            d.setHours(0, 0, 0, 0);
+            return d.getTime();
+        });
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+
+        if (!xpDates.includes(yesterday.getTime())) {
+            return 0; 
+        }
+
+        let streak = 1; 
+        let currentDate = yesterday.getTime();
+
+        // 4. Count backward until a day is missing
+        while (xpDates.includes(currentDate - 1000 * 60 * 60 * 24)) {
+            streak++;
+            currentDate -= 1000 * 60 * 60 * 24;
+        }
+
+        return {streak};
     }
 
     /**

@@ -32,6 +32,27 @@ exports.getXPProfile = async (req, res, next) => {
     }
 };
 
+exports.getUserStreak = async (req, res, next) => {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+        const streakInfo = await XPService.getUserStreak(userId);
+
+        res.json({
+            success: true,
+            data: streakInfo
+        });
+    } catch (error) {
+        logger.error('Error getting user streak:', error);
+        next(error);
+    }
+};
+
 /**
  * Get XP transaction history
  */
@@ -158,7 +179,7 @@ exports.updateLevel = async (req, res, next) => {
     try {
         const { id } = req.params;
         const updates = req.body;
-        
+
         const updatedLevel = await XPService.updateLevel(id, updates);
 
         res.json({
@@ -178,7 +199,7 @@ exports.updateLevel = async (req, res, next) => {
 exports.deleteLevel = async (req, res, next) => {
     try {
         const { id } = req.params;
-        
+
         await XPService.deleteLevel(id);
 
         res.json({
@@ -197,7 +218,7 @@ exports.deleteLevel = async (req, res, next) => {
 exports.toggleLevel = async (req, res, next) => {
     try {
         const { id } = req.params;
-        
+
         const updatedLevel = await XPService.toggleLevel(id);
 
         res.json({
@@ -224,7 +245,7 @@ exports.uploadBadgeImage = async (req, res, next) => {
         }
 
         const storageService = require('../../../services/storageService');
-        
+
         // Upload to storage
         const uploadResult = await storageService.uploadFile(
             req.file.buffer,
