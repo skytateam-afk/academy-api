@@ -320,7 +320,7 @@ be negative)
         }
 
         return {
-            streak: streak || 0
+            streak: streak ?? 0
         };
     }
 
