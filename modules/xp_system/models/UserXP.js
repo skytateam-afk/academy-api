@@ -291,7 +291,9 @@ be negative)
             .select(knex.raw('DATE(created_at) as xp_date'))
             .groupByRaw('DATE(created_at)')
             .orderBy('xp_date', 'desc');
-        if (!rows.length) return 0;
+        if (!rows.length) {
+            return { streak: 0}
+        };
 
 
         // 2. Convert XP dates to local midnight timestamps
@@ -307,7 +309,7 @@ be negative)
         yesterday.setDate(today.getDate() - 1);
 
         if (!xpDates.includes(yesterday.getTime())) {
-            return 0;
+            return { streak: 0}
         }
 
         let streak = 1;
