@@ -307,10 +307,10 @@ be negative)
         yesterday.setDate(today.getDate() - 1);
 
         if (!xpDates.includes(yesterday.getTime())) {
-            return 0; 
+            return 0;
         }
 
-        let streak = 1; 
+        let streak = 1;
         let currentDate = yesterday.getTime();
 
         // 4. Count backward until a day is missing
@@ -319,7 +319,9 @@ be negative)
             currentDate -= 1000 * 60 * 60 * 24;
         }
 
-        return {streak:streak};
+        return {
+            streak: streak || 0
+        };
     }
 
     /**
