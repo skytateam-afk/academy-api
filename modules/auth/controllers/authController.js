@@ -1588,7 +1588,8 @@ class AuthController {
                 {
                     userId: user.id,
                     username: user.username,
-                    role: user.role
+                    role: user.role,
+                    institution_id: user.institution_id || null
                 },
                 JWT_SECRET,
                 { expiresIn: SESSION_TIMEOUT }
@@ -1741,7 +1742,8 @@ class AuthController {
                 {
                     userId: user.id,
                     username: user.username,
-                    role: user.role
+                    role: user.role,
+                    institution_id: user.institution_id || null
                 },
                 JWT_SECRET,
                 { expiresIn: SESSION_TIMEOUT }
