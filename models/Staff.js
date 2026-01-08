@@ -126,7 +126,7 @@ class Staff {
       .whereNull('deleted_at')
       .update({
         ...staffData,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -167,8 +167,8 @@ class Staff {
       .where('id', id)
       .whereNull('deleted_at')
       .update({
-        deleted_at: knex.fn.now(),
-        updated_at: knex.fn.now()
+        deleted_at: new Date(),
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -318,7 +318,7 @@ class Staff {
       .whereNull('deleted_at')
       .update({
         ...updateData,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       });
   }
 }

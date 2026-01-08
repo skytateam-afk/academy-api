@@ -72,7 +72,7 @@ class AttachmentRepository {
         file_size,
         display_order: finalDisplayOrder,
         is_downloadable,
-        created_at: knex.fn.now()
+        created_at: new Date()
       })
       .returning('*');
 
@@ -191,7 +191,7 @@ class AttachmentRepository {
             file_size: attachment.file_size,
             display_order: attachment.display_order || currentOrder++,
             is_downloadable: attachment.is_downloadable !== undefined ? attachment.is_downloadable : true,
-            created_at: knex.fn.now()
+            created_at: new Date()
           })
           .returning('*');
         results.push(created);
@@ -301,7 +301,7 @@ class AttachmentRepository {
             file_size: attachment.file_size,
             display_order: attachment.display_order,
             is_downloadable: attachment.is_downloadable,
-            created_at: knex.fn.now()
+            created_at: new Date()
           })
           .returning('*');
         results.push(created);

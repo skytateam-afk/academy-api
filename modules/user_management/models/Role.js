@@ -119,7 +119,7 @@ class Role {
             throw new Error('No valid fields to update');
         }
 
-        updateData.updated_at = knex.fn.now();
+        updateData.updated_at = new Date()
 
         const [updatedRole] = await knex('roles')
             .where({ id: roleId })

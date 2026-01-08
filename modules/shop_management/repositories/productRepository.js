@@ -327,7 +327,7 @@ class ProductRepository {
         .where('id', id)
         .update({
           ...productData,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -580,7 +580,7 @@ class ProductRepository {
     try {
       const updateData = { is_published: isPublished };
       if (isPublished) {
-        updateData.published_at = knex.fn.now();
+        updateData.published_at = new Date()
       }
 
       const [product] = await knex('shop_products')

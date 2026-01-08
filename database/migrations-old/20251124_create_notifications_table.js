@@ -14,8 +14,8 @@ exports.up = async function(knex) {
       table.jsonb('data').defaultTo('{}') // Additional data like links, action buttons, etc.
       table.boolean('is_read').defaultTo(false)
       table.timestamp('read_at')
-      table.timestamp('created_at').defaultTo(knex.fn.now())
-      table.timestamp('updated_at').defaultTo(knex.fn.now())
+      table.timestamp('created_at').defaultTo(new Date())
+      table.timestamp('updated_at').defaultTo(new Date())
 
       // Indexes
       table.index(['user_id', 'is_read'])

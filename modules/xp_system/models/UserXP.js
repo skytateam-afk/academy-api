@@ -81,7 +81,7 @@ class UserXP {
                 total_xp: actualTotalXP,
                 current_level: correctLevel,
                 xp_to_next_level: xpToNextLevel,
-                updated_at: knex.fn.now()
+                updated_at: new Date()
             });
 
         // Also update the users table
@@ -130,7 +130,7 @@ class UserXP {
                     .update({
                         current_level: correctLevel,
                         xp_to_next_level: correctXPToNext,
-                        updated_at: knex.fn.now()
+                        updated_at: new Date()
                     });
                 userXP.current_level = correctLevel;
                 userXP.xp_to_next_level = correctXPToNext;

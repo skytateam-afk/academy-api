@@ -173,7 +173,7 @@ class ContactService {
       // Auto-set replied_by and replied_at when status changes to 'replied'
       if (status === 'replied' && userId) {
         updates.replied_by = userId;
-        updates.replied_at = knex.fn.now();
+        updates.replied_at = new Date()
       }
     }
 
@@ -181,7 +181,7 @@ class ContactService {
       updates.admin_notes = admin_notes;
     }
 
-    updates.updated_at = knex.fn.now();
+    updates.updated_at = new Date()
 
     await knex('contact_submissions')
       .where({ id })
@@ -201,7 +201,7 @@ class ContactService {
         .where({ id })
         .update({ 
           status: 'read',
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         });
     }
 
@@ -219,7 +219,7 @@ class ContactService {
         .where({ id })
         .update({ 
           status: 'new',
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         });
     }
 

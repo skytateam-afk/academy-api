@@ -58,7 +58,7 @@ class LibraryBorrowingRepository {
       if (overdue) {
         query = query
           .where('library_borrowing.status', 'borrowed')
-          .where('library_borrowing.due_date', '<', knex.fn.now());
+          .where('library_borrowing.due_date', '<', new Date())
       }
 
       // Get total count - use a simpler query without joins for counting
@@ -80,7 +80,7 @@ class LibraryBorrowingRepository {
       if (overdue) {
         countQuery = countQuery
           .where('status', 'borrowed')
-          .where('due_date', '<', knex.fn.now());
+          .where('due_date', '<', new Date())
       }
 
       const total = await countQuery.count('* as count').first();
@@ -154,15 +154,15 @@ class LibraryBorrowingRepository {
         .insert({
           item_id,
           user_id,
-          borrowed_at: knex.fn.now(),
+          borrowed_at: new Date(),
           due_date,
           status: 'borrowed',
           notes,
           fine_amount: 0,
           fine_paid: false,
           issued_by,
-          created_at: knex.fn.now(),
-          updated_at: knex.fn.now()
+          created_at: new Date(),
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -182,7 +182,7 @@ class LibraryBorrowingRepository {
         .where({ id })
         .update({
           ...borrowingData,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -202,9 +202,9 @@ class LibraryBorrowingRepository {
         .where({ id })
         .update({
           status: 'returned',
-          returned_at: knex.fn.now(),
+          returned_at: new Date(),
           received_by: receivedBy,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -225,7 +225,7 @@ class LibraryBorrowingRepository {
         .update({
           status: 'lost',
           fine_amount,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -245,7 +245,7 @@ class LibraryBorrowingRepository {
         .where({ id })
         .update({
           fine_amount,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -265,7 +265,7 @@ class LibraryBorrowingRepository {
         .where({ id })
         .update({
           fine_paid: true,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -375,7 +375,7 @@ class LibraryBorrowingRepository {
         .leftJoin('library_items', 'library_borrowing.item_id', 'library_items.id')
         .leftJoin('users', 'library_borrowing.user_id', 'users.id')
         .where('library_borrowing.status', 'borrowed')
-        .where('library_borrowing.due_date', '<', knex.fn.now());
+        .where('library_borrowing.due_date', '<', new Date())
 
       const total = await query.clone().count('library_borrowing.id as count').first();
 
@@ -415,7 +415,7 @@ class LibraryBorrowingRepository {
         .leftJoin('users', 'library_borrowing.user_id', 'users.id')
         .where('library_borrowing.status', 'borrowed')
         .whereBetween('library_borrowing.due_date', [
-          knex.fn.now(),
+          new Date(),
           knex.raw(`NOW() + INTERVAL '${days} days'`)
         ])
         .orderBy('library_borrowing.due_date', 'asc');
@@ -449,7 +449,7 @@ class LibraryBorrowingRepository {
 
       const overdueBorrowings = await baseQuery.clone()
         .where('status', 'borrowed')
-        .where('due_date', '<', knex.fn.now())
+        .where('due_date', '<', new Date())
         .count('* as count')
         .first();
 
@@ -482,7 +482,7 @@ class LibraryBorrowingRepository {
     try {
       const overdueItems = await knex('library_borrowing')
         .where('status', 'borrowed')
-        .where('due_date', '<', knex.fn.now())
+        .where('due_date', '<', new Date())
         .select('id', 'due_date');
 
       for (const item of overdueItems) {
@@ -496,7 +496,7 @@ class LibraryBorrowingRepository {
           .update({
             status: 'overdue',
             fine_amount: fineAmount,
-            updated_at: knex.fn.now()
+            updated_at: new Date()
           });
       }
 

@@ -196,7 +196,7 @@ async function initializeDatabase() {
   const startTime = Date.now();
 
   log('\n' + '='.repeat(60), colors.bright);
-  log('SchoolBox DATABASE INITIALIZATION', colors.bright);
+  log('Skyta Academy DATABASE INITIALIZATION', colors.bright);
   log('='.repeat(60) + '\n', colors.bright);
 
   try {

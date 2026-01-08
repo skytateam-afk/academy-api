@@ -14,7 +14,7 @@ exports.up = function(knex) {
 
       // Application details
       table.text('application_message').comment('Optional message from applicant');
-      table.timestamp('applied_at').defaultTo(knex.fn.now());
+      table.timestamp('applied_at').defaultTo(new Date())
 
       // Status management
       table.enum('status', ['pending', 'approved', 'rejected', 'cannot_reapply']).defaultTo('pending');

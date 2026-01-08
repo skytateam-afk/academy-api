@@ -7,7 +7,7 @@ exports.up = function(knex) {
     table.foreign('student_id').references('id').inTable('users').onDelete('CASCADE');
     table.string('enrollment_number', 50).comment('Student enrollment/admission number');
     table.integer('roll_number').unsigned().comment('Roll number within the classroom');
-    table.date('assigned_date').notNullable().defaultTo(knex.fn.now()).comment('Date assigned to classroom');
+    table.date('assigned_date').notNullable().defaultTo(new Date()).comment('Date assigned to classroom');
     table.enum('status', ['active', 'transferred', 'completed', 'withdrawn']).defaultTo('active');
     table.text('notes').comment('Additional notes about the assignment');
     table.uuid('assigned_by');

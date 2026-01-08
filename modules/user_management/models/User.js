@@ -218,7 +218,7 @@ class User {
     static async update(userId, updates) {
         const allowedFields = [
             'first_name', 'last_name', 'avatar_url', 'bio',
-            'phone', 'date_of_birth', 'is_active'
+            'phone', 'date_of_birth', 'is_active','institution_id'
         ];
 
         const updateData = {};
@@ -228,12 +228,12 @@ class User {
                 updateData[key] = value;
             }
         }
-
+        
         if (Object.keys(updateData).length === 0) {
-            throw new Error('No valid fields to update');
+            throw new Error('No valid fields to update still testing');
         }
 
-        updateData.updated_at = knex.fn.now();
+        updateData.updated_at = new Date()
 
         const [user] = await knex('users')
             .where({ id: userId })
@@ -241,7 +241,7 @@ class User {
             .returning([
                 'id', 'username', 'email', 'first_name', 'last_name',
                 'avatar_url', 'bio', 'phone', 'date_of_birth',
-                'is_active', 'is_verified', 'updated_at'
+                'is_active', 'is_verified', 'updated_at','institution_id'
             ]);
 
         if (!user) {
@@ -269,7 +269,7 @@ class User {
             .where({ id: userId })
             .update({
                 password_hash,
-                updated_at: knex.fn.now()
+                updated_at: new Date()
             });
 
         logger.info('User password updated', { userId });
@@ -297,7 +297,7 @@ class User {
             .where({ id: userId })
             .update({
                 role_id: role.id,
-                updated_at: knex.fn.now()
+                updated_at: new Date()
             })
             .returning(['id', 'username', 'email', 'role_id']);
 
@@ -404,7 +404,7 @@ class User {
             .where({ id: userId })
             .update({
                 is_verified: true,
-                email_verified_at: knex.fn.now()
+                email_verified_at: new Date()
             });
 
         logger.info('User email verified', { userId });
@@ -421,7 +421,7 @@ class User {
         await knex('users')
             .where({ id: userId })
             .update({
-                last_login: knex.fn.now(),
+                last_login: new Date(),
                 last_login_ip: ipAddress
             });
 

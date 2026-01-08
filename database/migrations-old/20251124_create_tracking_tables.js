@@ -9,7 +9,7 @@ exports.up = async function(knex) {
     table.uuid('announcement_id').notNullable().references('id').inTable('announcements').onDelete('CASCADE')
     table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE')
     table.boolean('is_dismissed').defaultTo(false)
-    table.timestamp('viewed_at').defaultTo(knex.fn.now())
+    table.timestamp('viewed_at').defaultTo(new Date())
     table.timestamp('dismissed_at').nullable()
     
     // Composite unique index to prevent duplicate views
@@ -23,7 +23,7 @@ exports.up = async function(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'))
     table.uuid('promotion_id').notNullable().references('id').inTable('promotions').onDelete('CASCADE')
     table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE')
-    table.timestamp('displayed_at').defaultTo(knex.fn.now())
+    table.timestamp('displayed_at').defaultTo(new Date())
     table.boolean('was_clicked').defaultTo(false)
     table.timestamp('clicked_at').nullable()
     table.boolean('was_dismissed').defaultTo(false)

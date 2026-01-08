@@ -97,7 +97,7 @@ class UserRepository {
    * Create a new user
    */
   async create(userData) {
-    const { username, email, password, first_name, last_name, role_id } = userData;
+    const { username, email, password, first_name, last_name, role_id, institution_id } = userData;
     
     // Hash password
     const password_hash = await bcrypt.hash(password, 10);
@@ -110,8 +110,9 @@ class UserRepository {
         first_name,
         last_name,
         role_id: role_id || (await this.getDefaultRoleId()),
-        created_at: knex.fn.now(),
-        updated_at: knex.fn.now()
+        institution_id: institution_id || null,
+        created_at: new Date(),
+        updated_at: new Date()
       })
       .returning('*');
     
@@ -129,7 +130,7 @@ class UserRepository {
       .where({ id })
       .update({
         ...updateData,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
     
@@ -146,7 +147,7 @@ class UserRepository {
       .where({ id })
       .update({
         password_hash,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       });
   }
 
@@ -211,7 +212,7 @@ class UserRepository {
     await knex('users')
       .where({ id })
       .update({
-        last_login: knex.fn.now()
+        last_login: new Date()
       });
   }
 
@@ -223,7 +224,7 @@ class UserRepository {
       .where({ id })
       .update({
         mfa_enabled: enabled,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       });
   }
 }

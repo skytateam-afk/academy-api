@@ -145,7 +145,7 @@ class Parent {
                 .where({ id: parentId })
                 .update({
                     ...updateData,
-                    updated_at: knex.fn.now()
+                    updated_at: new Date()
                 })
                 .returning('*');
 
@@ -263,7 +263,7 @@ class Parent {
             .where({ id: studentId })
             .update({
                 parent_id: parentId,
-                updated_at: knex.fn.now()
+                updated_at: new Date()
             })
             .returning('*');
 
@@ -285,7 +285,7 @@ class Parent {
             .where({ id: studentId })
             .update({
                 parent_id: null,
-                updated_at: knex.fn.now()
+                updated_at: new Date()
             })
             .returning('*');
 

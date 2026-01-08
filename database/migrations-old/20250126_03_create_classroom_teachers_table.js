@@ -6,7 +6,7 @@ exports.up = function(knex) {
     table.uuid('teacher_id').notNullable();
     table.foreign('teacher_id').references('id').inTable('users').onDelete('CASCADE');
     table.boolean('is_primary').defaultTo(false).comment('Indicates if this is the primary/form teacher');
-    table.date('assigned_date').notNullable().defaultTo(knex.fn.now()).comment('Date assigned to classroom');
+    table.date('assigned_date').notNullable().defaultTo(new Date()).comment('Date assigned to classroom');
     table.enum('status', ['active', 'inactive']).defaultTo('active');
     table.text('notes').comment('Additional notes about the assignment');
     table.uuid('assigned_by');

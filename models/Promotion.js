@@ -282,7 +282,7 @@ class Promotion {
       .where('id', id)
       .update({
         ...data,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*')
     
@@ -306,7 +306,7 @@ class Promotion {
       .insert({
         promotion_id: promotionId,
         user_id: userId,
-        displayed_at: knex.fn.now()
+        displayed_at: new Date()
       })
       .returning('*')
     
@@ -321,7 +321,7 @@ class Promotion {
       .where('id', displayId)
       .update({
         was_clicked: true,
-        clicked_at: knex.fn.now()
+        clicked_at: new Date()
       })
   }
 
@@ -333,7 +333,7 @@ class Promotion {
       .where('id', displayId)
       .update({
         was_dismissed: true,
-        dismissed_at: knex.fn.now()
+        dismissed_at: new Date()
       })
   }
 

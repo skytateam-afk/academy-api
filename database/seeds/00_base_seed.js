@@ -194,6 +194,12 @@ exports.seed = async function(knex) {
     { name: 'document.read', resource: 'document', action: 'read', description: 'View documents' },
     { name: 'document.update', resource: 'document', action: 'update', description: 'Update documents' },
     { name: 'document.delete', resource: 'document', action: 'delete', description: 'Delete documents' },
+
+    // Institution permissions
+    { name: 'institution.create', resource: 'institution', action: 'create', description: 'Create institutions' },
+    { name: 'institution.view', resource: 'institution', action: 'view', description: 'View institutions' },
+    { name: 'institution.update', resource: 'institution', action: 'update', description: 'Update institutions' },
+    { name: 'institution.delete', resource: 'institution', action: 'delete', description: 'Delete institutions' },
   ];
 
   await knex('permissions').insert(permissions).onConflict(['resource', 'action']).ignore();
@@ -316,7 +322,10 @@ exports.seed = async function(knex) {
     'certificate.create', 'certificate.read', 'certificate.update', 'certificate.delete', 'certificate.issue',
     
     // Document management
-    'document.create', 'document.read', 'document.update', 'document.delete'
+    'document.create', 'document.read', 'document.update', 'document.delete',
+
+    // Institution management
+    'institution.create', 'institution.view', 'institution.update', 'institution.delete'
   ];
   
   const adminPermissions = await knex('permissions').whereIn('name', adminPermissionNames).select('id');
@@ -431,10 +440,10 @@ exports.seed = async function(knex) {
       role_id: superAdminRole.id,
       is_active: true,
       is_verified: true,
-      email_verified_at: knex.fn.now(),
+      email_verified_at: new Date(),
       bio: 'System administrator with full access to all features',
-      created_at: knex.fn.now(),
-      updated_at: knex.fn.now()
+      created_at: new Date(),
+      updated_at: new Date()
     });
     console.log('✅ Default admin user created');
   } else {

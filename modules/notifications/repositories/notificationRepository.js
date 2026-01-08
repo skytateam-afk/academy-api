@@ -101,7 +101,7 @@ class NotificationRepository {
             .where({ id: notificationId, user_id: userId })
             .update({
                 is_read: true,
-                read_at: knex.fn.now()
+                read_at: new Date()
             })
             .returning('*');
 
@@ -116,7 +116,7 @@ class NotificationRepository {
             .where({ user_id: userId, is_read: false })
             .update({
                 is_read: true,
-                read_at: knex.fn.now()
+                read_at: new Date()
             });
 
         return count;

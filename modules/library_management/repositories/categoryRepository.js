@@ -87,8 +87,8 @@ class LibraryCategoryRepository {
           icon,
           sort_order: sort_order || 0,
           is_active: is_active !== undefined ? is_active : true,
-          created_at: knex.fn.now(),
-          updated_at: knex.fn.now()
+          created_at: new Date(),
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -108,7 +108,7 @@ class LibraryCategoryRepository {
         .where({ id })
         .update({
           ...categoryData,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 

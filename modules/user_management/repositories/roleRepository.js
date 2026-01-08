@@ -69,8 +69,8 @@ class RoleRepository {
       .insert({
         name,
         description,
-        created_at: knex.fn.now(),
-        updated_at: knex.fn.now()
+        created_at: new Date(),
+        updated_at: new Date()
       })
       .returning('*');
     
@@ -85,7 +85,7 @@ class RoleRepository {
       .where({ id })
       .update({
         ...roleData,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
     

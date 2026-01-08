@@ -40,7 +40,7 @@ class StorageRepository {
       .where({ user_id: userId })
       .update({
         used_bytes: usedBytes,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
     return storage;
@@ -53,7 +53,7 @@ class StorageRepository {
     await knex('user_storage')
       .where({ user_id: userId })
       .increment('used_bytes', bytes)
-      .update({ updated_at: knex.fn.now() });
+      .update({ updated_at: new Date()})
   }
 
   /**
@@ -63,7 +63,7 @@ class StorageRepository {
     await knex('user_storage')
       .where({ user_id: userId })
       .decrement('used_bytes', bytes)
-      .update({ updated_at: knex.fn.now() });
+      .update({ updated_at: new Date()})
   }
 
   /**
@@ -77,7 +77,7 @@ class StorageRepository {
       .where({ user_id: userId })
       .update({
         quota_bytes: quotaBytes,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
     return storage;

@@ -3,8 +3,8 @@
  */
 exports.up = async function (knex) {
   await knex.schema.alterTable('lesson_progress', table => {
-    table.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
-    table.timestamp('updated_at', { useTz: true }).defaultTo(knex.fn.now());
+    table.timestamp('created_at', { useTz: true }).defaultTo(new Date())
+    table.timestamp('updated_at', { useTz: true }).defaultTo(new Date())
   });
 };
 

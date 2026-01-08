@@ -217,7 +217,7 @@ class CategoryRepository {
         .where('id', id)
         .update({
           ...categoryData,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 

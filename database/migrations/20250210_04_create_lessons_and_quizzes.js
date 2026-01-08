@@ -22,8 +22,8 @@ exports.up = async function(knex) {
     table.timestamp('published_at');
     table.integer('module_count').defaultTo(0);
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.unique(['course_id', 'slug'], { indexName: 'unique_course_lesson_slug' });
     table.index('course_id', 'idx_lessons_course_id');
@@ -43,8 +43,8 @@ exports.up = async function(knex) {
     table.bigInteger('file_size').defaultTo(0);
     table.integer('display_order').defaultTo(0);
     table.boolean('is_downloadable').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.index('lesson_id', 'lesson_attachments_lesson_id_index');
     table.index(['lesson_id', 'display_order'], 'lesson_attachments_lesson_id_display_order_index');
@@ -73,8 +73,8 @@ exports.up = async function(knex) {
     table.integer('version').defaultTo(1).notNullable();
     table.uuid('previous_version_id').references('id').inTable('lesson_modules').onDelete('SET NULL');
     table.timestamp('published_at');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.unique(['lesson_id', 'slug'], { indexName: 'unique_module_slug_per_lesson' });
     table.index('lesson_id', 'idx_modules_lesson');
@@ -93,8 +93,8 @@ exports.up = async function(knex) {
     table.bigInteger('file_size').notNullable();
     table.boolean('is_downloadable').defaultTo(true);
     table.integer('order_index').defaultTo(0).notNullable();
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.index('module_id', 'idx_attachments_module');
     table.index(['module_id', 'order_index'], 'idx_attachments_module_order');
@@ -116,8 +116,8 @@ exports.up = async function(knex) {
     table.boolean('show_correct_answers').defaultTo(true);
     table.boolean('show_results_immediately').defaultTo(true);
     table.boolean('is_published').defaultTo(false);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
   });
 
   // Create quiz_questions table
@@ -131,8 +131,8 @@ exports.up = async function(knex) {
     table.integer('display_order').defaultTo(0);
     table.text('explanation');
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
   });
 
   // Create quiz_question_options table
@@ -142,7 +142,7 @@ exports.up = async function(knex) {
     table.text('option_text').notNullable();
     table.boolean('is_correct').defaultTo(false);
     table.integer('display_order').defaultTo(0);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
   });
 
   // Create quiz_attempts table
@@ -152,14 +152,14 @@ exports.up = async function(knex) {
     table.uuid('quiz_id').notNullable().references('id').inTable('quizzes').onDelete('CASCADE');
     table.uuid('enrollment_id').notNullable();
     table.integer('attempt_number').notNullable();
-    table.timestamp('started_at').defaultTo(knex.fn.now());
+    table.timestamp('started_at').defaultTo(new Date());
     table.timestamp('completed_at');
     table.integer('score');
     table.integer('max_score');
     table.boolean('passed');
     table.integer('time_taken_seconds');
     table.jsonb('answers');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
   });
 
   // Create assignments table
@@ -179,8 +179,8 @@ exports.up = async function(knex) {
     table.bigInteger('max_file_size');
     table.specificType('allowed_file_types', 'text[]');
     table.boolean('is_published').defaultTo(false);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
   });
 
   // Create assignment_submissions table
@@ -192,7 +192,7 @@ exports.up = async function(knex) {
     table.text('submission_text');
     table.text('submission_url');
     table.specificType('file_urls', 'text[]');
-    table.timestamp('submitted_at').defaultTo(knex.fn.now());
+    table.timestamp('submitted_at').defaultTo(new Date());
     table.timestamp('graded_at');
     table.uuid('graded_by').references('id').inTable('users');
     table.integer('score');

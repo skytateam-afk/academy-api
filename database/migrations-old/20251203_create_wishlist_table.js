@@ -13,7 +13,7 @@ exports.up = function(knex) {
     table.enum('item_type', ['course', 'library_item']).notNullable();
     table.uuid('item_id').notNullable();
     table.text('notes'); // Optional notes from user
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
     
     // Unique constraint: user can only wishlist an item once
     table.unique(['user_id', 'item_type', 'item_id']);

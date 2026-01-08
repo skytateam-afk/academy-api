@@ -48,6 +48,15 @@ const uploadFile = async (fileBuffer, filename, mimetype, folder = 'uploads', me
     try {
         const fileKey = generateFileKey(folder, filename);
         
+        // Map common MIME types for better compatibility
+        const mimeTypeMap = {
+            'video/quicktime': 'video/mp4',
+            'video/x-msvideo': 'video/mp4',
+            'video/x-matroska': 'video/mp4',
+        };
+        
+        const finalMimetype = mimeTypeMap[mimetype] || mimetype;
+        
         // Sanitize metadata values to only include ASCII printable characters
         // S3/R2 metadata values must be ASCII and cannot contain certain characters
         const sanitizeMetadataValue = (value) => {
@@ -60,7 +69,8 @@ const uploadFile = async (fileBuffer, filename, mimetype, folder = 'uploads', me
             Bucket: BUCKET_NAME,
             Key: fileKey,
             Body: fileBuffer,
-            ContentType: mimetype,
+            ContentType: finalMimetype,
+            CacheControl: 'public, max-age=31536000', // Cache for 1 year
             Metadata: {
                 originalname: sanitizeMetadataValue(filename),
                 uploadedat: new Date().toISOString().replace(/[^0-9T:-]/g, ''),
@@ -79,7 +89,9 @@ const uploadFile = async (fileBuffer, filename, mimetype, folder = 'uploads', me
             filename,
             fileKey,
             size: fileBuffer.length,
-            folder
+            folder,
+            originalMimetype: mimetype,
+            finalMimetype
         });
 
         return {

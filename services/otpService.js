@@ -44,8 +44,8 @@ class OTPService {
             // Invalidate any existing unused OTPs for this email and type
             await knex('otp_codes')
                 .where({ email, type, is_used: false })
-                .where('expires_at', '>', knex.fn.now())
-                .update({ is_used: true, used_at: knex.fn.now() });
+                .where('expires_at', '>', new Date())
+                .update({ is_used: true, used_at: new Date() });
 
             // Generate OTP code (use provided code or generate new one)
             const code = providedCode || this.generateCode(6);
@@ -161,7 +161,7 @@ class OTPService {
                     type,
                     is_used: false
                 })
-                .where('expires_at', '>', knex.fn.now())
+                .where('expires_at', '>', new Date())
                 .orderBy('created_at', 'desc')
                 .first();
 
@@ -318,7 +318,7 @@ class OTPService {
                     type,
                     is_used: false
                 })
-                .where('expires_at', '>', knex.fn.now())
+                .where('expires_at', '>', new Date())
                 .orderBy('created_at', 'desc')
                 .first();
 
@@ -357,7 +357,7 @@ class OTPService {
                 .where('id', otp.id)
                 .update({
                     is_used: true,
-                    used_at: knex.fn.now()
+                    used_at: new Date()
                 });
 
             logger.info('OTP verified successfully', {
@@ -436,7 +436,7 @@ class OTPService {
             const otp = await knex('otp_codes')
                 .where('type', 'mfa')
                 .where('is_used', false)
-                .where('expires_at', '>', knex.fn.now())
+                .where('expires_at', '>', new Date())
                 .whereRaw("metadata->>'mfaToken' = ?", [mfaToken])
                 .orderBy('created_at', 'desc')
                 .first();
@@ -468,7 +468,7 @@ class OTPService {
     async cleanupExpired() {
         try {
             const deleted = await knex('otp_codes')
-                .where('expires_at', '<', knex.fn.now())
+                .where('expires_at', '<', new Date())
                 .orWhere(function() {
                     this.where('is_used', true)
                         .where('used_at', '<', knex.raw("NOW() - INTERVAL '1 day'"));

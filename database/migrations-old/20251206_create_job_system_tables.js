@@ -25,8 +25,8 @@ exports.up = async function (knex) {
         table.decimal('max_salary', 15, 2);
         table.string('currency', 10).defaultTo('USD');
 
-        table.timestamp('created_at').defaultTo(knex.fn.now());
-        table.timestamp('updated_at').defaultTo(knex.fn.now());
+        table.timestamp('created_at').defaultTo(new Date())
+        table.timestamp('updated_at').defaultTo(new Date())
 
         table.index('is_active');
         table.index('type');
@@ -51,8 +51,8 @@ exports.up = async function (knex) {
         table.jsonb('experience').defaultTo('[]'); // Array of experience objects
         table.jsonb('education').defaultTo('[]'); // Array of education objects
 
-        table.timestamp('created_at').defaultTo(knex.fn.now());
-        table.timestamp('updated_at').defaultTo(knex.fn.now());
+        table.timestamp('created_at').defaultTo(new Date())
+        table.timestamp('updated_at').defaultTo(new Date())
 
         table.index('user_id');
     });
@@ -76,8 +76,8 @@ exports.up = async function (knex) {
 
         table.text('admin_notes'); // Internal notes
 
-        table.timestamp('created_at').defaultTo(knex.fn.now());
-        table.timestamp('updated_at').defaultTo(knex.fn.now());
+        table.timestamp('created_at').defaultTo(new Date())
+        table.timestamp('updated_at').defaultTo(new Date())
 
         table.index('job_id');
         table.index('user_id');

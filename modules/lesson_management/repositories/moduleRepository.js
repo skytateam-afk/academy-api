@@ -75,7 +75,7 @@ class ModuleRepository {
       .where('id', id)
       .update({
         ...updates,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
     return module;
@@ -256,7 +256,7 @@ class ModuleRepository {
     const updates = { is_published: isPublished };
     
     if (isPublished) {
-      updates.published_at = knex.fn.now();
+      updates.published_at = new Date()
     }
 
     return this.update(id, updates);

@@ -13,7 +13,7 @@ exports.up = async function(knex) {
       resource: 'shop_category',
       action: 'create',
       description: 'Create shop categories',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     {
       id: knex.raw('uuid_generate_v4()'),
@@ -21,7 +21,7 @@ exports.up = async function(knex) {
       resource: 'shop_category',
       action: 'read',
       description: 'View shop categories',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     {
       id: knex.raw('uuid_generate_v4()'),
@@ -29,7 +29,7 @@ exports.up = async function(knex) {
       resource: 'shop_category',
       action: 'update',
       description: 'Update shop categories',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     {
       id: knex.raw('uuid_generate_v4()'),
@@ -37,7 +37,7 @@ exports.up = async function(knex) {
       resource: 'shop_category',
       action: 'delete',
       description: 'Delete shop categories',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     
     // Shop Product permissions
@@ -47,7 +47,7 @@ exports.up = async function(knex) {
       resource: 'shop_product',
       action: 'create',
       description: 'Create shop products',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     {
       id: knex.raw('uuid_generate_v4()'),
@@ -55,7 +55,7 @@ exports.up = async function(knex) {
       resource: 'shop_product',
       action: 'read',
       description: 'View shop products',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     {
       id: knex.raw('uuid_generate_v4()'),
@@ -63,7 +63,7 @@ exports.up = async function(knex) {
       resource: 'shop_product',
       action: 'update',
       description: 'Update shop products',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     {
       id: knex.raw('uuid_generate_v4()'),
@@ -71,7 +71,7 @@ exports.up = async function(knex) {
       resource: 'shop_product',
       action: 'delete',
       description: 'Delete shop products',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     {
       id: knex.raw('uuid_generate_v4()'),
@@ -79,7 +79,7 @@ exports.up = async function(knex) {
       resource: 'shop_product',
       action: 'publish',
       description: 'Publish/unpublish shop products',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     
     // Shop Order permissions
@@ -89,7 +89,7 @@ exports.up = async function(knex) {
       resource: 'shop_order',
       action: 'read',
       description: 'View shop orders',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     {
       id: knex.raw('uuid_generate_v4()'),
@@ -97,7 +97,7 @@ exports.up = async function(knex) {
       resource: 'shop_order',
       action: 'update',
       description: 'Update shop orders',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     {
       id: knex.raw('uuid_generate_v4()'),
@@ -105,7 +105,7 @@ exports.up = async function(knex) {
       resource: 'shop_order',
       action: 'delete',
       description: 'Delete shop orders',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     {
       id: knex.raw('uuid_generate_v4()'),
@@ -113,7 +113,7 @@ exports.up = async function(knex) {
       resource: 'shop_order',
       action: 'manage',
       description: 'Manage order fulfillment and status',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     
     // Shop Cart permissions
@@ -123,7 +123,7 @@ exports.up = async function(knex) {
       resource: 'shop_cart',
       action: 'manage',
       description: 'Manage shopping cart',
-      created_at: knex.fn.now()
+      created_at: new Date()
     },
     
     // Shop Analytics permissions
@@ -133,7 +133,7 @@ exports.up = async function(knex) {
       resource: 'shop_analytics',
       action: 'view',
       description: 'View shop analytics and sales reports',
-      created_at: knex.fn.now()
+      created_at: new Date()
     }
   ]).onConflict(['resource', 'action']).ignore();
 
@@ -150,7 +150,7 @@ exports.up = async function(knex) {
       id: knex.raw('uuid_generate_v4()'),
       role_id: superAdminRole.id,
       permission_id: perm.id,
-      created_at: knex.fn.now()
+      created_at: new Date()
     }));
     
     await knex('role_permissions').insert(rolePermissions).onConflict(['role_id', 'permission_id']).ignore();
@@ -177,7 +177,7 @@ exports.up = async function(knex) {
       id: knex.raw('uuid_generate_v4()'),
       role_id: adminRole.id,
       permission_id: perm.id,
-      created_at: knex.fn.now()
+      created_at: new Date()
     }));
     
     await knex('role_permissions').insert(rolePermissions).onConflict(['role_id', 'permission_id']).ignore();
@@ -196,7 +196,7 @@ exports.up = async function(knex) {
       id: knex.raw('uuid_generate_v4()'),
       role_id: studentRole.id,
       permission_id: perm.id,
-      created_at: knex.fn.now()
+      created_at: new Date()
     }));
     
     await knex('role_permissions').insert(rolePermissions).onConflict(['role_id', 'permission_id']).ignore();
@@ -207,7 +207,7 @@ exports.up = async function(knex) {
       id: knex.raw('uuid_generate_v4()'),
       role_id: userRole.id,
       permission_id: perm.id,
-      created_at: knex.fn.now()
+      created_at: new Date()
     }));
     
     await knex('role_permissions').insert(rolePermissions).onConflict(['role_id', 'permission_id']).ignore();

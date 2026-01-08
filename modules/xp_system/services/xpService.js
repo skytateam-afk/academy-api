@@ -455,7 +455,7 @@ class XPService {
                 .where('id', id)
                 .update({
                     ...updates,
-                    updated_at: knex.fn.now()
+                    updated_at: new Date()
                 })
                 .returning('*');
 
@@ -507,7 +507,7 @@ class XPService {
                 .where('id', id)
                 .update({
                     is_active: !level.is_active,
-                    updated_at: knex.fn.now()
+                    updated_at: new Date()
                 })
                 .returning('*');
 

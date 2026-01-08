@@ -123,7 +123,7 @@ const updateXPActivity = async (req, res) => {
         xp_value,
         description,
         is_active,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -202,7 +202,7 @@ const toggleXPActivity = async (req, res) => {
       .where('id', id)
       .update({
         is_active: !activity.is_active,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
 

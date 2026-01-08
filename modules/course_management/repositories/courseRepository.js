@@ -174,8 +174,8 @@ class CourseRepository {
         duration_hours,
         level,
         status,
-        created_at: knex.fn.now(),
-        updated_at: knex.fn.now()
+        created_at: new Date(),
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -190,7 +190,7 @@ class CourseRepository {
       .where({ id })
       .update({
         ...courseData,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -205,7 +205,7 @@ class CourseRepository {
       .where({ id })
       .update({
         status,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
 

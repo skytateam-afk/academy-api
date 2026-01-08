@@ -115,8 +115,8 @@ class LessonRepository {
         display_order: finalDisplayOrder,
         is_published,
         metadata: metadata ? JSON.stringify(metadata) : null,
-        created_at: knex.fn.now(),
-        updated_at: knex.fn.now()
+        created_at: new Date(),
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -142,7 +142,7 @@ class LessonRepository {
       .where({ id })
       .update({
         ...updateData,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -157,7 +157,7 @@ class LessonRepository {
       .where({ id })
       .update({
         is_published: isPublished,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -177,7 +177,7 @@ class LessonRepository {
           .where({ id, course_id: courseId })
           .update({
             display_order,
-            updated_at: knex.fn.now()
+            updated_at: new Date()
           });
       }
 
@@ -351,7 +351,7 @@ class LessonRepository {
           .where({ id, course_id: courseId })
           .update({
             ...updateData,
-            updated_at: knex.fn.now()
+            updated_at: new Date()
           })
           .returning('*');
         results.push(lesson);

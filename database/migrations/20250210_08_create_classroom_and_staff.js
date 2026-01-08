@@ -23,8 +23,8 @@ exports.up = async function(knex) {
     table.boolean('is_active').defaultTo(true);
     table.uuid('created_by').references('id').inTable('users').onDelete('SET NULL');
     table.uuid('updated_by').references('id').inTable('users').onDelete('SET NULL');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).NotNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).NotNullable();
 
     table.index('academic_year', 'classrooms_academic_year_index');
     table.index('class_teacher_id', 'classrooms_class_teacher_id_index');
@@ -41,7 +41,7 @@ exports.up = async function(knex) {
     table.uuid('student_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
     table.string('enrollment_number', 50);
     table.integer('roll_number');
-    table.date('assigned_date').defaultTo(knex.fn.now()).notNullable();
+    table.date('assigned_date').defaultTo(knex.fn.now());
     table.text('status').defaultTo('active')
       .checkIn(['active', 'transferred', 'completed', 'withdrawn']);
     table.text('notes');
@@ -62,7 +62,7 @@ exports.up = async function(knex) {
     table.integer('classroom_id').notNullable().references('id').inTable('classrooms').onDelete('CASCADE');
     table.uuid('teacher_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
     table.boolean('is_primary').defaultTo(false);
-    table.date('assigned_date').defaultTo(knex.fn.now()).notNullable();
+    table.date('assigned_date').defaultTo(knex.fn.now());
     table.text('status').defaultTo('active')
       .checkIn(['active', 'inactive']);
     table.text('notes');
@@ -253,7 +253,7 @@ exports.up = async function(knex) {
     table.increments('id').primary();
     table.integer('subject_group_id').references('id').inTable('subject_groups').onDelete('CASCADE');
     table.integer('subject_id').references('id').inTable('subjects').onDelete('CASCADE');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
 
     table.unique(['subject_group_id', 'subject_id'], { indexName: 'subject_group_subjects_subject_group_id_subject_id_key' });
   });

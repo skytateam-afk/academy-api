@@ -1,7 +1,7 @@
 # Auth Module
 
 ## Overview
-The Auth module handles all authentication and authorization functionality for the SchoolBox API.
+The Auth module handles all authentication and authorization functionality for the Skyta Academydemy API.
 
 ## Features
 - User login (email/username + password)

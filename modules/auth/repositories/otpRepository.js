@@ -18,7 +18,7 @@ class OtpRepository {
         otp_code,
         expires_at,
         ip_address,
-        created_at: knex.fn.now()
+        created_at: new Date()
       })
       .returning('*');
     
@@ -43,7 +43,7 @@ class OtpRepository {
       .where({ id })
       .update({
         is_used: true,
-        used_at: knex.fn.now()
+        used_at: new Date()
       });
   }
 
@@ -72,7 +72,7 @@ class OtpRepository {
    */
   async deleteExpired() {
     await knex('otp_codes')
-      .where('expires_at', '<', knex.fn.now())
+      .where('expires_at', '<', new Date())
       .delete();
   }
 }

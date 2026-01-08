@@ -2,7 +2,7 @@
 
 # Simple, straightforward commands
 help:
-	@echo "SchoolBox Platform Commands"
+	@echo "Skyta Academy Platform Commands"
 	@echo ""
 	@echo "Setup:"
 	@echo "  make install          Install all dependencies"

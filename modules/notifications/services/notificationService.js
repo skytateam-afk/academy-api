@@ -102,7 +102,7 @@ class NotificationService {
         return this.createNotification(
             userId,
             this.constructor.TYPES.WELCOME,
-            'Welcome to SchoolBox!',
+            'Welcome to Skyta Academy!',
             `Hi ${username}! Welcome to our learning platform. Start exploring courses and begin your learning journey.`,
             { username }
         );

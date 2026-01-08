@@ -106,7 +106,7 @@ exports.up = function(knex) {
       table.integer('total_courses').defaultTo(0);
       
       // Timeline
-      table.timestamp('enrolled_at').defaultTo(knex.fn.now());
+      table.timestamp('enrolled_at').defaultTo(new Date())
       table.timestamp('started_at');
       table.timestamp('completed_at');
       table.timestamp('last_accessed_at');

@@ -42,7 +42,7 @@ class ModuleAttachmentRepository {
       .where('id', id)
       .update({
         ...updates,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
     return attachment;

@@ -7,6 +7,7 @@ const auth = require('./auth');
 const userManagement = require('./user_management');
 const courseManagement = require('./course_management');
 const pathwayManagement = require('./pathway_management');
+const institutionManagement = require('./institution_management');
 const notifications = require('./notifications');
 const announcements = require('./announcements');
 const promotions = require('./promotions');
@@ -26,6 +27,7 @@ module.exports = {
   userManagement,
   courseManagement,
   pathwayManagement,
+  institutionManagement,
   notifications,
   announcements,
   promotions,

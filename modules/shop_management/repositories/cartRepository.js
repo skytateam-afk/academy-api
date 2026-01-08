@@ -151,7 +151,7 @@ class CartRepository {
           .where('id', existingItem.id)
           .update({
             quantity: newQuantity,
-            updated_at: knex.fn.now()
+            updated_at: new Date()
           })
           .returning('*');
 
@@ -207,7 +207,7 @@ class CartRepository {
         .where('id', itemId)
         .update({
           quantity,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -334,7 +334,7 @@ class CartRepository {
   async cleanupExpiredCarts() {
     try {
       const expiredCarts = await knex('shop_carts')
-        .where('expires_at', '<', knex.fn.now())
+        .where('expires_at', '<', new Date())
         .select('id');
 
       if (expiredCarts.length > 0) {

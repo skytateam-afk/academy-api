@@ -2,7 +2,7 @@
  * Authentication Middleware Module
  * 
  * This module provides JWT (JSON Web Token) based authentication middleware
- * for protecting API routes in the SchoolBox application.
+ * for protecting API routes in the Skyta Academy application.
  * 
  * Security Features:
  * - Validates JWT tokens in the Authorization header

@@ -182,7 +182,7 @@ class Announcement {
       .where('id', id)
       .update({
         ...data,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*')
     
@@ -206,7 +206,7 @@ class Announcement {
       .insert({
         announcement_id: announcementId,
         user_id: userId,
-        viewed_at: knex.fn.now()
+        viewed_at: new Date()
       })
       .onConflict(['announcement_id', 'user_id'])
       .ignore()
@@ -223,7 +223,7 @@ class Announcement {
       })
       .update({
         is_dismissed: true,
-        dismissed_at: knex.fn.now()
+        dismissed_at: new Date()
       })
   }
 

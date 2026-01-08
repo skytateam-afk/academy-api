@@ -23,8 +23,8 @@ exports.up = async function(knex) {
     table.timestamp('refunded_at');
     table.text('refund_reason');
     table.uuid('order_id');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.index('course_id', 'transactions_course_id_index');
     table.index('created_at', 'transactions_created_at_index');
@@ -38,7 +38,7 @@ exports.up = async function(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
     table.uuid('course_id').notNullable().references('id').inTable('courses').onDelete('CASCADE');
-    table.timestamp('enrolled_at').defaultTo(knex.fn.now());
+    table.timestamp('enrolled_at').defaultTo(new Date());
     table.timestamp('started_at');
     table.timestamp('completed_at');
     table.decimal('progress_percent', 5, 2).defaultTo(0.00);
@@ -78,7 +78,7 @@ exports.up = async function(knex) {
     table.decimal('progress_percent', 5, 2).defaultTo(0);
     table.integer('completed_courses').defaultTo(0);
     table.integer('total_courses').defaultTo(0);
-    table.timestamp('enrolled_at').defaultTo(knex.fn.now());
+    table.timestamp('enrolled_at').defaultTo(new Date());
     table.timestamp('started_at');
     table.timestamp('completed_at');
     table.timestamp('last_accessed_at');
@@ -86,8 +86,8 @@ exports.up = async function(knex) {
     table.string('certificate_url', 255);
     table.text('status').defaultTo('active')
       .checkIn(['active', 'completed', 'dropped', 'suspended']);
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.unique(['user_id', 'pathway_id'], { indexName: 'pathway_enrollments_user_id_pathway_id_unique' });
     table.index('enrolled_at', 'pathway_enrollments_enrolled_at_index');
@@ -110,8 +110,8 @@ exports.up = async function(knex) {
     table.timestamp('last_accessed_at');
     table.decimal('quiz_average', 5, 2);
     table.decimal('assignment_average', 5, 2);
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.unique(['pathway_enrollment_id', 'course_id'], { indexName: 'pathway_progress_pathway_enrollment_id_course_id_unique' });
     table.index('course_id', 'pathway_progress_course_id_index');
@@ -126,7 +126,7 @@ exports.up = async function(knex) {
     table.uuid('lesson_id').notNullable().references('id').inTable('lessons').onDelete('CASCADE');
     table.uuid('enrollment_id').notNullable().references('id').inTable('enrollments').onDelete('CASCADE');
     table.uuid('course_id').notNullable().references('id').inTable('courses').onDelete('CASCADE');
-    table.timestamp('started_at').defaultTo(knex.fn.now());
+    table.timestamp('started_at').defaultTo(new Date());
     table.timestamp('completed_at');
     table.integer('last_position').defaultTo(0);
     table.integer('watch_time_seconds').defaultTo(0);
@@ -158,8 +158,8 @@ exports.up = async function(knex) {
     table.integer('quiz_score');
     table.boolean('quiz_passed').defaultTo(false);
     table.jsonb('completion_data');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.unique(['user_id', 'module_id'], { indexName: 'module_progress_user_id_module_id_unique' });
     table.index('is_completed', 'module_progress_is_completed_index');
@@ -176,8 +176,8 @@ exports.up = async function(knex) {
     table.integer('rating').notNullable().checkBetween([1, 5]);
     table.text('review_text');
     table.boolean('is_published').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.unique(['user_id', 'course_id'], { indexName: 'unique_user_course_review' });
   });
@@ -190,8 +190,8 @@ exports.up = async function(knex) {
     table.string('certificate_number', 255).notNullable().unique();
     table.timestamp('issued_at').notNullable();
     table.jsonb('certificate_data').defaultTo('{}');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.unique(['user_id', 'course_id'], { indexName: 'certificates_user_id_course_id_unique' });
     table.index('certificate_number', 'certificates_certificate_number_index');
@@ -215,8 +215,8 @@ exports.up = async function(knex) {
     table.text('error_message');
     table.uuid('created_by').references('id').inTable('users');
     table.uuid('updated_by').references('id').inTable('users');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.index('is_active', 'payment_providers_is_active_index');
     table.index('provider_name', 'payment_providers_provider_name_index');
@@ -231,7 +231,7 @@ exports.up = async function(knex) {
     table.boolean('processed').defaultTo(false);
     table.timestamp('processed_at');
     table.text('error_message');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
   });
 };
 

@@ -164,7 +164,8 @@ class StaffController {
             first_name: staffData.first_name,
             last_name: staffData.last_name,
             phone: staffData.phone,
-            role_id: roleId
+            role_id: roleId,
+            institution_id: req.user?.institution_id || null
           });
 
           userCreated = true;

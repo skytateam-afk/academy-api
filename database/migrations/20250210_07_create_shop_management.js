@@ -38,8 +38,8 @@ exports.up = async function(knex) {
     table.decimal('rating_average', 3, 2).defaultTo(0);
     table.integer('rating_count').defaultTo(0);
     table.integer('low_stock_threshold').defaultTo(0);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.index('category_id', 'shop_products_category_id_index');
     table.index('is_published', 'shop_products_is_published_index');
@@ -56,7 +56,7 @@ exports.up = async function(knex) {
     table.string('alt_text', 255);
     table.integer('display_order').defaultTo(0);
     table.boolean('is_primary').defaultTo(false);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date())
 
     table.index('product_id', 'shop_product_images_product_id_index');
     table.index(['product_id', 'display_order'], 'shop_product_images_product_id_display_order_index');
@@ -81,8 +81,8 @@ exports.up = async function(knex) {
     table.text('review_text');
     table.boolean('is_verified_purchase').defaultTo(false);
     table.boolean('is_published').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.unique(['user_id', 'product_id'], { indexName: 'shop_product_reviews_user_id_product_id_unique' });
     table.index('product_id', 'shop_product_reviews_product_id_index');
@@ -95,8 +95,8 @@ exports.up = async function(knex) {
     table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE');
     table.string('session_id', 255);
     table.timestamp('expires_at');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.index('session_id', 'shop_carts_session_id_index');
     table.index('user_id', 'shop_carts_user_id_index');
@@ -109,8 +109,8 @@ exports.up = async function(knex) {
     table.uuid('product_id').notNullable().references('id').inTable('shop_products').onDelete('CASCADE');
     table.integer('quantity').defaultTo(1).notNullable();
     table.decimal('price_at_addition', 10, 2).notNullable();
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.unique(['cart_id', 'product_id'], { indexName: 'shop_cart_items_cart_id_product_id_unique' });
     table.index('cart_id', 'shop_cart_items_cart_id_index');
@@ -148,8 +148,8 @@ exports.up = async function(knex) {
     table.text('customer_notes');
     table.text('admin_notes');
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.index('created_at', 'shop_orders_created_at_index');
     table.index('order_number', 'shop_orders_order_number_index');
@@ -181,7 +181,7 @@ exports.up = async function(knex) {
     table.decimal('unit_price', 10, 2).notNullable();
     table.decimal('total_price', 10, 2).notNullable();
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date())
 
     table.index('order_id', 'shop_order_items_order_id_index');
     table.index('product_id', 'shop_order_items_product_id_index');
@@ -197,7 +197,7 @@ exports.up = async function(knex) {
     table.text('type').defaultTo('payment')
       .checkIn(['payment', 'refund', 'partial_refund']);
     table.text('notes');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date())
 
     table.index('order_id', 'shop_transactions_order_id_index');
     table.index('transaction_id', 'shop_transactions_transaction_id_index');

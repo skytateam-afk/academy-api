@@ -14,8 +14,8 @@ exports.up = async function(knex) {
       .checkIn(['system', 'custom', 'auto']);
     table.uuid('category_id').references('id').inTable('tag_categories').onDelete('SET NULL');
     table.uuid('created_by').references('id').inTable('users').onDelete('SET NULL');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.unique(['tag_key', 'tag_value'], { indexName: 'unique_tag_key_value' });
     table.index('created_by', 'idx_system_tags_created_by');
@@ -52,8 +52,8 @@ exports.up = async function(knex) {
     table.boolean('is_certification').defaultTo(false);
     table.uuid('subscription_tier_id').references('id').inTable('subscription_tiers').onDelete('SET NULL');
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('category_id', 'idx_courses_category_id');
     table.index('created_at', 'idx_courses_created_at');
@@ -109,8 +109,8 @@ exports.up = async function(knex) {
     table.integer('completion_count').defaultTo(0);
     table.uuid('subscription_tier_id').references('id').inTable('subscription_tiers').onDelete('SET NULL');
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.index('career_focus', 'pathways_career_focus_index');
     table.index('category_id', 'pathways_category_id_index');
@@ -130,8 +130,8 @@ exports.up = async function(knex) {
     table.text('description');
     table.jsonb('learning_objectives');
     table.uuid('prerequisite_course_id').references('id').inTable('courses').onDelete('SET NULL');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.unique(['pathway_id', 'course_id'], { indexName: 'pathway_courses_pathway_id_course_id_unique' });
     table.index('course_id', 'pathway_courses_course_id_index');
@@ -145,15 +145,15 @@ exports.up = async function(knex) {
     table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
     table.uuid('pathway_id').notNullable().references('id').inTable('pathways').onDelete('CASCADE');
     table.text('application_message');
-    table.timestamp('applied_at').defaultTo(knex.fn.now());
+    table.timestamp('applied_at').defaultTo(new Date());
     table.text('status').defaultTo('pending')
       .checkIn(['pending', 'approved', 'rejected', 'cannot_reapply']);
     table.uuid('reviewed_by').references('id').inTable('users').onDelete('SET NULL');
     table.timestamp('reviewed_at');
     table.text('review_notes');
     table.boolean('prevent_reapplication').defaultTo(false);
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.unique(['user_id', 'pathway_id'], { indexName: 'unique_user_pathway_application' });
     table.index('applied_at', 'pathway_applications_applied_at_index');
@@ -179,8 +179,8 @@ exports.up = async function(knex) {
     table.string('action_label', 100);
     table.string('action_url', 500);
     table.uuid('created_by').references('id').inTable('users').onDelete('SET NULL');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.index(['is_active', 'start_date', 'end_date'], 'announcements_is_active_start_date_end_date_index');
     table.index('priority', 'announcements_priority_index');
@@ -193,7 +193,7 @@ exports.up = async function(knex) {
     table.uuid('announcement_id').notNullable().references('id').inTable('announcements').onDelete('CASCADE');
     table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
     table.boolean('is_dismissed').defaultTo(false);
-    table.timestamp('viewed_at').defaultTo(knex.fn.now());
+    table.timestamp('viewed_at').defaultTo(new Date());
     table.timestamp('dismissed_at');
 
     table.unique(['announcement_id', 'user_id'], { indexName: 'announcement_views_announcement_id_user_id_unique' });
@@ -223,8 +223,8 @@ exports.up = async function(knex) {
     table.string('discount_code', 100);
     table.json('targeting_rules');
     table.uuid('created_by').references('id').inTable('users').onDelete('SET NULL');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.index('display_type', 'promotions_display_type_index');
     table.index(['is_active', 'start_date', 'end_date'], 'promotions_is_active_start_date_end_date_index');
@@ -237,7 +237,7 @@ exports.up = async function(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('promotion_id').notNullable().references('id').inTable('promotions').onDelete('CASCADE');
     table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
-    table.timestamp('displayed_at').defaultTo(knex.fn.now());
+    table.timestamp('displayed_at').defaultTo(new Date());
     table.boolean('was_clicked').defaultTo(false);
     table.timestamp('clicked_at');
     table.boolean('was_dismissed').defaultTo(false);
@@ -255,7 +255,7 @@ exports.up = async function(knex) {
     table.string('resource_type', 50).notNullable();
     table.uuid('resource_id').notNullable();
     table.uuid('tagged_by').references('id').inTable('users').onDelete('SET NULL');
-    table.timestamp('tagged_at').defaultTo(knex.fn.now());
+    table.timestamp('tagged_at').defaultTo(new Date());
 
     table.unique(['resource_type', 'resource_id', 'tag_id'], { indexName: 'unique_resource_tag' });
     table.index(['resource_type', 'resource_id'], 'idx_resource_tags_resource');
@@ -279,8 +279,8 @@ exports.up = async function(knex) {
     table.timestamp('replied_at');
     table.string('ip_address', 45);
     table.string('user_agent', 500);
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.index('created_at', 'contact_submissions_created_at_index');
     table.index('email', 'contact_submissions_email_index');
@@ -295,7 +295,7 @@ exports.up = async function(knex) {
       .checkIn(['course', 'library_item', 'shop_product']);
     table.uuid('item_id').notNullable();
     table.text('notes');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
 
     table.unique(['user_id', 'item_type', 'item_id'], { indexName: 'user_wishlist_user_id_item_type_item_id_unique' });
     table.index('created_at', 'user_wishlist_created_at_index');

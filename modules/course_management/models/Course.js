@@ -345,7 +345,7 @@ class Course {
                 prerequisites
             } = updateData;
 
-            const updates = { updated_at: knex.fn.now() };
+            const updates = { updated_at: new Date()}
 
             // Generate new slug if title changed
             if (title && title !== course.title) {
@@ -465,14 +465,14 @@ class Course {
      */
     static async togglePublish(id, isPublished) {
         try {
-            const publishedAt = isPublished ? knex.fn.now() : null;
+            const publishedAt = isPublished ? new Date():null;
 
             await knex('courses')
                 .where({ id })
                 .update({
                     is_published: isPublished,
                     published_at: publishedAt,
-                    updated_at: knex.fn.now()
+                    updated_at: new Date()
                 });
 
             logger.info('Course publish status updated', { courseId: id, isPublished });
@@ -495,7 +495,7 @@ class Course {
                 .where({ id })
                 .update({
                     is_featured: isFeatured,
-                    updated_at: knex.fn.now()
+                    updated_at: new Date()
                 });
 
             logger.info('Course featured status updated', { courseId: id, isFeatured });

@@ -193,7 +193,7 @@ class DocumentRepository {
       .where({ id: documentId })
       .update({
         ...updates,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
     return document;
@@ -215,7 +215,7 @@ class DocumentRepository {
     const [document] = await knex('documents')
       .where({ id: documentId })
       .update({
-        deleted_at: knex.fn.now()
+        deleted_at: new Date()
       })
       .returning('*');
     return document;
@@ -228,7 +228,7 @@ class DocumentRepository {
     const documents = await knex('documents')
       .whereIn('id', documentIds)
       .update({
-        deleted_at: knex.fn.now()
+        deleted_at: new Date()
       })
       .returning('*');
     return documents;

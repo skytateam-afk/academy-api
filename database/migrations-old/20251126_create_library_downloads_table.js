@@ -8,9 +8,9 @@ exports.up = async function(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
     table.uuid('item_id').notNullable().references('id').inTable('library_items').onDelete('CASCADE');
-    table.timestamp('first_downloaded_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('first_downloaded_at').notNullable().defaultTo(new Date())
     table.integer('download_count').defaultTo(1);
-    table.timestamp('last_downloaded_at').notNullable().defaultTo(knex.fn.now());
+    table.timestamp('last_downloaded_at').notNullable().defaultTo(new Date())
 
     // Ensure each user can only have one record per item
     table.unique(['user_id', 'item_id']);

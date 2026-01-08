@@ -35,6 +35,7 @@ const openApiSpec = {
     { name: 'Users', description: 'User management operations' },
     { name: 'Roles', description: 'Role management and assignment' },
     { name: 'Permissions', description: 'Permission management' },
+    { name: 'Institutions', description: 'Institution management operations' },
     { name: 'Courses', description: 'Course management operations' },
     { name: 'Categories', description: 'Course category management' },
     { name: 'Lessons', description: 'Lesson management and content delivery' },
@@ -73,6 +74,7 @@ const openApiSpec = {
           dateOfBirth: { type: 'string', format: 'date', nullable: true },
           roleId: { type: 'string', format: 'uuid', nullable: true },
           roleName: { type: 'string', nullable: true },
+          institutionId: { type: 'string', format: 'uuid', nullable: true, description: 'Institution the user belongs to' },
           isActive: { type: 'boolean' },
           isVerified: { type: 'boolean' },
           createdAt: { type: 'string', format: 'date-time' },
@@ -453,6 +455,7 @@ const openApiSpec = {
           isPublished: { type: 'boolean', default: false },
           isFeatured: { type: 'boolean', default: false },
           enrollmentCount: { type: 'integer', default: 0 },
+          institutionId: { type: 'string', format: 'uuid', nullable: true, description: 'Institution this pathway belongs to' },
           createdBy: { type: 'string', format: 'uuid' },
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' },
@@ -467,6 +470,21 @@ const openApiSpec = {
               }
             }
           }
+        }
+      },
+      Institution: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          name: { type: 'string', example: 'Skyta Academy' },
+          official_email: { type: 'string', format: 'email', nullable: true, example: 'info@skyta.edu' },
+          address: { type: 'string', nullable: true, example: '123 Education Street, Learning City' },
+          phone_number: { type: 'string', nullable: true, example: '+1-555-123-4567' },
+          subscription_tier_id: { type: 'string', format: 'uuid', nullable: true },
+          subscription_tier_name: { type: 'string', nullable: true, example: 'Premium' },
+          is_active: { type: 'boolean', default: true },
+          created_at: { type: 'string', format: 'date-time' },
+          updated_at: { type: 'string', format: 'date-time' }
         }
       }
     }
@@ -506,6 +524,12 @@ const openApiSpec = {
                     minLength: 8,
                     example: 'SecurePass123!',
                     description: 'Password (min 8 chars, must contain uppercase, lowercase, and number)'
+                  },
+                  institution_id: {
+                    type: 'string',
+                    format: 'uuid',
+                    nullable: true,
+                    description: 'Institution ID (optional - user will be associated with this institution)'
                   }
                 }
               }
@@ -532,6 +556,7 @@ const openApiSpec = {
                         last_name: { type: 'string', example: 'Doe' },
                         email: { type: 'string', format: 'email' },
                         role: { type: 'string', example: 'student' },
+                        institution_id: { type: 'string', format: 'uuid', nullable: true },
                         created_at: { type: 'string', format: 'date-time' }
                       }
                     }
@@ -586,6 +611,12 @@ const openApiSpec = {
                     minLength: 8,
                     example: 'SecurePass123!',
                     description: 'Password (min 8 chars, must contain uppercase, lowercase, and number)'
+                  },
+                  institution_id: {
+                    type: 'string',
+                    format: 'uuid',
+                    nullable: true,
+                    description: 'Institution ID (optional - user will be associated with this institution)'
                   }
                 }
               }
@@ -611,6 +642,7 @@ const openApiSpec = {
                         last_name: { type: 'string', example: 'Doe' },
                         email: { type: 'string', format: 'email' },
                         role: { type: 'string', example: 'student' },
+                        institution_id: { type: 'string', format: 'uuid', nullable: true },
                         created_at: { type: 'string', format: 'date-time' }
                       }
                     }
@@ -2010,12 +2042,14 @@ const openApiSpec = {
                 type: 'object',
                 required: ['email', 'username', 'password'],
                 properties: {
-                  email: { type: 'string', format: 'email' },
-                  username: { type: 'string' },
-                  password: { type: 'string', minLength: 8 },
-                  firstName: { type: 'string' },
-                  lastName: { type: 'string' },
-                  roleId: { type: 'string', format: 'uuid' }
+                  email: { type: 'string', format: 'email', example: 'user@example.com', description: 'User email address' },
+                  username: { type: 'string', example: 'johndoe', description: 'Username (optional - will be auto-generated if not provided)' },
+                  password: { type: 'string', minLength: 8, example: 'SecurePass123!', description: 'Password (min 8 chars, must contain uppercase, lowercase, and number)' },
+                  first_name: { type: 'string', example: 'John', description: 'User first name' },
+                  last_name: { type: 'string', example: 'Doe', description: 'User last name' },
+                  phone: { type: 'string', example: '+1-555-123-4567', description: 'Phone number' },
+                  roleId: { type: 'string', format: 'uuid', description: 'Role ID' },
+                  institution_id: { type: 'string', format: 'uuid', nullable: true, description: 'Institution ID (optional - user will be associated with this institution)' }
                 }
               }
             }
@@ -2083,7 +2117,7 @@ const openApiSpec = {
       put: {
         tags: ['Users'],
         summary: 'Update user',
-        description: 'Update user profile information (first name, last name, bio, phone)',
+        description: 'Update user profile information (first name, last name, bio, phone, institution)',
         security: [{ bearerAuth: [] }],
         parameters: [
           { name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'User ID' }
@@ -2095,11 +2129,12 @@ const openApiSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  first_name: { type: 'string', example: 'John' },
-                  last_name: { type: 'string', example: 'Doe' },
-                  bio: { type: 'string', example: 'Software developer and tech enthusiast' },
-                  phone: { type: 'string', example: '+1234567890' },
-                  dateOfBirth: { type: 'string', format: 'date', example: '1990-01-15' }
+                  first_name: { type: 'string', example: 'John', description: 'User first name' },
+                  last_name: { type: 'string', example: 'Doe', description: 'User last name' },
+                  bio: { type: 'string', example: 'Software developer and tech enthusiast', description: 'User biography' },
+                  phone: { type: 'string', example: '+1234567890', description: 'Phone number' },
+                  dateOfBirth: { type: 'string', format: 'date', example: '1990-01-15', description: 'Date of birth' },
+                  institution_id: { type: 'string', format: 'uuid', nullable: true, description: 'Institution ID (optional - associate/update user institution)' }
                 }
               }
             }
@@ -14252,16 +14287,23 @@ const openApiSpec = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['title', 'description'],
+                required: ['title', 'description', 'createdBy'],
                 properties: {
-                  title: { type: 'string', example: 'Web Development Pathway' },
-                  description: { type: 'string' },
-                  slug: { type: 'string' },
-                  imageUrl: { type: 'string' },
-                  duration: { type: 'string' },
-                  difficulty: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
-                  isPublished: { type: 'boolean' },
-                  isFeatured: { type: 'boolean' }
+                  title: { type: 'string', example: 'Web Development Pathway', description: 'Pathway title' },
+                  description: { type: 'string', description: 'Pathway description' },
+                  shortDescription: { type: 'string', description: 'Short description (max 500 chars)' },
+                  careerFocus: { type: 'string', example: 'Full Stack Development', description: 'Career focus area' },
+                  categoryId: { type: 'string', format: 'uuid', description: 'Category ID' },
+                  level: { type: 'string', enum: ['beginner', 'intermediate', 'advanced', 'all'], description: 'Difficulty level' },
+                  price: { type: 'number', example: 99.99, description: 'Pathway price' },
+                  currency: { type: 'string', example: 'USD', description: 'Currency code (3 chars)' },
+                  hasCertification: { type: 'boolean', description: 'Whether pathway offers certification' },
+                  certificationCriteria: { type: 'string', description: 'Certification criteria' },
+                  enrollmentLimit: { type: 'integer', description: 'Maximum enrollments allowed' },
+                  createdBy: { type: 'string', format: 'uuid', description: 'Creator user ID' },
+                  institution_id: { type: 'string', format: 'uuid', nullable: true, description: 'Institution ID (optional - pathway will belong to this institution)' },
+                  thumbnailUrl: { type: 'string', format: 'uri', description: 'Thumbnail image URL' },
+                  bannerUrl: { type: 'string', format: 'uri', description: 'Banner image URL' }
                 }
               }
             }
@@ -14276,6 +14318,7 @@ const openApiSpec = {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean' },
+                    message: { type: 'string' },
                     data: { $ref: '#/components/schemas/Pathway' }
                   }
                 }
@@ -14552,6 +14595,204 @@ const openApiSpec = {
                 }
               }
             }
+          }
+        }
+      }
+    },
+
+    // ===== Institution Management =====
+    '/api/institutions': {
+      get: {
+        tags: ['Institutions'],
+        summary: 'Get all institutions',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Search by institution name or email' },
+          { name: 'sortBy', in: 'query', schema: { type: 'string', default: 'name' } },
+          { name: 'sortOrder', in: 'query', schema: { type: 'string', enum: ['ASC', 'DESC'], default: 'ASC' } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of institutions',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Institution' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      post: {
+        tags: ['Institutions'],
+        summary: 'Create new institution',
+        security: [{ bearerAuth: [] }],
+        description: 'Create a new institution (requires institution.create permission)',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name'],
+                properties: {
+                  name: { type: 'string', example: 'Skyta Academy', description: 'Institution name' },
+                  official_email: { type: 'string', format: 'email', example: 'info@skyta.edu', description: 'Official institution email' },
+                  address: { type: 'string', example: '123 Education Street, Learning City', description: 'Institution address' },
+                  phone_number: { type: 'string', example: '+1-555-123-4567', description: 'Institution phone number' },
+                  subscription_tier_id: { type: 'string', format: 'uuid', description: 'Subscription tier ID' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Institution created successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    data: { $ref: '#/components/schemas/Institution' }
+                  }
+                }
+              }
+            }
+          },
+          '403': {
+            description: 'Permission denied'
+          }
+        }
+      }
+    },
+
+    '/api/institutions/{id}': {
+      get: {
+        tags: ['Institutions'],
+        summary: 'Get institution by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' }, description: 'Institution ID' }
+        ],
+        responses: {
+          '200': {
+            description: 'Institution details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Institution' }
+                  }
+                }
+              }
+            }
+          },
+          '404': {
+            description: 'Institution not found'
+          }
+        }
+      },
+      put: {
+        tags: ['Institutions'],
+        summary: 'Update institution',
+        security: [{ bearerAuth: [] }],
+        description: 'Update institution details (requires institution.update permission)',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' }, description: 'Institution ID' }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string', example: 'Updated Institution Name' },
+                  official_email: { type: 'string', format: 'email', example: 'newemail@institution.edu' },
+                  address: { type: 'string', example: 'Updated Address' },
+                  phone_number: { type: 'string', example: '+1-555-987-6543' },
+                  subscription_tier_id: { type: 'string', format: 'uuid' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Institution updated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    data: { $ref: '#/components/schemas/Institution' }
+                  }
+                }
+              }
+            }
+          },
+          '403': {
+            description: 'Permission denied'
+          },
+          '404': {
+            description: 'Institution not found'
+          }
+        }
+      },
+      delete: {
+        tags: ['Institutions'],
+        summary: 'Delete institution',
+        security: [{ bearerAuth: [] }],
+        description: 'Delete an institution (requires institution.delete permission)',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' }, description: 'Institution ID' }
+        ],
+        responses: {
+          '200': {
+            description: 'Institution deleted successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          },
+          '403': {
+            description: 'Permission denied'
+          },
+          '404': {
+            description: 'Institution not found'
           }
         }
       }

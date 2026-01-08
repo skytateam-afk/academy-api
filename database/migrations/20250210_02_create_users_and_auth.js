@@ -10,7 +10,7 @@ exports.up = async function(knex) {
     table.uuid('user_id').notNullable();
     table.uuid('tier_id').notNullable().references('id').inTable('subscription_tiers').onDelete('CASCADE');
     table.string('status', 255).defaultTo('pending');
-    table.timestamp('started_at').defaultTo(knex.fn.now());
+    table.timestamp('started_at').defaultTo(new Date()
     table.timestamp('expires_at');
     table.timestamp('cancelled_at');
     table.string('payment_provider', 255).defaultTo('manual');
@@ -18,8 +18,8 @@ exports.up = async function(knex) {
     table.decimal('amount_paid', 10, 2);
     table.string('currency', 3).defaultTo('USD');
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.unique(['user_id', 'tier_id', 'status'], { indexName: 'user_subscriptions_user_id_tier_id_status_unique' });
     table.index(['user_id', 'status'], 'user_subscriptions_user_id_status_index');
@@ -54,8 +54,8 @@ exports.up = async function(knex) {
     table.integer('total_xp').defaultTo(0);
     table.integer('current_level').defaultTo(1);
     table.string('google_id', 255).unique();
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('email', 'idx_users_email');
     table.index('is_active', 'idx_users_is_active');
@@ -88,8 +88,8 @@ exports.up = async function(knex) {
     table.text('user_agent');
     table.timestamp('expires_at').notNullable();
     table.timestamp('refresh_expires_at');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('last_activity').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('last_activity').defaultTo(new Date());
   });
 
   // Create otp table
@@ -101,7 +101,7 @@ exports.up = async function(knex) {
     table.timestamp('expires_at').notNullable();
     table.boolean('used').defaultTo(false);
     table.timestamp('used_at');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
   });
 
   // Create otp_codes table
@@ -116,7 +116,7 @@ exports.up = async function(knex) {
     table.string('ip_address', 45);
     table.text('user_agent');
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
 
     table.index(['email', 'code', 'is_used'], 'otp_codes_email_code_is_used_index');
     table.index('email', 'otp_codes_email_index');
@@ -131,7 +131,7 @@ exports.up = async function(knex) {
     table.timestamp('expires_at').notNullable();
     table.boolean('used').defaultTo(false);
     table.timestamp('used_at');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
   });
 
   // Create role_permissions table
@@ -139,7 +139,7 @@ exports.up = async function(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('role_id').notNullable().references('id').inTable('roles').onDelete('CASCADE');
     table.uuid('permission_id').notNullable().references('id').inTable('permissions').onDelete('CASCADE');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
 
     table.unique(['role_id', 'permission_id'], { indexName: 'unique_role_permission' });
   });
@@ -150,7 +150,7 @@ exports.up = async function(knex) {
     table.uuid('user_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
     table.uuid('permission_id').notNullable().references('id').inTable('permissions').onDelete('CASCADE');
     table.boolean('granted').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
 
     table.unique(['user_id', 'permission_id'], { indexName: 'unique_user_permission' });
   });
@@ -161,7 +161,7 @@ exports.up = async function(knex) {
     table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE');
     table.uuid('permission_id').references('id').inTable('permissions').onDelete('CASCADE');
     table.uuid('granted_by').references('id').inTable('users');
-    table.timestamp('granted_at').defaultTo(knex.fn.now());
+    table.timestamp('granted_at').defaultTo(new Date());
 
     table.unique(['user_id', 'permission_id'], { indexName: 'users_permissions_user_id_permission_id_unique' });
   });
@@ -188,8 +188,8 @@ exports.up = async function(knex) {
     table.boolean('show_progress_publicly').defaultTo(false);
     table.string('timezone', 255).defaultTo('UTC');
     table.string('language', 255).defaultTo('en');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
   });
 
   // Create user_personalisations table
@@ -197,8 +197,8 @@ exports.up = async function(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.uuid('user_id').notNullable().unique().references('id').inTable('users').onDelete('CASCADE');
     table.jsonb('data').defaultTo('{}');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
   });
 
   // Create user_storage table
@@ -206,7 +206,7 @@ exports.up = async function(knex) {
     table.uuid('user_id').primary().references('id').inTable('users').onDelete('CASCADE');
     table.bigInteger('used_bytes').defaultTo(0);
     table.bigInteger('quota_bytes').defaultTo(1073741824);
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('user_id', 'user_storage_user_id_index');
   });
@@ -218,8 +218,8 @@ exports.up = async function(knex) {
     table.integer('total_xp').defaultTo(0).notNullable();
     table.integer('current_level').defaultTo(1).notNullable();
     table.integer('xp_to_next_level').defaultTo(100).notNullable();
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('current_level', 'user_xp_current_level_index');
     table.index('total_xp', 'user_xp_total_xp_index');
@@ -236,7 +236,7 @@ exports.up = async function(knex) {
     table.string('reference_type', 50);
     table.text('description');
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
 
     table.index('activity_type', 'xp_transactions_activity_type_index');
     table.index('created_at', 'xp_transactions_created_at_index');
@@ -254,7 +254,7 @@ exports.up = async function(knex) {
     table.jsonb('data');
     table.boolean('is_read').defaultTo(false);
     table.timestamp('read_at');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
   });
 
   // Create audit_logs table
@@ -270,7 +270,7 @@ exports.up = async function(knex) {
     table.boolean('success').notNullable();
     table.text('error_message');
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
 
     table.index('action', 'idx_audit_logs_action');
     table.index('created_at', 'idx_audit_logs_created_at');
@@ -290,8 +290,8 @@ exports.up = async function(knex) {
     table.string('portfolio_url', 500);
     table.jsonb('experience').defaultTo('[]');
     table.jsonb('education').defaultTo('[]');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('user_id', 'work_profiles_user_id_index');
   });
@@ -308,8 +308,8 @@ exports.up = async function(knex) {
     table.text('resume_url');
     table.text('bio');
     table.boolean('is_active').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
 
     table.index('user_id', 'idx_job_profiles_user_id');
   });
@@ -328,8 +328,8 @@ exports.up = async function(knex) {
     table.text('status').defaultTo('pending')
       .checkIn(['pending', 'reviewed', 'shortlisted', 'interview', 'rejected', 'hired', 'withdrawn']);
     table.text('admin_notes');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('email', 'job_applications_email_index');
     table.index('job_id', 'job_applications_job_id_index');
@@ -343,7 +343,7 @@ exports.up = async function(knex) {
     table.integer('menu_item_id').notNullable().references('id').inTable('menu_items').onDelete('CASCADE');
     table.string('user_type', 50).notNullable();
     table.boolean('is_visible').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
 
     table.unique(['menu_item_id', 'user_type'], { indexName: 'menu_item_user_types_menu_item_id_user_type_key' });
     table.index('menu_item_id', 'idx_menu_user_types_menu');
@@ -363,8 +363,8 @@ exports.up = async function(knex) {
     table.text('description');
     table.string('category', 100);
     table.string('parent_group', 255);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.unique(['user_type', 'menu_key'], { indexName: 'menu_visibility_settings_user_type_menu_key_key' });
     table.index('user_type', 'idx_menu_visibility_user_type');

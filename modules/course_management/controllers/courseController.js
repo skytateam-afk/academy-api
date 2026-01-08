@@ -59,11 +59,20 @@ const upload = multer({
         fileSize: 200 * 1024 * 1024, // 200MB limit for videos and thumbnails
     },
     fileFilter: (req, file, cb) => {
-        const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4'];
+        const allowedMimes = [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'video/mp4',
+            'video/quicktime',
+            'video/x-msvideo',
+            'video/x-matroska',
+            'video/webm'
+        ];
         if (allowedMimes.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new Error('Invalid file type. Only JPEG, PNG, WEBP images and MP4 videos are allowed.'));
+            cb(new Error('Invalid file type. Only JPEG, PNG, WEBP images and MP4/MOV/AVI/MKV/WEBM videos are allowed.'));
         }
     }
 });
@@ -798,19 +807,38 @@ exports.uploadPreviewVideo = [
                 previewVideoUrl: uploadResult.fileUrl
             });
 
+            logger.info('Preview video uploaded successfully', {
+                courseId: id,
+                filename: req.file.originalname,
+                mimetype: req.file.mimetype,
+                size: req.file.size,
+                fileUrl: uploadResult.fileUrl
+            });
+
             res.json({
                 success: true,
                 message: 'Preview video uploaded successfully',
                 data: {
                     previewVideoUrl: uploadResult.fileUrl,
+                    mimetype: req.file.mimetype,
+                    filename: req.file.originalname,
+                    size: req.file.size,
                     course: updatedCourse
                 }
             });
         } catch (error) {
-            logger.error('Error in uploadPreviewVideo', { error: error.message, id: req.params.id });
+            logger.error('Error in uploadPreviewVideo', { 
+                error: error.message, 
+                id: req.params.id,
+                filename: req.file?.originalname,
+                mimetype: req.file?.mimetype,
+                size: req.file?.size,
+                stack: error.stack
+            });
             res.status(500).json({
                 success: false,
-                error: 'Failed to upload preview video'
+                error: 'Failed to upload preview video',
+                details: error.message
             });
         }
     }

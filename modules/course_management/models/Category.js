@@ -204,7 +204,7 @@ class Category {
 
             const { name, description, parentId, iconUrl, displayOrder, isActive } = updateData;
             
-            const updates = { updated_at: knex.fn.now() };
+            const updates = { updated_at: new Date()}
             
             // Generate new slug if name changed
             if (name && name !== category.name) {

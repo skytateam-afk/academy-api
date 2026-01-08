@@ -27,6 +27,7 @@ class User {
             last_name,
             phone,
             date_of_birth,
+            institution_id,
             role_name = 'student' // Default role
         } = userData;
 
@@ -54,15 +55,27 @@ class User {
 
             const role_id = roleResult.rows[0].id;
 
+            // Validate institution_id if provided
+            if (institution_id) {
+                const institutionResult = await db.query(
+                    'SELECT id FROM institutions WHERE id = $1',
+                    [institution_id]
+                );
+
+                if (institutionResult.rows.length === 0) {
+                    throw new Error(`Institution with ID '${institution_id}' not found`);
+                }
+            }
+
             // Insert user
             const query = `
                 INSERT INTO users (
                     username, email, password_hash, first_name, last_name,
-                    phone, date_of_birth, role_id
+                    phone, date_of_birth, role_id, institution_id
                 )
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 RETURNING id, username, email, first_name, last_name, phone,
-                          date_of_birth, role_id, is_active, is_verified, created_at
+                          date_of_birth, role_id, institution_id, is_active, is_verified, created_at
             `;
 
             const result = await db.query(query, [
@@ -73,7 +86,8 @@ class User {
                 last_name || null,
                 phone || null,
                 date_of_birth || null,
-                role_id
+                role_id,
+                institution_id || null
             ]);
 
             const user = result.rows[0];
@@ -81,7 +95,8 @@ class User {
             logger.info('User created', {
                 userId: user.id,
                 username: user.username,
-                email: user.email
+                email: user.email,
+                institutionId: user.institution_id
             });
 
             return user;

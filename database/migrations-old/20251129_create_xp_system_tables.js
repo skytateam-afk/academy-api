@@ -12,8 +12,8 @@ exports.up = function (knex) {
             table.integer('xp_value').notNullable();
             table.text('description');
             table.boolean('is_active').defaultTo(true);
-            table.timestamp('created_at').defaultTo(knex.fn.now());
-            table.timestamp('updated_at').defaultTo(knex.fn.now());
+            table.timestamp('created_at').defaultTo(new Date())
+            table.timestamp('updated_at').defaultTo(new Date())
         })
 
         // User XP - Stores total XP and level for each user
@@ -23,8 +23,8 @@ exports.up = function (knex) {
             table.integer('total_xp').defaultTo(0).notNullable();
             table.integer('current_level').defaultTo(1).notNullable();
             table.integer('xp_to_next_level').defaultTo(100).notNullable();
-            table.timestamp('created_at').defaultTo(knex.fn.now());
-            table.timestamp('updated_at').defaultTo(knex.fn.now());
+            table.timestamp('created_at').defaultTo(new Date())
+            table.timestamp('updated_at').defaultTo(new Date())
 
             table.unique('user_id');
             table.index('user_id');
@@ -42,7 +42,7 @@ exports.up = function (knex) {
             table.string('reference_type', 50); // 'module', 'quiz', etc.
             table.text('description');
             table.jsonb('metadata'); // Additional data like quiz score, etc.
-            table.timestamp('created_at').defaultTo(knex.fn.now());
+            table.timestamp('created_at').defaultTo(new Date())
 
             table.index('user_id');
             table.index('activity_type');

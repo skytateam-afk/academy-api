@@ -21,8 +21,8 @@ exports.up = function(knex) {
             table.boolean('is_active').defaultTo(true);
             table.integer('sort_order').defaultTo(0);
             table.string('stripe_price_id').nullable(); // for Stripe integration
-            table.timestamp('created_at').defaultTo(knex.fn.now());
-            table.timestamp('updated_at').defaultTo(knex.fn.now());
+            table.timestamp('created_at').defaultTo(new Date())
+            table.timestamp('updated_at').defaultTo(new Date())
 
             table.index(['is_active', 'sort_order']);
             table.index(['slug']);
@@ -33,7 +33,7 @@ exports.up = function(knex) {
             table.uuid('user_id').notNullable();
             table.uuid('tier_id').notNullable();
             table.string('status').defaultTo('pending'); // pending, active, expired, cancelled
-            table.timestamp('started_at').defaultTo(knex.fn.now());
+            table.timestamp('started_at').defaultTo(new Date())
             table.timestamp('expires_at').nullable();
             table.timestamp('cancelled_at').nullable();
             table.string('payment_provider').defaultTo('manual');
@@ -41,8 +41,8 @@ exports.up = function(knex) {
             table.decimal('amount_paid', 10, 2).nullable();
             table.string('currency', 3).defaultTo('USD');
             table.jsonb('metadata');
-            table.timestamp('created_at').defaultTo(knex.fn.now());
-            table.timestamp('updated_at').defaultTo(knex.fn.now());
+            table.timestamp('created_at').defaultTo(new Date())
+            table.timestamp('updated_at').defaultTo(new Date())
 
             // Foreign keys
             table.foreign('user_id').references('users.id').onDelete('CASCADE');

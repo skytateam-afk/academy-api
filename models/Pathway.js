@@ -28,7 +28,8 @@ class Pathway {
                 minPrice,
                 maxPrice,
                 sortBy = 'created_at',
-                sortOrder = 'DESC'
+                sortOrder = 'DESC',
+                institutionId // New parameter to filter by institution
             } = options;
 
             const offset = (page - 1) * limit;
@@ -54,6 +55,11 @@ class Pathway {
                 );
 
             // Apply filters
+            // Filter by institution if provided (restrict pathways to user's institution)
+            if (institutionId) {
+                query = query.where('p.institution_id', institutionId);
+            }
+
             if (search) {
                 query = query.where(function() {
                     this.where('p.title', 'ilike', `%${search}%`)
@@ -232,6 +238,7 @@ class Pathway {
                 certificationCriteria,
                 enrollmentLimit,
                 createdBy,
+                institution_id,
                 metadata
             } = pathwayData;
 
@@ -265,6 +272,7 @@ class Pathway {
                     certification_criteria: certificationCriteria || null,
                     enrollment_limit: enrollmentLimit || null,
                     created_by: createdBy,
+                    institution_id: institution_id || null,
                     metadata: metadata ? JSON.stringify(metadata) : null
                 })
                 .returning('*');
@@ -527,14 +535,14 @@ class Pathway {
      */
     static async togglePublish(id, isPublished) {
         try {
-            const publishedAt = isPublished ? knex.fn.now() : null;
+            const publishedAt = isPublished ? new Date() : null;
 
             await knex('pathways')
                 .where('id', id)
                 .update({
                     is_published: isPublished,
                     published_at: publishedAt,
-                    updated_at: knex.fn.now()
+                    updated_at: new Date()
                 });
 
             logger.info('Pathway publish status updated', { pathwayId: id, isPublished });
@@ -557,7 +565,7 @@ class Pathway {
                 .where('id', id)
                 .update({
                     is_featured: isFeatured,
-                    updated_at: knex.fn.now()
+                    updated_at: new Date()
                 });
 
             logger.info('Pathway featured status updated', { pathwayId: id, isFeatured });

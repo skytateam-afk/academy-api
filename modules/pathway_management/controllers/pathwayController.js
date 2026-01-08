@@ -31,6 +31,7 @@ const createPathwaySchema = z.object({
     certificationCriteria: z.string().optional(),
     enrollmentLimit: z.preprocess((val) => val ? parseInt(val) : undefined, z.number().int().positive().optional()),
     createdBy: z.string().uuid(),
+    institution_id: z.string().uuid().optional(),
     metadata: z.record(z.any()).optional()
 });
 
@@ -87,7 +88,9 @@ exports.getAllPathways = async (req, res) => {
             url: req.url,
             params: req.params,
             query: req.query,
-            route: req.route?.path
+            route: req.route?.path,
+            userId: req.user?.id,
+            userInstitutionId: req.user?.institution_id
         });
 
         const {
@@ -122,9 +125,11 @@ exports.getAllPathways = async (req, res) => {
             minPrice: minPrice ? parseFloat(minPrice) : undefined,
             maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
             sortBy,
-            sortOrder
+            sortOrder,
+            // Filter by user's institution ONLY if student - all other roles see all pathways
+            institutionId: (req.user?.role === 'student' || req.user?.role_name === 'student') && req.user?.institution_id ? req.user.institution_id : undefined
         };
-
+        
         const result = await Pathway.getAll(options);
 
         res.json({
@@ -248,7 +253,14 @@ exports.createPathway = async (req, res) => {
             }
         }
 
-        const validationResult = createPathwaySchema.safeParse(req.body);
+        // Set createdBy from authenticated user if not provided
+        const userId = req.user.userId;
+        const requestBody = {
+            ...req.body,
+            createdBy: req.body.createdBy || userId
+        };
+
+        const validationResult = createPathwaySchema.safeParse(requestBody);
 
         if (!validationResult.success) {
             return res.status(400).json({
@@ -260,7 +272,6 @@ exports.createPathway = async (req, res) => {
 
         // Handle file uploads to Cloudflare R2
         const pathwayData = { ...validationResult.data };
-        const userId = req.user.userId;
 
         // Upload thumbnail if provided
         if (req.files && req.files.thumbnail && req.files.thumbnail[0]) {

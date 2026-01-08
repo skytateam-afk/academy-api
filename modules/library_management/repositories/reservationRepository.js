@@ -133,13 +133,13 @@ class LibraryReservationRepository {
         .insert({
           item_id,
           user_id,
-          reserved_at: knex.fn.now(),
+          reserved_at: new Date(),
           expires_at,
           status: 'active',
           queue_position: parseInt(queueCount.count) + 1,
           notes,
-          created_at: knex.fn.now(),
-          updated_at: knex.fn.now()
+          created_at: new Date(),
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -159,7 +159,7 @@ class LibraryReservationRepository {
         .where({ id })
         .update({
           ...reservationData,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -179,7 +179,7 @@ class LibraryReservationRepository {
         .where({ id })
         .update({
           status: 'fulfilled',
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -204,7 +204,7 @@ class LibraryReservationRepository {
         .where({ id })
         .update({
           status: 'cancelled',
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -228,8 +228,8 @@ class LibraryReservationRepository {
       const [reservation] = await knex('library_reservations')
         .where({ id })
         .update({
-          notified_at: knex.fn.now(),
-          updated_at: knex.fn.now()
+          notified_at: new Date(),
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -388,7 +388,7 @@ class LibraryReservationRepository {
         .leftJoin('library_items', 'library_reservations.item_id', 'library_items.id')
         .leftJoin('users', 'library_reservations.user_id', 'users.id')
         .where('library_reservations.status', 'active')
-        .where('library_reservations.expires_at', '<', knex.fn.now());
+        .where('library_reservations.expires_at', '<', new Date())
     } catch (error) {
       logger.error('Error finding expired reservations:', error);
       throw error;
@@ -410,7 +410,7 @@ class LibraryReservationRepository {
           .where({ id: activeReservations[i].id })
           .update({
             queue_position: i + 1,
-            updated_at: knex.fn.now()
+            updated_at: new Date()
           });
       }
     } catch (error) {
@@ -426,7 +426,7 @@ class LibraryReservationRepository {
     try {
       const expiredReservations = await knex('library_reservations')
         .where('status', 'active')
-        .where('expires_at', '<', knex.fn.now())
+        .where('expires_at', '<', new Date())
         .select('id', 'item_id');
 
       for (const reservation of expiredReservations) {
@@ -434,7 +434,7 @@ class LibraryReservationRepository {
           .where({ id: reservation.id })
           .update({
             status: 'expired',
-            updated_at: knex.fn.now()
+            updated_at: new Date()
           });
 
         // Update queue positions

@@ -81,7 +81,7 @@ exports.generateCertificate = async (req, res) => {
       .first();
 
     // Get institution settings (already fetched above)
-    const institutionName = institutionSettings.organization_name || 'SchoolBox';
+    const institutionName = institutionSettings.organization_name || 'Skyta Academy';
 
     // Create certificate data
     const certificateData = {

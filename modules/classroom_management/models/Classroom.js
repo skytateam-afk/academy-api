@@ -157,7 +157,7 @@ class Classroom {
       .where('id', id)
       .update({
         ...classroomData,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       });
     return this.findById(id);
   }
@@ -177,7 +177,7 @@ class Classroom {
       student_id: studentData.student_id,
       enrollment_number: studentData.enrollment_number,
       roll_number: studentData.roll_number,
-      assigned_date: studentData.assigned_date || knex.fn.now(),
+      assigned_date: studentData.assigned_date || new Date(),      
       status: studentData.status || 'active',
       notes: studentData.notes,
       assigned_by: studentData.assigned_by
@@ -259,7 +259,7 @@ class Classroom {
       .where('id', id)
       .update({
         ...updateData,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       });
     return this.findStudentAssignment(id);
   }
@@ -270,7 +270,7 @@ class Classroom {
       student_id: student.student_id,
       enrollment_number: student.enrollment_number,
       roll_number: student.roll_number,
-      assigned_date: student.assigned_date || knex.fn.now(),
+      assigned_date: student.assigned_date || new Date(),
       status: 'active',
       notes: student.notes,
       assigned_by: assignedBy
@@ -347,7 +347,7 @@ class Classroom {
   static async updateStudentAssignmentStatus(assignmentId, status, notes) {
     const updateData = {
       status,
-      updated_at: knex.fn.now()
+      updated_at: new Date()
     };
 
     if (notes) {
@@ -367,7 +367,7 @@ class Classroom {
       classroom_id: classroomId,
       teacher_id: teacherData.teacher_id,
       is_primary: teacherData.is_primary || false,
-      assigned_date: teacherData.assigned_date || knex.fn.now(),
+      assigned_date: teacherData.assigned_date || new Date(),
       status: teacherData.status || 'active',
       notes: teacherData.notes,
       assigned_by: teacherData.assigned_by
@@ -454,7 +454,7 @@ class Classroom {
       classroom_id: classroomId,
       teacher_id: teacher.teacher_id,
       is_primary: teacher.is_primary || false,
-      assigned_date: teacher.assigned_date || knex.fn.now(),
+      assigned_date: teacher.assigned_date || new Date(),
       status: 'active',
       notes: teacher.notes,
       assigned_by: assignedBy

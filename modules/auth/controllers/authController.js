@@ -44,7 +44,7 @@ class AuthController {
      * @access Public
      */
     async signup(req, res) {
-        const { email, first_name, last_name, password } = req.body;
+        const { email, first_name, last_name, password, institution_id } = req.body;
         const ipAddress = req.ip || req.connection.remoteAddress;
 
         try {
@@ -71,7 +71,7 @@ class AuthController {
                 return existingUser !== null;
             });
 
-            logger.info('Generated unique username for signup', { username, email });
+            logger.info('Generated unique username for signup', { username, email, institutionId: institution_id });
 
             // Validate email format
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -99,14 +99,15 @@ class AuthController {
             // Get default role ID (student role)
             const defaultRoleId = await userRepository.getDefaultRoleId();
 
-            // Create user with default user role (not verified yet)
+            // Create user with default user role (not verified yet), optional institution_id
             const newUser = await userRepository.create({
                 username,
                 email,
                 first_name,
                 last_name,
                 password,
-                role_id: defaultRoleId
+                role_id: defaultRoleId,
+                institution_id: institution_id || null
             });
 
             logger.success('User signed up successfully', {
@@ -114,7 +115,8 @@ class AuthController {
                 username: newUser.username,
                 email: newUser.email,
                 first_name: newUser.first_name,
-                last_name: newUser.last_name
+                last_name: newUser.last_name,
+                institutionId: newUser.institution_id
             });
 
             logSecurityEvent('USER_SIGNUP', {
@@ -123,6 +125,7 @@ class AuthController {
                 email: newUser.email,
                 first_name: newUser.first_name,
                 last_name: newUser.last_name,
+                institutionId: newUser.institution_id,
                 ip: ipAddress
             });
 
@@ -168,6 +171,7 @@ class AuthController {
                     email: newUser.email,
                     first_name: newUser.first_name,
                     last_name:newUser.last_name,
+                    institution_id: newUser.institution_id,
                     is_verified: false,
                     created_at: newUser.created_at
                 }
@@ -176,7 +180,8 @@ class AuthController {
         } catch (error) {
             logger.error('Signup failed', {
                 email,
-                error: error.message
+                error: error.message,
+                institutionId: req.body?.institution_id
             });
 
             res.status(400).json({
@@ -344,7 +349,8 @@ class AuthController {
                 {
                     userId: authenticatedUser.id,
                     username: authenticatedUser.username,
-                    role: authenticatedUser.role
+                    role: authenticatedUser.role,
+                    institution_id: authenticatedUser.institution_id || null
                 },
                 JWT_SECRET,
                 { expiresIn: SESSION_TIMEOUT }
@@ -371,6 +377,7 @@ class AuthController {
                     username: authenticatedUser.username,
                     email: authenticatedUser.email,
                     role: authenticatedUser.role,
+                    institution_id: authenticatedUser.institution_id || null,
                     message: 'logged in'
                 }
             });
@@ -425,6 +432,7 @@ class AuthController {
 
             let user = await userRepository.findByEmail(email);
 
+
             if (user) {
                 // User exists, update google_id if not set
                 if (!user.google_id) {
@@ -466,14 +474,15 @@ class AuthController {
                 {
                     userId: user.id,
                     username: user.username,
-                    role: user.role
+                    role: user.role,
+                    institution_id: user.institution_id || null
                 },
                 JWT_SECRET,
                 { expiresIn: SESSION_TIMEOUT }
             );
 
             await userRepository.updateLastLogin(user.id, ipAddress);
-
+            
             res.json({
                 success: true,
                 message: 'Google login successful',
@@ -483,7 +492,8 @@ class AuthController {
                     username: user.username,
                     email: user.email,
                     role: user.role,
-                    avatar_url: user.avatar_url
+                    avatar_url: user.avatar_url,
+                    institutionId: user.institution_id || null
                 }
             });
 
@@ -504,7 +514,7 @@ class AuthController {
      * @access Protected
      */
     async register(req, res) {
-        const { email, password, first_name, last_name } = req.body;
+        const { email, password, first_name, last_name, institution_id } = req.body;
         const ipAddress = req.ip || req.connection.remoteAddress;
 
         try {
@@ -530,7 +540,7 @@ class AuthController {
                 return existingUser !== null;
             });
 
-            logger.info('Generated unique username', { username, email });
+            logger.info('Generated unique username', { username, email, institutionId: institution_id });
 
             // Validate email format
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -558,14 +568,15 @@ class AuthController {
             // Get default role ID
             const defaultRoleId = await userRepository.getDefaultRoleId();
 
-            // Create user (always with 'user' role)
+            // Create user (always with 'user' role, optional institution_id)
             const newUser = await userRepository.create({
                 username,
                 email,
                 first_name,
                 last_name,
                 password,
-                role_id: defaultRoleId
+                role_id: defaultRoleId,
+                institution_id: institution_id || null
             });
 
             logger.success('User registered successfully', {
@@ -573,6 +584,7 @@ class AuthController {
                 username: newUser.username,
                 first_name: newUser.first_name,
                 last_name: newUser.last_name,
+                institutionId: newUser.institution_id,
                 registeredBy: req.user.username
             });
 
@@ -581,6 +593,7 @@ class AuthController {
                 username: newUser.username,
                 first_name: newUser.first_name,
                 last_name: newUser.last_name,
+                institutionId: newUser.institution_id,
                 registeredBy: req.user.userId,
                 ip: ipAddress
             });
@@ -594,6 +607,7 @@ class AuthController {
                     first_name: newUser.first_name,
                     last_name: newUser.last_name,
                     email: newUser.email,
+                    institution_id: newUser.institution_id,
                     role: newUser.role,
                     created_at: newUser.created_at
                 }
@@ -602,7 +616,8 @@ class AuthController {
         } catch (error) {
             logger.error('Registration failed', {
                 username,
-                error: error.message
+                error: error.message,
+                institutionId: req.body?.institution_id
             });
 
             res.status(400).json({

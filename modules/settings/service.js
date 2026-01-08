@@ -89,7 +89,7 @@ class SettingsService {
 
             let settings;
             const updateData = {
-                updated_at: knex.fn.now()
+                updated_at: new Date()
             };
 
             // Only include fields that are actually being updated
@@ -227,7 +227,7 @@ class SettingsService {
 
             let settings;
             const updateData = {
-                updated_at: knex.fn.now()
+                updated_at: new Date()
             };
 
             // Only include fields that are actually being updated
@@ -320,7 +320,7 @@ class SettingsService {
             const fieldName = `${type}_url`;
             const updateData = {
                 [fieldName]: uploadResult.fileUrl,
-                updated_at: knex.fn.now()
+                updated_at: new Date()
             };
 
             // Get existing settings
@@ -391,7 +391,7 @@ class SettingsService {
                 .where({ id: existing.id })
                 .update({
                     [fieldName]: null,
-                    updated_at: knex.fn.now()
+                    updated_at: new Date()
                 })
                 .returning('*');
 
@@ -527,7 +527,7 @@ class SettingsService {
             }
 
             const updateData = {
-                updated_at: knex.fn.now()
+                updated_at: new Date()
             };
 
             // Only include fields that are being updated
@@ -606,7 +606,7 @@ class SettingsService {
                 .where('id', id)
                 .update({
                     is_active: !existing.is_active,
-                    updated_at: knex.fn.now()
+                    updated_at: new Date()
                 })
                 .returning('*');
 

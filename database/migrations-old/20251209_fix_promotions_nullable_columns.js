@@ -23,7 +23,7 @@ exports.up = function(knex) {
 exports.down = function(knex) {
   return knex.schema.alterTable('promotions', (table) => {
     // Revert back to not nullable (with defaults to prevent errors)
-    table.timestamp('end_date').notNullable().defaultTo(knex.fn.now()).alter()
+    table.timestamp('end_date').notNullable().defaultTo(new Date()).alter()
     table.string('action_label', 100).notNullable().defaultTo('Learn More').alter()
     table.string('action_url', 500).notNullable().defaultTo('#').alter()
   })

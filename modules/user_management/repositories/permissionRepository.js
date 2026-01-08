@@ -52,7 +52,7 @@ class PermissionRepository {
       .insert({
         name,
         description,
-        created_at: knex.fn.now()
+        created_at: new Date()
       })
       .returning('*');
     
@@ -113,7 +113,7 @@ class PermissionRepository {
     const permissions = permissionsData.map(p => ({
       name: p.name,
       description: p.description,
-      created_at: knex.fn.now()
+      created_at: new Date()
     }));
     
     return await knex('permissions')

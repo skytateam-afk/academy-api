@@ -15,8 +15,8 @@ exports.up = function(knex) {
       table.string('icon_url');
       table.integer('display_order').defaultTo(0);
       table.boolean('is_active').defaultTo(true);
-      table.timestamp('created_at').defaultTo(knex.fn.now());
-      table.timestamp('updated_at').defaultTo(knex.fn.now());
+      table.timestamp('created_at').defaultTo(new Date())
+      table.timestamp('updated_at').defaultTo(new Date())
       
       table.index('slug');
       table.index('parent_id');
@@ -66,8 +66,8 @@ exports.up = function(knex) {
       table.decimal('rating_average', 3, 2).defaultTo(0.00);
       table.integer('rating_count').defaultTo(0);
       
-      table.timestamp('created_at').defaultTo(knex.fn.now());
-      table.timestamp('updated_at').defaultTo(knex.fn.now());
+      table.timestamp('created_at').defaultTo(new Date())
+      table.timestamp('updated_at').defaultTo(new Date())
       
       table.index('slug');
       table.index('category_id');
@@ -84,7 +84,7 @@ exports.up = function(knex) {
       table.string('alt_text');
       table.integer('display_order').defaultTo(0);
       table.boolean('is_primary').defaultTo(false);
-      table.timestamp('created_at').defaultTo(knex.fn.now());
+      table.timestamp('created_at').defaultTo(new Date())
       
       table.index('product_id');
       table.index(['product_id', 'is_primary']);
@@ -104,8 +104,8 @@ exports.up = function(knex) {
       table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE');
       table.string('session_id'); // For guest users
       table.timestamp('expires_at');
-      table.timestamp('created_at').defaultTo(knex.fn.now());
-      table.timestamp('updated_at').defaultTo(knex.fn.now());
+      table.timestamp('created_at').defaultTo(new Date())
+      table.timestamp('updated_at').defaultTo(new Date())
       
       table.index('user_id');
       table.index('session_id');
@@ -118,8 +118,8 @@ exports.up = function(knex) {
       table.uuid('product_id').notNullable().references('id').inTable('shop_products').onDelete('CASCADE');
       table.integer('quantity').notNullable().defaultTo(1);
       table.decimal('price_at_addition', 10, 2).notNullable(); // Price when added to cart
-      table.timestamp('created_at').defaultTo(knex.fn.now());
-      table.timestamp('updated_at').defaultTo(knex.fn.now());
+      table.timestamp('created_at').defaultTo(new Date())
+      table.timestamp('updated_at').defaultTo(new Date())
       
       table.unique(['cart_id', 'product_id']);
       table.index('cart_id');
@@ -189,8 +189,8 @@ exports.up = function(knex) {
       table.text('admin_notes');
       table.jsonb('metadata');
       
-      table.timestamp('created_at').defaultTo(knex.fn.now());
-      table.timestamp('updated_at').defaultTo(knex.fn.now());
+      table.timestamp('created_at').defaultTo(new Date())
+      table.timestamp('updated_at').defaultTo(new Date())
       
       table.index('order_number');
       table.index('user_id');
@@ -212,7 +212,7 @@ exports.up = function(knex) {
       table.decimal('unit_price', 10, 2).notNullable();
       table.decimal('total_price', 10, 2).notNullable();
       table.jsonb('metadata'); // Product attributes at time of purchase
-      table.timestamp('created_at').defaultTo(knex.fn.now());
+      table.timestamp('created_at').defaultTo(new Date())
       
       table.index('order_id');
       table.index('product_id');
@@ -228,8 +228,8 @@ exports.up = function(knex) {
       table.text('review_text');
       table.boolean('is_verified_purchase').defaultTo(false);
       table.boolean('is_published').defaultTo(true);
-      table.timestamp('created_at').defaultTo(knex.fn.now());
-      table.timestamp('updated_at').defaultTo(knex.fn.now());
+      table.timestamp('created_at').defaultTo(new Date())
+      table.timestamp('updated_at').defaultTo(new Date())
       
       table.unique(['user_id', 'product_id']);
       table.index('product_id');
@@ -246,7 +246,7 @@ exports.up = function(knex) {
       table.string('currency', 3).defaultTo('USD');
       table.enum('type', ['payment', 'refund', 'partial_refund']).defaultTo('payment');
       table.text('notes');
-      table.timestamp('created_at').defaultTo(knex.fn.now());
+      table.timestamp('created_at').defaultTo(new Date())
       
       table.index('order_id');
       table.index('transaction_id');

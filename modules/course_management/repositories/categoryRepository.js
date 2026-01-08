@@ -135,8 +135,8 @@ class CategoryRepository {
         parent_id,
         icon,
         color,
-        created_at: knex.fn.now(),
-        updated_at: knex.fn.now()
+        created_at: new Date(),
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -151,7 +151,7 @@ class CategoryRepository {
       .where({ id })
       .update({
         ...categoryData,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -253,7 +253,7 @@ class CategoryRepository {
       .where({ id: categoryId })
       .update({
         parent_id: newParentId,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
 

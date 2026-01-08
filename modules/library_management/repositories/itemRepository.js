@@ -266,8 +266,8 @@ class LibraryItemRepository {
           view_count: 0,
           download_count: 0,
           added_by,
-          created_at: knex.fn.now(),
-          updated_at: knex.fn.now()
+          created_at: new Date(),
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -292,7 +292,7 @@ class LibraryItemRepository {
         .where({ id })
         .update({
           ...itemData,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -312,7 +312,7 @@ class LibraryItemRepository {
         .where({ id })
         .update({
           status,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -332,7 +332,7 @@ class LibraryItemRepository {
         .where({ id })
         .update({
           available_copies: knex.raw('available_copies + ?', [change]),
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -581,7 +581,7 @@ class LibraryItemRepository {
         .first();
       const overdueItems = await knex('library_borrowing')
         .where('status', 'borrowed')
-        .where('due_date', '<', knex.fn.now())
+        .where('due_date', '<', new Date())
         .count('* as count')
         .first();
 

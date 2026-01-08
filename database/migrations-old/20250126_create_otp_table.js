@@ -14,7 +14,7 @@ exports.up = function(knex) {
         table.timestamp('used_at').nullable();
         table.string('ip_address', 45).nullable();
         table.text('user_agent').nullable();
-        table.timestamp('created_at').defaultTo(knex.fn.now());
+        table.timestamp('created_at').defaultTo(new Date())
         
         // Indexes
         table.index(['email', 'code', 'is_used']);

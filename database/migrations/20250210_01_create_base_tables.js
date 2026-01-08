@@ -14,8 +14,8 @@ exports.up = async function(knex) {
     table.string('name', 50).notNullable().unique();
     table.text('description');
     table.boolean('is_system_role').defaultTo(false);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
   });
 
   // Create permissions table
@@ -25,7 +25,7 @@ exports.up = async function(knex) {
     table.string('resource', 50).notNullable();
     table.string('action', 50).notNullable();
     table.text('description');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
     table.unique(['resource', 'action'], { indexName: 'unique_permission' });
   });
 
@@ -36,7 +36,7 @@ exports.up = async function(knex) {
     table.text('description');
     table.string('color', 7);
     table.string('icon', 50);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
   });
 
   // Create tags table
@@ -44,7 +44,7 @@ exports.up = async function(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
     table.string('name', 50).notNullable().unique();
     table.string('slug', 50).notNullable().unique();
-    table.timestamp('created_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
   });
 
   // Create parents table
@@ -55,8 +55,8 @@ exports.up = async function(knex) {
     table.string('email', 255).notNullable().unique();
     table.string('phone', 255);
     table.text('address');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()otNullable();
+    table.timestamp('updated_at').defaultTo(new Date()e();
   });
 
   // Create categories table
@@ -69,8 +69,8 @@ exports.up = async function(knex) {
     table.text('icon_url');
     table.integer('display_order').defaultTo(0);
     table.boolean('is_active').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date()
+    table.timestamp('updated_at').defaultTo(new Date()
 
     table.index('parent_id', 'idx_categories_parent_id');
   });
@@ -92,8 +92,8 @@ exports.up = async function(knex) {
     table.boolean('is_active').defaultTo(true);
     table.integer('sort_order').defaultTo(0);
     table.string('stripe_price_id', 255);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index(['is_active', 'sort_order'], 'subscription_tiers_is_active_sort_order_index');
     table.index('slug', 'subscription_tiers_slug_index');
@@ -135,8 +135,8 @@ exports.up = async function(knex) {
     table.string('currency_code', 3).defaultTo('NGN');
     table.string('currency_symbol', 10).defaultTo('₦');
     table.string('currency_position', 10).defaultTo('before');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
   });
 
   // Create xp_activities table
@@ -146,8 +146,8 @@ exports.up = async function(knex) {
     table.integer('xp_value').notNullable();
     table.text('description');
     table.boolean('is_active').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
   });
 
   // Create xp_levels table
@@ -164,8 +164,8 @@ exports.up = async function(knex) {
     table.boolean('is_active').defaultTo(true);
     table.integer('display_order').defaultTo(0).notNullable();
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('is_active', 'xp_levels_is_active_index');
     table.index('level_number', 'xp_levels_level_number_index');
@@ -181,8 +181,8 @@ exports.up = async function(knex) {
       .checkIn(['science', 'arts', 'commercial', 'general', 'vocational', 'language', 'humanities', 'other']);
     table.text('description');
     table.boolean('is_active').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
   });
 
   // Create grading_scales table
@@ -192,8 +192,8 @@ exports.up = async function(knex) {
     table.jsonb('grade_config').notNullable();
     table.boolean('is_default').defaultTo(false);
     table.uuid('created_by');
-    table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-    table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
   });
 
   // Create subject_groups table
@@ -204,8 +204,8 @@ exports.up = async function(knex) {
     table.string('academic_session', 50);
     table.string('term', 20);
     table.uuid('created_by');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
   });
 
   // Create jobs table
@@ -227,8 +227,8 @@ exports.up = async function(knex) {
     table.string('currency', 10).defaultTo('USD');
     table.string('company_logo_url', 500);
     table.string('company_name', 255);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('created_at', 'jobs_created_at_index');
     table.index('is_active', 'jobs_is_active_index');
@@ -253,8 +253,8 @@ exports.up = async function(knex) {
     table.string('badge_variant', 50);
     table.boolean('requires_auth').defaultTo(false);
     table.jsonb('metadata');
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('is_active', 'idx_menu_items_active');
     table.index('menu_key', 'idx_menu_items_key');
@@ -271,8 +271,8 @@ exports.up = async function(knex) {
     table.integer('sort_order').defaultTo(0);
     table.boolean('is_active').defaultTo(true);
     table.string('slug', 100).notNullable().unique();
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('is_active', 'library_categories_is_active_index');
     table.index('slug', 'library_categories_slug_index');
@@ -288,8 +288,8 @@ exports.up = async function(knex) {
     table.string('icon_url', 255);
     table.integer('display_order').defaultTo(0);
     table.boolean('is_active').defaultTo(true);
-    table.timestamp('created_at').defaultTo(knex.fn.now());
-    table.timestamp('updated_at').defaultTo(knex.fn.now());
+    table.timestamp('created_at').defaultTo(new Date());
+    table.timestamp('updated_at').defaultTo(new Date());
 
     table.index('is_active', 'shop_categories_is_active_index');
     table.index('parent_id', 'shop_categories_parent_id_index');

@@ -17,7 +17,7 @@ exports.up = async function (knex) {
             table.boolean('is_completed').defaultTo(false);
             table.integer('completion_percentage').defaultTo(0);
             table.timestamp('completed_at').nullable();
-            table.timestamp('last_accessed_at').defaultTo(knex.fn.now());
+            table.timestamp('last_accessed_at').defaultTo(new Date())
 
             table.integer('time_spent_seconds').defaultTo(0);
 

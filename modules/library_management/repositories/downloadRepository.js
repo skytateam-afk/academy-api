@@ -23,7 +23,7 @@ class LibraryDownloadRepository {
         await knex('library_downloads')
           .where({ user_id: userId, item_id: itemId })
           .increment('download_count', 1)
-          .update({ last_downloaded_at: knex.fn.now() });
+          .update({ last_downloaded_at: new Date()});
 
         return await knex('library_downloads')
           .where({ user_id: userId, item_id: itemId })
@@ -34,9 +34,9 @@ class LibraryDownloadRepository {
           .insert({
             user_id: userId,
             item_id: itemId,
-            first_downloaded_at: knex.fn.now(),
+            first_downloaded_at: new Date(),
             download_count: 1,
-            last_downloaded_at: knex.fn.now()
+            last_downloaded_at: new Date()
           })
           .returning('*');
 

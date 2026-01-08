@@ -77,8 +77,8 @@ class UserRepository {
         first_name,
         last_name,
         role_id: role_id || (await this.getDefaultRoleId()),
-        created_at: knex.fn.now(),
-        updated_at: knex.fn.now()
+        created_at: new Date(),
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -93,7 +93,7 @@ class UserRepository {
       .where({ id })
       .update({
         ...userData,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       })
       .returning('*');
 
@@ -110,7 +110,7 @@ class UserRepository {
       .where({ id })
       .update({
         password_hash,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       });
   }
 
@@ -121,7 +121,7 @@ class UserRepository {
     await knex('users')
       .where({ id })
       .update({
-        last_login: knex.fn.now()
+        last_login: new Date()
       });
   }
 
@@ -144,7 +144,7 @@ class UserRepository {
       .where({ id })
       .update({
         mfa_enabled: enabled,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       });
   }
 
@@ -190,7 +190,7 @@ class UserRepository {
         user_id: userId,
         token_hash: hashedToken,
         expires_at: expiresAt,
-        created_at: knex.fn.now()
+        created_at: new Date()
       });
   }
 
@@ -200,7 +200,7 @@ class UserRepository {
   async verifyPasswordResetToken(hashedToken) {
     const tokenRecord = await knex('password_reset_tokens')
       .where({ token_hash: hashedToken })
-      .andWhere('expires_at', '>', knex.fn.now())
+      .andWhere('expires_at', '>', new Date())
       .first();
 
     if (!tokenRecord) {
@@ -252,7 +252,7 @@ class UserRepository {
         .where({ user_id: userId })
         .update({
           ...updates,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -265,8 +265,8 @@ class UserRepository {
           ui_mode: updates.ui_mode || 'explorer',
           theme: updates.theme || 'green',
           theme_mode: updates.theme_mode || 'light',
-          created_at: knex.fn.now(),
-          updated_at: knex.fn.now()
+          created_at: new Date(),
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -284,8 +284,8 @@ class UserRepository {
         ui_mode: 'explorer',
         theme: 'green',
         theme_mode: 'light',
-        created_at: knex.fn.now(),
-        updated_at: knex.fn.now()
+        created_at: new Date(),
+        updated_at: new Date()
       })
       .returning('*');
 

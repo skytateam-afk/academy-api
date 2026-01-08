@@ -380,7 +380,7 @@ class OrderRepository {
         .where('id', orderId)
         .update({
           status,
-          updated_at: knex.fn.now()
+          updated_at: new Date()
         })
         .returning('*');
 
@@ -398,11 +398,11 @@ class OrderRepository {
     try {
       const updateData = {
         payment_status: paymentStatus,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       };
 
       if (paymentStatus === 'paid') {
-        updateData.paid_at = knex.fn.now();
+        updateData.paid_at = new Date()
         updateData.status = 'paid';
       }
 
@@ -429,7 +429,7 @@ class OrderRepository {
     try {
       const updateData = {
         fulfillment_status: fulfillmentStatus,
-        updated_at: knex.fn.now()
+        updated_at: new Date()
       };
 
       if (trackingData) {

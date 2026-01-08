@@ -11,8 +11,8 @@ exports.up = async function(knex) {
     table.uuid('parent_folder_id').nullable().references('id').inTable('document_folders').onDelete('CASCADE')
     table.string('name', 255).notNullable()
     table.text('description').nullable()
-    table.timestamp('created_at').defaultTo(knex.fn.now())
-    table.timestamp('updated_at').defaultTo(knex.fn.now())
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
     
     // Unique constraint: folder name must be unique per user and parent folder
     table.unique(['user_id', 'parent_folder_id', 'name'])
@@ -39,8 +39,8 @@ exports.up = async function(knex) {
     table.boolean('is_public').defaultTo(false)
     table.integer('download_count').defaultTo(0)
     table.integer('view_count').defaultTo(0)
-    table.timestamp('created_at').defaultTo(knex.fn.now())
-    table.timestamp('updated_at').defaultTo(knex.fn.now())
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
     
     // Indexes
     table.index('user_id')
@@ -63,7 +63,7 @@ exports.up = async function(knex) {
     table.timestamp('expires_at').nullable()
     table.integer('max_downloads').nullable()
     table.integer('download_count').defaultTo(0)
-    table.timestamp('created_at').defaultTo(knex.fn.now())
+    table.timestamp('created_at').defaultTo(new Date())
     
     // Indexes
     table.index('document_id')
@@ -82,7 +82,7 @@ exports.up = async function(knex) {
     table.bigInteger('file_size').notNullable()
     table.uuid('uploaded_by').notNullable().references('id').inTable('users')
     table.text('change_notes').nullable()
-    table.timestamp('created_at').defaultTo(knex.fn.now())
+    table.timestamp('created_at').defaultTo(new Date())
     
     // Indexes
     table.index('document_id')
@@ -94,7 +94,7 @@ exports.up = async function(knex) {
     table.uuid('user_id').primary().references('id').inTable('users').onDelete('CASCADE')
     table.bigInteger('used_bytes').defaultTo(0)
     table.bigInteger('quota_bytes').defaultTo(1073741824) // 1GB default
-    table.timestamp('updated_at').defaultTo(knex.fn.now())
+    table.timestamp('updated_at').defaultTo(new Date())
     
     // Index
     table.index('user_id')

@@ -44,7 +44,7 @@ class PersonalisationRepository {
                     .where('user_id', userId)
                     .update({
                         data: newData,
-                        updated_at: knex.fn.now()
+                        updated_at: new Date()
                     })
                     .returning('*');
 
