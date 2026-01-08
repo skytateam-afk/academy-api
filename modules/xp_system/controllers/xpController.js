@@ -85,20 +85,31 @@ exports.getXPHistory = async (req, res, next) => {
 };
 
 /**
- * Get XP leaderboard with pagination
+ * Get XP leaderboard filtered by authenticated user's current level
  */
 exports.getLeaderboard = async (req, res, next) => {
     try {
+        const userId = req.user?.userId;
         const { limit = 20, offset = 0 } = req.query;
 
-        const leaderboard = await XPService.getLeaderboard(
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+
+        const result = await XPService.getLeaderboard(
+            userId,
             parseInt(limit),
             parseInt(offset)
         );
 
         res.json({
             success: true,
-            data: leaderboard,
+            data: result.leaderboard,
+            userLevel: result.userLevel,
+            userRank: result.userRank,
             pagination: {
                 limit: parseInt(limit),
                 offset: parseInt(offset)

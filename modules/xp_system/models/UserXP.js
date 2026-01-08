@@ -327,9 +327,18 @@ be negative)
     }
 
     /**
-     * Get XP leaderboard with pagination support
+     * Get XP leaderboard filtered by user's current level
      */
-    static async getLeaderboard(limit = 10, offset = 0) {
+    static async getLeaderboard(userId, limit = 10, offset = 0) {
+        // Get the authenticated user's current level
+        const userXP = await knex('user_xp')
+            .where('user_id', userId)
+            .select('current_level')
+            .first();
+
+        const userLevel = userXP?.current_level || 1;
+
+        // Get leaderboard for users at the same level
         const leaderboard = await knex('user_xp')
             .join('users', 'user_xp.user_id', 'users.id')
             .join('roles', 'users.role_id', 'roles.id')
@@ -345,13 +354,25 @@ be negative)
                 'user_xp.current_level',
                 'roles.name as role'
             )
+            .where('user_xp.current_level', '=', userLevel)
             .where('user_xp.total_xp', '>', 0)
             .whereNotIn('roles.name', ['super_admin', 'admin', 'instructor', 'staff'])
             .orderBy('user_xp.total_xp', 'desc')
             .limit(limit)
             .offset(offset);
 
-        return leaderboard;
+        // Calculate user's rank within their level
+        const rank = await knex('user_xp')
+            .where('current_level', '=', userLevel)
+            .where('total_xp', '>', knex.select('total_xp').from('user_xp').where('user_id', userId))
+            .count('* as count')
+            .first();
+
+        return {
+            leaderboard,
+            userLevel,
+            userRank: parseInt(rank?.count || 0) + 1
+        };
     }
 
     /**

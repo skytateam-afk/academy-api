@@ -11,8 +11,8 @@ exports.up = async function(knex) {
     table.uuid('parent_folder_id').references('id').inTable('document_folders').onDelete('CASCADE');
     table.string('name', 255).notNullable();
     table.text('description');
-    table.timestamp('created_at').defaultTo(new Date()
-    table.timestamp('updated_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
     table.timestamp('deleted_at');
 
     table.unique(['user_id', 'parent_folder_id', 'name'], { indexName: 'document_folders_user_id_parent_folder_id_name_unique' });
@@ -38,8 +38,8 @@ exports.up = async function(knex) {
     table.boolean('is_public').defaultTo(false);
     table.integer('download_count').defaultTo(0);
     table.integer('view_count').defaultTo(0);
-    table.timestamp('created_at').defaultTo(new Date()
-    table.timestamp('updated_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
     table.timestamp('deleted_at');
 
     table.index('created_at', 'documents_created_at_index');
@@ -59,7 +59,7 @@ exports.up = async function(knex) {
     table.bigInteger('file_size').notNullable();
     table.uuid('uploaded_by').notNullable().references('id').inTable('users');
     table.text('change_notes');
-    table.timestamp('created_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
 
     table.index('document_id', 'document_versions_document_id_index');
     table.index('uploaded_by', 'document_versions_uploaded_by_index');
@@ -81,7 +81,7 @@ exports.up = async function(knex) {
     table.integer('max_downloads');
     table.integer('download_count').defaultTo(0);
     table.string('recipient_email', 255);
-    table.timestamp('created_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
 
     table.index('access_token', 'document_shares_access_token_index');
     table.index('document_id', 'document_shares_document_id_index');
@@ -124,8 +124,8 @@ exports.up = async function(knex) {
     table.string('thumbnail_url', 500);
     table.string('file_mime_type', 100);
     table.integer('duration');
-    table.timestamp('created_at').defaultTo(new Date()
-    table.timestamp('updated_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.index('author', 'library_items_author_index');
     table.index('category_id', 'library_items_category_id_index');
@@ -141,7 +141,7 @@ exports.up = async function(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('item_id').references('id').inTable('library_items').onDelete('CASCADE');
     table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE');
-    table.timestamp('borrowed_at').defaultTo(new Date()
+    table.timestamp('borrowed_at').defaultTo(new Date())
     table.timestamp('due_date').notNullable();
     table.timestamp('returned_at');
     table.text('status').defaultTo('borrowed')
@@ -151,8 +151,8 @@ exports.up = async function(knex) {
     table.boolean('fine_paid').defaultTo(false);
     table.uuid('issued_by').references('id').inTable('users').onDelete('SET NULL');
     table.uuid('received_by').references('id').inTable('users').onDelete('SET NULL');
-    table.timestamp('created_at').defaultTo(new Date()
-    table.timestamp('updated_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.index('due_date', 'library_borrowing_due_date_index');
     table.index('item_id', 'library_borrowing_item_id_index');
@@ -166,15 +166,15 @@ exports.up = async function(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.uuid('item_id').references('id').inTable('library_items').onDelete('CASCADE');
     table.uuid('user_id').references('id').inTable('users').onDelete('CASCADE');
-    table.timestamp('reserved_at').defaultTo(new Date()
+    table.timestamp('reserved_at').defaultTo(new Date())
     table.timestamp('expires_at').notNullable();
     table.text('status').defaultTo('active')
       .checkIn(['active', 'fulfilled', 'expired', 'cancelled']);
     table.integer('queue_position');
     table.text('notes');
     table.timestamp('notified_at');
-    table.timestamp('created_at').defaultTo(new Date()
-    table.timestamp('updated_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.index('expires_at', 'library_reservations_expires_at_index');
     table.index('item_id', 'library_reservations_item_id_index');
@@ -190,8 +190,8 @@ exports.up = async function(knex) {
     table.integer('rating').notNullable().checkBetween([1, 5]);
     table.text('review');
     table.boolean('is_approved').defaultTo(false);
-    table.timestamp('created_at').defaultTo(new Date()
-    table.timestamp('updated_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.unique(['item_id', 'user_id'], { indexName: 'library_reviews_item_id_user_id_unique' });
     table.index('is_approved', 'library_reviews_is_approved_index');
@@ -206,8 +206,8 @@ exports.up = async function(knex) {
     table.string('name', 255).notNullable();
     table.text('description');
     table.boolean('is_public').defaultTo(false);
-    table.timestamp('created_at').defaultTo(new Date()
-    table.timestamp('updated_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.index('is_public', 'library_reading_lists_is_public_index');
     table.index('user_id', 'library_reading_lists_user_id_index');
@@ -220,7 +220,7 @@ exports.up = async function(knex) {
     table.uuid('item_id').references('id').inTable('library_items').onDelete('CASCADE');
     table.integer('sort_order').defaultTo(0);
     table.text('notes');
-    table.timestamp('added_at').defaultTo(new Date()
+    table.timestamp('added_at').defaultTo(new Date())
 
     table.unique(['reading_list_id', 'item_id'], { indexName: 'library_reading_list_items_reading_list_id_item_id_unique' });
     table.index('item_id', 'library_reading_list_items_item_id_index');
@@ -237,7 +237,7 @@ exports.up = async function(knex) {
     table.text('details');
     table.string('ip_address', 45);
     table.string('user_agent', 500);
-    table.timestamp('created_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
 
     table.index('action', 'library_activity_log_action_index');
     table.index('created_at', 'library_activity_log_created_at_index');

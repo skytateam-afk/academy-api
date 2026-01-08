@@ -295,11 +295,11 @@ class XPService {
     }
 
     /**
-     * Get leaderboard with pagination and levels
+     * Get leaderboard filtered by authenticated user's current level
      */
-    static async getLeaderboard(limit = 10, offset = 0) {
+    static async getLeaderboard(userId, limit = 10, offset = 0) {
         try {
-            const leaderboard = await UserXP.getLeaderboard(limit, offset);
+            const result = await UserXP.getLeaderboard(userId, limit, offset);
 
             // Get all XP levels for level calculation
             const levels = await knex('xp_levels')
@@ -307,7 +307,7 @@ class XPService {
                 .orderBy('min_xp', 'asc');
 
             // Add level information to each user
-            const leaderboardWithLevels = leaderboard.map(user => {
+            const leaderboardWithLevels = result.leaderboard.map(user => {
                 const userLevel = this._calculateUserLevel(user.total_xp, levels);
                 return {
                     ...user,
@@ -320,9 +320,13 @@ class XPService {
                 };
             });
 
-            return leaderboardWithLevels;
+            return {
+                leaderboard: leaderboardWithLevels,
+                userLevel: result.userLevel,
+                userRank: result.userRank
+            };
         } catch (error) {
-            logger.error('Error getting leaderboard with levels:', error);
+            logger.error('Error getting leaderboard:', error);
             throw error;
         }
     }
