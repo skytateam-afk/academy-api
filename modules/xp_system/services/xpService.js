@@ -266,9 +266,16 @@ class XPService {
             const userLevel = this._calculateUserLevel(xpData.total_xp, levels);
             const nextLevel = this._getNextLevel(xpData.total_xp, levels);
             const progressToNextLevel = this._calculateLevelProgress(xpData.total_xp, levels);
+            
+            // Recalculate xp_to_next_level from actual database levels
+            let recalculatedXpToNextLevel = 0;
+            if (nextLevel && nextLevel.min_xp) {
+                recalculatedXpToNextLevel = Math.max(0, nextLevel.min_xp - xpData.total_xp);
+            }
 
             return {
                 ...xpData,
+                xp_to_next_level: recalculatedXpToNextLevel, // Override with recalculated value
                 recent_transactions: recentTransactions,
                 breakdown,
                 // Add level information from database
@@ -356,15 +363,23 @@ class XPService {
                 .orderBy('min_xp', 'asc');
 
             const userLevel = this._calculateUserLevel(xpData.total_xp, levels);
+            const nextLevel = this._getNextLevel(xpData.total_xp, levels);
+            
+            // Recalculate xp_to_next_level from actual database levels
+            let recalculatedXpToNextLevel = 0;
+            if (nextLevel && nextLevel.min_xp) {
+                recalculatedXpToNextLevel = Math.max(0, nextLevel.min_xp - xpData.total_xp);
+            }
 
             return {
                 ...xpData,
+                xp_to_next_level: recalculatedXpToNextLevel, // Override with recalculated value
                 level: userLevel ? userLevel.level_number : 1,
                 level_name: userLevel ? userLevel.name : 'Beginner',
                 level_badge_icon: userLevel ? userLevel.badge_icon : '🌱',
                 level_badge_color: userLevel ? userLevel.badge_color : '#10B981',
                 level_description: userLevel ? userLevel.description : null,
-                next_level: this._getNextLevel(xpData.total_xp, levels),
+                next_level: nextLevel,
                 progress_to_next_level: this._calculateLevelProgress(xpData.total_xp, levels)
             };
         } catch (error) {

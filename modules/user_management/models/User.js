@@ -374,7 +374,7 @@ class User {
         // Get users
         const users = await query
             .select(
-                'u.id', 'u.username', 'u.email', 'u.first_name', 'u.last_name',
+                'u.id', 'u.username', 'u.email', 'u.first_name', 'u.last_name','u.institution_id',
                 'u.avatar_url', 'u.phone', 'u.is_active', 'u.is_verified',
                 'u.last_login', 'u.created_at',
                 'r.name as role_name'
