@@ -103,7 +103,8 @@ class UserController {
                 last_name,
                 phone,
                 date_of_birth,
-                role_name = 'student'
+                role_name = 'student',
+                institution_id = null
             } = req.body;
 
             // Validate required fields (username and password are now optional, will be auto-generated)
@@ -147,7 +148,8 @@ class UserController {
                 last_name,
                 phone,
                 date_of_birth,
-                role_name
+                role_name,
+                institution_id
             });
 
             // Send account created email with credentials (don't block response if it fails)

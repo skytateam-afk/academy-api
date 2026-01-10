@@ -30,7 +30,7 @@ class UserXP {
             }
             return levels[0].level_number;
         }
-        
+
         // Fallback to formula if no levels provided
         if (totalXP < 0) totalXP = 0;
         return Math.floor(Math.sqrt(totalXP / 100)) + 1;
@@ -42,7 +42,7 @@ class UserXP {
     static async getCurrentLevel(totalXP) {
         const levels = await this.getXPLevels();
         if (!levels || levels.length === 0) return null;
-        
+
         for (let i = levels.length - 1; i >= 0; i--) {
             const level = levels[i];
             if (totalXP >= level.min_xp && (level.max_xp === null || totalXP <= level.max_xp)) {
@@ -59,16 +59,16 @@ class UserXP {
     static async getXPToNextLevel(totalXP) {
         const levels = await this.getXPLevels();
         if (!levels || levels.length === 0) return 100;
-        
+
         // Find current level
         const currentLevel = this.calculateLevel(totalXP, levels);
         const nextLevelObj = levels.find(l => l.level_number === currentLevel + 1);
-        
+
         if (!nextLevelObj) {
             // Already at max level
             return 0;
         }
-        
+
         // Return XP needed to reach the START of next level
         return Math.max(0, nextLevelObj.min_xp - totalXP);
     }
@@ -87,10 +87,10 @@ class UserXP {
                 .where('is_active', true)
                 .orderBy('level_number', 'asc')
                 .first();
-            
+
             const initialLevel = firstLevel?.level_number || 1;
             const xpToNextLevel = firstLevel ? (firstLevel.max_xp - 0) : 100;
-            
+
             // Create new XP record for user
             const [created] = await knex('user_xp')
                 .insert({
@@ -234,17 +234,17 @@ be negative)
             let userXP = await trx('user_xp')
                 .where('user_id', userId)
                 .first();
-            
+
             if (!userXP) {
                 // Get the first level from database
                 const firstLevel = await knex('xp_levels')
                     .where('is_active', true)
                     .orderBy('level_number', 'asc')
                     .first();
-                
+
                 const initialLevel = firstLevel?.level_number || 1;
                 const xpToNextLevelValue = firstLevel ? (firstLevel.max_xp - 0) : 100;
-                
+
                 const [created] = await trx('user_xp')
                     .insert({
                         user_id: userId,
@@ -255,20 +255,20 @@ be negative)
                     .returning('*');
                 userXP = created;
             }
-            
+
             // Calculate new total XP (ensure it doesn't go below 0)
             const newTotalXP = Math.max(0, userXP.total_xp + amount);
-            
+
             // Get levels for calculation
             const levels = await knex('xp_levels')
                 .where('is_active', true)
                 .orderBy('min_xp', 'asc');
-            
+
             const newLevel = this.calculateLevel(newTotalXP, levels);
-            
+
             // Find next level object to calculate xp_to_next_level
             const nextLevelObj = levels.find(l => l.level_number === newLevel + 1);
-            const xpToNextLevel = nextLevelObj 
+            const xpToNextLevel = nextLevelObj
                 ? Math.max(0, nextLevelObj.min_xp - newTotalXP)
                 : 0;
 
@@ -361,7 +361,7 @@ be negative)
             .groupByRaw('DATE(created_at)')
             .orderBy('xp_date', 'desc');
         if (!rows.length) {
-            return { streak: 0}
+            return { streak: 0 }
         };
 
 
@@ -378,7 +378,7 @@ be negative)
         yesterday.setDate(today.getDate() - 1);
 
         if (!xpDates.includes(yesterday.getTime())) {
-            return { streak: 0}
+            return { streak: 0 }
         }
 
         let streak = 1;
