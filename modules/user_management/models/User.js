@@ -27,7 +27,8 @@ class User {
             last_name,
             phone,
             date_of_birth,
-            role_name = 'student' // Default role
+            role_name = 'student',
+            institution_id=null // Default role
         } = userData;
 
         try {
@@ -64,11 +65,12 @@ class User {
                     last_name: last_name || null,
                     phone: phone || null,
                     date_of_birth: date_of_birth || null,
-                    role_id: role.id
+                    role_id: role.id,
+                    institution_id: institution_id
                 })
                 .returning([
                     'id', 'username', 'email', 'first_name', 'last_name',
-                    'phone', 'date_of_birth', 'role_id', 'is_active',
+                    'phone', 'date_of_birth', 'role_id', 'is_active', 'institution_id',
                     'is_verified', 'created_at'
                 ]);
 
