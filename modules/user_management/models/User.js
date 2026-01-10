@@ -104,7 +104,7 @@ class User {
             .select(
                 'u.id', 'u.username', 'u.email', 'u.first_name', 'u.last_name',
                 'u.avatar_url', 'u.bio', 'u.phone', 'u.date_of_birth',
-                'u.is_active', 'u.is_verified', 'u.email_verified_at',
+                'u.is_active', 'u.is_verified', 'u.email_verified_at','u.institution_id',
                 'u.last_login', 'u.last_login_ip', 'u.created_at', 'u.updated_at',
                 'u.total_xp', 'u.current_level',
                 'r.id as role_id', 'r.name as role_name', 'r.description as role_description'
