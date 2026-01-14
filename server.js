@@ -40,6 +40,7 @@ const resultRoutes = require('./modules/results/result.routes');
 const menuVisibilityRoutes = modules.menuVisibility;
 const contactRoutes = modules.contactManagement;
 const searchRoutes = modules.search;
+const aiManagementRoutes = require('./modules/ai_management/routes/aiManagementRoutes');
 
 const app = express();
 
@@ -171,8 +172,9 @@ app.use('/api/results', resultRoutes);
 app.use('/api/menu-visibility', menuVisibilityRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/search', searchRoutes);
-app.use('/api', modules.jobManagement.routes); // Mount Job Routes at /api to allow /api/jobs and /api/admin/jobs
-app.use('/api/users', modules.userManagement.routes.workProfileRoutes); // Mount Work Profile Routes
+app.use('/api/ai', aiManagementRoutes);
+app.use('/api', modules.jobManagement.routes); 
+app.use('/api/users', modules.userManagement.routes.workProfileRoutes); 
 
 
 // 404 handler

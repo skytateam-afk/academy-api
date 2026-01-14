@@ -14599,7 +14599,1110 @@ const openApiSpec = {
         }
       }
     },
+    // ====== AI Management =========
+    // ==========================================
+    // Conversation Routes
+    // ==========================================
+    '/api/ai/conversations': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get all conversations',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Search keywords' },
+          { name: 'userId', in: 'query', schema: { type: 'string' }, description: 'Filter by User ID' },
+          { name: 'startDate', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'endDate', in: 'query', schema: { type: 'string', format: 'date' } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of conversations',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Conversation' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
 
+    '/api/ai/conversations/analytics': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get conversation analytics',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'startDate', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'endDate', in: 'query', schema: { type: 'string', format: 'date' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Analytics data',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { type: 'object' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/conversations/{sessionId}': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get conversation by Session ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'sessionId', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Conversation details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Conversation' }
+                  }
+                }
+              }
+            }
+          },
+          '404': { description: 'Conversation not found' }
+        }
+      },
+      delete: {
+        tags: ['Ai Management'],
+        summary: 'Delete conversation',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'sessionId', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Conversation deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    // ==========================================
+    // Feedback Routes
+    // ==========================================
+    '/api/ai/feedbacks': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get all feedback',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'search', in: 'query', schema: { type: 'string' } },
+          { name: 'feedbackType', in: 'query', schema: { type: 'string' } },
+          { name: 'rating', in: 'query', schema: { type: 'integer' } },
+          { name: 'startDate', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'endDate', in: 'query', schema: { type: 'string', format: 'date' } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of feedback',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Feedback' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/feedbacks/analytics': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get feedback analytics',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'startDate', in: 'query', schema: { type: 'string', format: 'date' } },
+          { name: 'endDate', in: 'query', schema: { type: 'string', format: 'date' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Feedback analytics',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { type: 'object' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/feedbacks/{id}': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get feedback by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Feedback details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Feedback' }
+                  }
+                }
+              }
+            }
+          },
+          '404': { description: 'Feedback not found' }
+        }
+      },
+      delete: {
+        tags: ['Ai Management'],
+        summary: 'Delete feedback',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Feedback deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    // ==========================================
+    // Widget Configuration Routes
+    // ==========================================
+    '/api/ai/widget-config': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get active widget configuration',
+        description: 'Returns the currently active widget configuration (publicly accessible)',
+        responses: {
+          '200': {
+            description: 'Active config details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/WidgetConfig' }
+                  }
+                }
+              }
+            }
+          },
+          '404': { description: 'No active configuration found' }
+        }
+      },
+      post: {
+        tags: ['Ai Management'],
+        summary: 'Create widget configuration',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name', 'config'],
+                properties: {
+                  name: { type: 'string', example: 'Default Chat Widget' },
+                  description: { type: 'string' },
+                  is_active: { type: 'boolean', default: false },
+                  config: {
+                    type: 'object',
+                    description: 'JSON configuration object for the widget UI/Behavior'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Configuration created',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/WidgetConfig' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/widget-config/all': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'List all widget configurations',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'List of all configs',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/WidgetConfig' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/widget-config/{id}': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get widget configuration by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Configuration details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/WidgetConfig' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      put: {
+        tags: ['Ai Management'],
+        summary: 'Update widget configuration',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  is_active: { type: 'boolean' },
+                  config: { type: 'object' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Configuration updated',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/WidgetConfig' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Ai Management'],
+        summary: 'Delete widget configuration',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Configuration deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/widget-config/{id}/activate': {
+      put: {
+        tags: ['Ai Management'],
+        summary: 'Activate a widget configuration',
+        security: [{ bearerAuth: [] }],
+        description: 'Sets this configuration as active and deactivates others',
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Configuration activated',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/WidgetConfig' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    // ==========================================
+    // Widget Authentication Routes
+    // ==========================================
+    '/api/ai/widget/request-otp': {
+      post: {
+        tags: ['Ai Management'],
+        summary: 'Request OTP',
+        description: 'Request a one-time password for widget authentication',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['email'],
+                properties: {
+                  email: { type: 'string', format: 'email', example: 'user@example.com' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'OTP sent',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    expiresIn: { type: 'integer' }
+                  }
+                }
+              }
+            }
+          },
+          '429': { description: 'Too many requests' }
+        }
+      }
+    },
+
+    '/api/ai/widget/verify-otp': {
+      post: {
+        tags: ['Ai Management'],
+        summary: 'Verify OTP',
+        description: 'Verify OTP and authenticate user',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['email', 'otp', 'nickname'],
+                properties: {
+                  email: { type: 'string', format: 'email' },
+                  otp: { type: 'string', example: '123456' },
+                  nickname: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Authentication successful',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    user: {
+                      type: 'object',
+                      properties: {
+                        email: { type: 'string' },
+                        nickname: { type: 'string' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': { description: 'Invalid OTP' }
+        }
+      }
+    },
+
+    // ==========================================
+    // Prompt Routes
+    // ==========================================
+    '/api/ai/prompts': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'List prompts',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'grouped', in: 'query', schema: { type: 'boolean', default: false }, description: 'Group by version' },
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'version', in: 'query', schema: { type: 'string' } },
+          { name: 'search', in: 'query', schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of prompts',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Prompt' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      post: {
+        tags: ['Ai Management'],
+        summary: 'Create new prompt',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['version', 'name', 'content'],
+                properties: {
+                  version: { type: 'string', example: 'v1.0' },
+                  name: { type: 'string', example: 'customer_support_agent' },
+                  content: { type: 'string', description: 'The prompt text' },
+                  description: { type: 'string' },
+                  metadata: { type: 'object' },
+                  is_active: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Prompt created',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Prompt' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/prompts/versions': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get prompt versions',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'List of versions',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { type: 'array', items: { type: 'string' } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/prompts/version/{version}': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get prompts by version',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'version', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'active_only', in: 'query', schema: { type: 'boolean' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Prompts in version',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Prompt' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/prompts/version/{version}/{name}': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get specific prompt by version and name',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'version', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'name', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Prompt details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Prompt' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/prompts/{id}': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get prompt by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Prompt details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Prompt' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      put: {
+        tags: ['Ai Management'],
+        summary: 'Update prompt',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  version: { type: 'string' },
+                  name: { type: 'string' },
+                  content: { type: 'string' },
+                  description: { type: 'string' },
+                  metadata: { type: 'object' },
+                  is_active: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Prompt updated',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Prompt' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Ai Management'],
+        summary: 'Delete prompt',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Prompt deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/prompts/version/{version}/activate': {
+      put: {
+        tags: ['Ai Management'],
+        summary: 'Activate a specific version',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'version', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Version activated',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    data: { type: 'array' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    // ==========================================
+    // Knowledge Base Routes
+    // ==========================================
+    '/api/ai/knowledge-base': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'List knowledge base entries',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'collectionName', in: 'query', schema: { type: 'string' } },
+          { name: 'category', in: 'query', schema: { type: 'string' } },
+          { name: 'search', in: 'query', schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of entries',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/KnowledgeBaseEntry' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        total: { type: 'integer' },
+                        totalPages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/knowledge-base/collections': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get all collections',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'List of collections',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { type: 'array', items: { type: 'string' } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/knowledge-base/stats': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get knowledge base stats',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Statistics',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { type: 'object' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/knowledge-base/ingest': {
+      post: {
+        tags: ['Ai Management'],
+        summary: 'Ingest CSV file',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['file', 'collectionName'],
+                properties: {
+                  file: { type: 'string', format: 'binary' },
+                  collectionName: { type: 'string' },
+                  fresh: { type: 'boolean', description: 'If true, replaces existing collection' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Ingestion started',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    jobId: { type: 'string', format: 'uuid' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/knowledge-base/ingest/progress/{jobId}': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get ingestion progress',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'jobId', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Job progress',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        jobId: { type: 'string' },
+                        status: { type: 'string', enum: ['pending', 'processing', 'completed', 'failed'] },
+                        progress: { type: 'integer' },
+                        message: { type: 'string' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/knowledge-base/{id}': {
+      get: {
+        tags: ['Ai Management'],
+        summary: 'Get entry by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Entry details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/KnowledgeBaseEntry' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Ai Management'],
+        summary: 'Delete entry',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Entry deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    '/api/ai/knowledge-base/collection/{collectionName}': {
+      delete: {
+        tags: ['Ai Management'],
+        summary: 'Clear a collection',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'collectionName', in: 'path', required: true, schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Collection cleared',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        entries_deleted: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     // ===== Institution Management =====
     '/api/institutions': {
       get: {
