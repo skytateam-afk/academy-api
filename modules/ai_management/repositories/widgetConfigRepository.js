@@ -46,19 +46,15 @@ class WidgetConfigRepository {
    */
   async create(configData) {
     const { name, config, description, is_active } = configData;
-    
+
     // If setting as active, deactivate all others first
     if (is_active) {
       await knex('ai_widget_configs')
         .update({ is_active: false });
     }
 
-    // Generate UUID for the widget config
-    const id = knex.raw('gen_random_uuid()');
-    
     const [created] = await knex('ai_widget_configs')
       .insert({
-        id: id,
         name,
         config: JSON.stringify(config),
         description,
