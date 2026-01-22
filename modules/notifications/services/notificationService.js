@@ -112,6 +112,7 @@ class NotificationService {
      * Notify user of successful course enrollment
      */
     async sendCourseEnrollmentNotification(userId, courseId, courseTitle) {
+        console.log(userId)
         return this.createNotification(
             userId,
             this.constructor.TYPES.COURSE_ENROLLED,

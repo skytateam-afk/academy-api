@@ -8,6 +8,8 @@ const dashboardController = require('../controllers/dashboardController');
 const { authenticateToken } = require('../../../middleware/auth');
 const { requirePermission } = require('../../../middleware/rbac');
 
+const institutionDashboardRoutes = require('./institutionDashboardRoutes');
+
 /**
  * @route   GET /api/dashboard/stats
  * @desc    Get dashboard statistics
@@ -34,4 +36,8 @@ router.get(
   dashboardController.getAnalyticsData
 );
 
+// Institution Dashboard Routes
+router.use('/institution', institutionDashboardRoutes);
+
 module.exports = router;
+

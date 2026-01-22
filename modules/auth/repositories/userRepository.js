@@ -77,6 +77,7 @@ class UserRepository {
         first_name,
         last_name,
         role_id: role_id || (await this.getDefaultRoleId()),
+        institution_id: userData.institution_id || null,
         created_at: new Date(),
         updated_at: new Date()
       })
