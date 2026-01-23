@@ -37,18 +37,11 @@ class InstitutionDashboardController {
                 .count('* as count')
                 .first();
 
-            // 3. Pathway Enrollments
-            const totalEnrollments = await knex('pathway_enrollments as pe')
+            // 5. Average Progress
+            const avgProgress = await knex('pathway_enrollments as pe')
                 .join('pathways as p', 'pe.pathway_id', 'p.id')
                 .where('p.institution_id', institutionId)
-                .count('* as count')
-                .first();
-
-            // 4. Completions
-            const completions = await knex('pathway_enrollments as pe')
-                .join('pathways as p', 'pe.pathway_id', 'p.id')
-                .where({ 'p.institution_id': institutionId, 'pe.status': 'completed' })
-                .count('* as count')
+                .avg('pe.progress_percent as avgProgress')
                 .first();
 
             res.json({
@@ -60,7 +53,8 @@ class InstitutionDashboardController {
                     completions: parseInt(completions.count) || 0,
                     completionRate: totalEnrollments.count > 0
                         ? ((parseInt(completions.count) / parseInt(totalEnrollments.count)) * 100).toFixed(2)
-                        : 0
+                        : 0,
+                    avgProgress: parseFloat(avgProgress?.avgProgress || 0).toFixed(2)
                 }
             });
         } catch (error) {
@@ -98,7 +92,11 @@ class InstitutionDashboardController {
             const [{ total }] = await query.clone().count('* as total');
 
             const students = await query
-                .select('id', 'username', 'email', 'first_name', 'last_name', 'phone', 'is_active', 'created_at')
+                .select(
+                    'id', 'username', 'email', 'first_name', 'last_name',
+                    'phone', 'is_active', 'created_at',
+                    'student_id', 'department', 'level'
+                )
                 .limit(limit)
                 .offset(offset)
                 .orderBy('created_at', 'desc');
@@ -144,6 +142,9 @@ class InstitutionDashboardController {
             const emailIdx = headers.indexOf('email');
             const firstNameIdx = headers.indexOf('first_name');
             const lastNameIdx = headers.indexOf('last_name');
+            const studentIdIdx = headers.indexOf('student_id');
+            const deptIdx = headers.indexOf('department');
+            const levelIdx = headers.indexOf('level');
 
             if (emailIdx === -1 || firstNameIdx === -1 || lastNameIdx === -1) {
                 return res.status(400).json({
@@ -159,6 +160,9 @@ class InstitutionDashboardController {
                 const email = cols[emailIdx];
                 const firstName = cols[firstNameIdx];
                 const lastName = cols[lastNameIdx];
+                const studentId = studentIdIdx !== -1 ? cols[studentIdIdx] : null;
+                const department = deptIdx !== -1 ? cols[deptIdx] : null;
+                const level = levelIdx !== -1 ? cols[levelIdx] : null;
 
                 if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                     results.failed++;
@@ -175,7 +179,10 @@ class InstitutionDashboardController {
                         first_name: firstName,
                         last_name: lastName,
                         role_name: 'student',
-                        institution_id: institutionId
+                        institution_id: institutionId,
+                        student_id: studentId,
+                        department: department,
+                        level: level
                     });
 
                     emailService.sendAccountCreatedEmail({
@@ -184,13 +191,14 @@ class InstitutionDashboardController {
                         password: generatedPassword,
                         firstName: user.first_name,
                         lastName: user.last_name,
-                        roleName: 'student'
+                        roleName: 'student',
+                        institutionName: 'Institutional Portal'
                     }).catch(err => logger.error('Welcome email failed', { error: err.message, userId: user.id }));
 
                     results.success++;
                 } catch (error) {
                     results.failed++;
-                    results.errors.push(`Row ${i + 1}: ${error.message}`);
+                    results.errors.push(`Row ${i + 1} (${email}): ${error.message}`);
                 }
             }
 
@@ -248,6 +256,7 @@ class InstitutionDashboardController {
             }
 
             const results = { success: 0, alreadyEnrolled: 0, errors: [] };
+            const successfulStudentIds = []; // Track successful IDs
 
             for (const studentId of studentIds) {
                 try {
@@ -279,6 +288,7 @@ class InstitutionDashboardController {
                     await Pathway.enrollMemberInAllPathwayCourses(pathwayId, studentId);
 
                     results.success++;
+                    successfulStudentIds.push(studentId);
                 } catch (error) {
                     results.errors.push(`Error enrolling ${studentId}: ${error.message}`);
                 }
@@ -292,6 +302,82 @@ class InstitutionDashboardController {
         } catch (error) {
             logger.error('Pathway assignment error', { error: error.message });
             res.status(500).json({ success: false, message: 'Error assigning pathway' });
+        }
+    }
+
+    /**
+     * Update student details
+     */
+    async updateStudent(req, res) {
+        try {
+            const { institutionId } = req.user;
+            const { id } = req.params;
+            const { student_id, department, level } = req.body;
+
+            const student = await knex('users')
+                .where({ id, institution_id: institutionId })
+                .first();
+
+            if (!student) {
+                return res.status(404).json({ success: false, message: 'Student not found in your institution' });
+            }
+
+            await knex('users')
+                .where({ id })
+                .update({
+                    student_id,
+                    department,
+                    level,
+                    updated_at: new Date()
+                });
+
+            res.json({ success: true, message: 'Student details updated successfully' });
+        } catch (error) {
+            logger.error('Error updating student', { error: error.message });
+            res.status(500).json({ success: false, message: 'Error updating student' });
+        }
+    }
+
+    /**
+     * Update student status (activate/deactivate)
+     */
+    async updateStudentStatus(req, res) {
+        try {
+            const { institutionId } = req.user;
+            const { id } = req.params;
+            const { isActive } = req.body;
+
+            if (typeof isActive !== 'boolean') {
+                return res.status(400).json({ success: false, message: 'isActive must be a boolean' });
+            }
+
+            const student = await knex('users')
+                .where({ id, institution_id: institutionId })
+                .first();
+
+            if (!student) {
+                return res.status(404).json({ success: false, message: 'Student not found in your institution' });
+            }
+
+            await knex('users')
+                .where({ id })
+                .update({
+                    is_active: isActive,
+                    updated_at: new Date()
+                });
+
+            // Send notification
+            emailService.sendAccountStatusEmail({
+                email: student.email,
+                firstName: student.first_name,
+                isActive,
+                institutionName: 'Institutional Portal' // Could fetch institution name if needed
+            }).catch(err => logger.error('Status email failed', { error: err.message }));
+
+            res.json({ success: true, message: `Student access ${isActive ? 'activated' : 'deactivated'} successfully` });
+        } catch (error) {
+            logger.error('Error updating student status', { error: error.message });
+            res.status(500).json({ success: false, message: 'Error updating student status' });
         }
     }
 }

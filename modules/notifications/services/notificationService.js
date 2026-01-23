@@ -15,7 +15,7 @@ class NotificationService {
         WELCOME: 'welcome',
         ACCOUNT_CREATED: 'account_created',
         PASSWORD_CHANGED: 'password_changed',
-        
+
         // Course related
         COURSE_CREATED: 'course_created',
         COURSE_ENROLLED: 'course_enrolled',
@@ -23,7 +23,7 @@ class NotificationService {
         COURSE_UPDATED: 'course_updated',
         COURSE_DELETED: 'course_deleted',
         NEW_LESSON_ADDED: 'new_lesson_added',
-        
+
         // Lesson related
         LESSON_CREATED: 'lesson_created',
         LESSON_UPDATED: 'lesson_updated',
@@ -32,7 +32,7 @@ class NotificationService {
         LESSON_DELETED: 'lesson_deleted',
         MODULE_ADDED: 'module_added',
         ATTACHMENT_ADDED: 'attachment_added',
-        
+
         // Library related
         LIBRARY_ITEM_ADDED: 'library_item_added',
         BOOK_BORROWED: 'book_borrowed',
@@ -40,27 +40,28 @@ class NotificationService {
         BOOK_RESERVED: 'book_reserved',
         BOOK_AVAILABLE: 'book_available',
         BOOK_OVERDUE: 'book_overdue',
-        
+
         // Payment related
         PAYMENT_SUCCESSFUL: 'payment_successful',
         PAYMENT_FAILED: 'payment_failed',
         REFUND_PROCESSED: 'refund_processed',
-        
+
         // User management
         ROLE_CHANGED: 'role_changed',
         PERMISSION_GRANTED: 'permission_granted',
         ACCOUNT_STATUS_CHANGED: 'account_status_changed',
         PROFILE_UPDATED: 'profile_updated',
-        
+
         // Announcements & Promotions
         NEW_ANNOUNCEMENT: 'new_announcement',
         NEW_PROMOTION: 'new_promotion',
-        
+
         // Pathway related
         PATHWAY_CREATED: 'pathway_created',
         PATHWAY_PUBLISHED: 'pathway_published',
         COURSE_ADDED_TO_PATHWAY: 'course_added_to_pathway',
-        
+        PATHWAY_ASSIGNED: 'pathway_assigned',
+
         // General
         SYSTEM_ANNOUNCEMENT: 'system_announcement'
     };
@@ -195,7 +196,7 @@ class NotificationService {
             userId,
             this.constructor.TYPES.ACCOUNT_STATUS_CHANGED,
             isActive ? 'Account Activated' : 'Account Deactivated',
-            isActive 
+            isActive
                 ? 'Your account has been activated. You can now access the platform.'
                 : 'Your account has been deactivated. Please contact support if you believe this is an error.',
             { isActive }
@@ -268,7 +269,7 @@ class NotificationService {
     }
 
     // ==================== COURSE NOTIFICATIONS ====================
-    
+
     /**
      * Notify instructor when course is created
      */
@@ -539,6 +540,19 @@ class NotificationService {
         );
     }
 
+    /**
+     * Notify user when assigned to a pathway
+     */
+    async sendPathwayAssignedNotification(userId, pathwayTitle) {
+        return this.createNotification(
+            userId,
+            this.constructor.TYPES.PATHWAY_ASSIGNED,
+            'Pathway Assigned',
+            `You have been assigned to the learning pathway "${pathwayTitle}" by your institution.`,
+            { pathwayTitle }
+        );
+    }
+
     // ==================== BATCH NOTIFICATIONS ====================
 
     /**
@@ -576,22 +590,22 @@ class NotificationService {
     async sendBatchAnnouncementNotification(announcementTitle, announcementId, userFilters = {}) {
         try {
             const db = require('../../../config/database');
-            
+
             // Build query based on filters
             let query = db('users').select('id').where('is_active', true);
-            
+
             if (userFilters.role && Array.isArray(userFilters.role) && userFilters.role.length > 0) {
                 query = query.whereIn('role', userFilters.role);
             }
-            
+
             const users = await query;
             const userIds = users.map(u => u.id);
-            
+
             if (userIds.length === 0) {
                 logger.info('No users found matching filters for announcement notification');
                 return { successful: 0, failed: 0, total: 0 };
             }
-            
+
             return await this.sendBatchNotifications(
                 userIds,
                 this.constructor.TYPES.NEW_ANNOUNCEMENT,
@@ -613,30 +627,30 @@ class NotificationService {
     async sendBatchPromotionNotification(promotionTitle, promotionId, userFilters = {}) {
         try {
             const db = require('../../../config/database');
-            
+
             // Build query based on filters
             let query = db('users').select('id', 'created_at').where('is_active', true);
-            
+
             if (userFilters.role && Array.isArray(userFilters.role) && userFilters.role.length > 0) {
                 query = query.whereIn('role', userFilters.role);
             }
-            
+
             let users = await query;
-            
+
             // Filter for new users if specified
             if (userFilters.is_new_user) {
                 const sevenDaysAgo = new Date();
                 sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
                 users = users.filter(u => new Date(u.created_at) >= sevenDaysAgo);
             }
-            
+
             const userIds = users.map(u => u.id);
-            
+
             if (userIds.length === 0) {
                 logger.info('No users found matching filters for promotion notification');
                 return { successful: 0, failed: 0, total: 0 };
             }
-            
+
             return await this.sendBatchNotifications(
                 userIds,
                 this.constructor.TYPES.NEW_PROMOTION,

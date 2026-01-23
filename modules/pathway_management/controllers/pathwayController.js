@@ -127,9 +127,12 @@ exports.getAllPathways = async (req, res) => {
             sortBy,
             sortOrder,
             // Filter by user's institution ONLY if student - all other roles see all pathways
-            institutionId: (req.user?.role === 'student' || req.user?.role_name === 'student') && req.user?.institution_id ? req.user.institution_id : undefined
+            institutionId: (req.user?.role === 'student' || req.user?.role_name === 'student') && req.user?.institution_id ? req.user.institution_id : undefined,
+            // For students, only show assigned pathways
+            enrolledByUserId: (req.user?.role === 'student' || req.user?.role_name === 'student') ? req.user.userId : undefined
         };
-        
+
+
         const result = await Pathway.getAll(options);
 
         res.json({
@@ -188,6 +191,31 @@ exports.getPathwayById = async (req, res) => {
                 success: false,
                 error: 'Pathway not found'
             });
+        }
+
+        // Implicit enrollment for institutional students
+        if (req.user && req.user.institution_id && pathway.institution_id === req.user.institution_id) {
+            const knex = require('../../../config/knex');
+            const existingEnrollment = await knex('pathway_enrollments')
+                .where({ pathway_id: id, user_id: req.user.userId })
+                .first();
+
+            if (!existingEnrollment) {
+                try {
+                    await knex('pathway_enrollments').insert({
+                        pathway_id: id,
+                        user_id: req.user.userId,
+                        status: 'active',
+                        enrolled_at: new Date()
+                    });
+
+                    // Also enroll in all courses of the pathway
+                    await Pathway.enrollMemberInAllPathwayCourses(id, req.user.userId);
+                    logger.info('Auto-enrolled institutional student in pathway', { userId: req.user.userId, pathwayId: id });
+                } catch (enrollError) {
+                    logger.warn('Failed to auto-enroll institutional student', { error: enrollError.message });
+                }
+            }
         }
 
         res.json({
@@ -257,7 +285,11 @@ exports.createPathway = async (req, res) => {
         const userId = req.user.userId;
         const requestBody = {
             ...req.body,
-            createdBy: req.body.createdBy || userId
+            createdBy: req.body.createdBy || userId,
+            // Force institution_id for institution admins
+            institution_id: (req.user.role === 'institution_admin' || req.user.role_name === 'institution_admin') && req.user.institution_id
+                ? req.user.institution_id
+                : req.body.institution_id
         };
 
         const validationResult = createPathwaySchema.safeParse(requestBody);
@@ -423,6 +455,23 @@ exports.updatePathway = async (req, res) => {
         }
 
         logger.info('Validation passed successfully');
+
+        // Check ownership for institution admins
+        if (req.user.role === 'institution_admin' || req.user.role_name === 'institution_admin') {
+            const existingPathway = await Pathway.getById(id);
+            if (!existingPathway) {
+                return res.status(404).json({ success: false, error: 'Pathway not found' });
+            }
+            if (existingPathway.institution_id !== req.user.institution_id) {
+                logger.warn('Unauthorized pathway update attempt', {
+                    userId: req.user.userId,
+                    pathwayId: id,
+                    userInstitution: req.user.institution_id,
+                    pathwayInstitution: existingPathway.institution_id
+                });
+                return res.status(403).json({ success: false, error: 'Unauthorized to update this pathway' });
+            }
+        }
 
         // Handle file uploads to Cloudflare R2
         const pathwayData = { ...validationResult.data };

@@ -252,6 +252,8 @@ exports.getEnrollmentStatus = async (req, res) => {
 
         // Check enrollment in database
         const knex = require('../../../config/knex');
+        const User = require('../../user_management/models/User');
+
         const enrollment = await knex('enrollments')
             .where({
                 course_id: id,
@@ -259,11 +261,19 @@ exports.getEnrollmentStatus = async (req, res) => {
             })
             .first();
 
+        let isEnrolled = !!enrollment;
+
+        // If not explicitly enrolled, check if they have implicit access (institutional/subscription)
+        if (!isEnrolled) {
+            isEnrolled = await User.hasAccessToCourse(req.user.userId, id);
+        }
+
         res.json({
             success: true,
             data: {
-                is_enrolled: !!enrollment,
-                enrollment_date: enrollment ? enrollment.enrolled_at : null
+                is_enrolled: isEnrolled,
+                enrollment_date: enrollment ? enrollment.enrolled_at : null,
+                is_implicit: !enrollment && isEnrolled
             }
         });
     } catch (error) {
@@ -827,8 +837,8 @@ exports.uploadPreviewVideo = [
                 }
             });
         } catch (error) {
-            logger.error('Error in uploadPreviewVideo', { 
-                error: error.message, 
+            logger.error('Error in uploadPreviewVideo', {
+                error: error.message,
                 id: req.params.id,
                 filename: req.file?.originalname,
                 mimetype: req.file?.mimetype,
@@ -904,26 +914,12 @@ exports.selfEnroll = async (req, res) => {
             });
         }
 
-        // Check subscription tier eligibility
-        let isEligibleBySubscription = false;
+        // Check if user has access via subscription or institution
+        const User = require('../../user_management/models/User');
+        const hasAccess = await User.hasAccessToCourse(userId, id);
 
-        if (course.subscription_tier_id) {
-            const UserSubscription = require('../../../models/UserSubscription');
-            const activeSubscription = await UserSubscription.getUserActiveSubscription(userId);
-
-            if (activeSubscription && activeSubscription.tierId === course.subscription_tier_id) {
-                isEligibleBySubscription = true;
-                logger.info('User eligible for course via subscription', {
-                    userId,
-                    courseId: id,
-                    tierId: activeSubscription.tierId
-                });
-            }
-        }
-
-        // If course is paid and user is NOT eligible via subscription, block enrollment
-        // (Assuming selfEnroll is for free/subscription access only)
-        if (course.price > 0 && !isEligibleBySubscription) {
+        // If course is paid and user does NOT have access via subscription/institution, block enrollment
+        if (course.price > 0 && !hasAccess) {
             return res.status(403).json({
                 success: false,
                 error: 'This is a paid course. Please purchase it or upgrade your subscription to enroll.',

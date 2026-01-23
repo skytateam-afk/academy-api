@@ -28,6 +28,8 @@ router.post('/students/bulk-upload',
     upload.single('file'),
     institutionDashboardController.bulkUploadStudents
 );
+router.put('/students/:id', requirePermission('institution.students.manage'), institutionDashboardController.updateStudent);
+router.patch('/students/:id/status', requirePermission('institution.students.manage'), institutionDashboardController.updateStudentStatus);
 
 // Pathway Management
 router.get('/pathways', requirePermission('institution.pathways.manage'), institutionDashboardController.getPathways);

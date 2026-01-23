@@ -28,7 +28,10 @@ class User {
             phone,
             date_of_birth,
             role_name = 'student',
-            institution_id=null // Default role
+            institution_id = null,
+            student_id = null,
+            department = null,
+            level = null
         } = userData;
 
         try {
@@ -66,11 +69,15 @@ class User {
                     phone: phone || null,
                     date_of_birth: date_of_birth || null,
                     role_id: role.id,
-                    institution_id: institution_id
+                    institution_id: institution_id,
+                    student_id: student_id,
+                    department: department,
+                    level: level
                 })
                 .returning([
                     'id', 'username', 'email', 'first_name', 'last_name',
                     'phone', 'date_of_birth', 'role_id', 'is_active', 'institution_id',
+                    'student_id', 'department', 'level',
                     'is_verified', 'created_at'
                 ]);
 
@@ -104,7 +111,8 @@ class User {
             .select(
                 'u.id', 'u.username', 'u.email', 'u.first_name', 'u.last_name',
                 'u.avatar_url', 'u.bio', 'u.phone', 'u.date_of_birth',
-                'u.is_active', 'u.is_verified', 'u.email_verified_at','u.institution_id',
+                'u.is_active', 'u.is_verified', 'u.email_verified_at', 'u.institution_id',
+                'u.student_id', 'u.department', 'u.level',
                 'u.last_login', 'u.last_login_ip', 'u.created_at', 'u.updated_at',
                 'u.total_xp', 'u.current_level',
                 'r.id as role_id', 'r.name as role_name', 'r.description as role_description'
@@ -220,7 +228,8 @@ class User {
     static async update(userId, updates) {
         const allowedFields = [
             'first_name', 'last_name', 'avatar_url', 'bio',
-            'phone', 'date_of_birth', 'is_active','institution_id'
+            'phone', 'date_of_birth', 'is_active', 'institution_id',
+            'student_id', 'department', 'level'
         ];
 
         const updateData = {};
@@ -230,7 +239,7 @@ class User {
                 updateData[key] = value;
             }
         }
-        
+
         if (Object.keys(updateData).length === 0) {
             throw new Error('No valid fields to update still testing');
         }
@@ -243,7 +252,8 @@ class User {
             .returning([
                 'id', 'username', 'email', 'first_name', 'last_name',
                 'avatar_url', 'bio', 'phone', 'date_of_birth',
-                'is_active', 'is_verified', 'updated_at','institution_id'
+                'is_active', 'is_verified', 'updated_at', 'institution_id',
+                'student_id', 'department', 'level'
             ]);
 
         if (!user) {
@@ -376,7 +386,8 @@ class User {
         // Get users
         const users = await query
             .select(
-                'u.id', 'u.username', 'u.email', 'u.first_name', 'u.last_name','u.institution_id',
+                'u.id', 'u.username', 'u.email', 'u.first_name', 'u.last_name', 'u.institution_id',
+                'u.student_id', 'u.department', 'u.level',
                 'u.avatar_url', 'u.phone', 'u.is_active', 'u.is_verified',
                 'u.last_login', 'u.created_at',
                 'r.name as role_name'
@@ -411,6 +422,184 @@ class User {
 
         logger.info('User email verified', { userId });
         return true;
+    }
+
+    /**
+     * Check if user has access to a pathway based on personal or institutional subscription
+     * @param {string} userId - User ID
+     * @param {string} pathwayId - Pathway ID
+     * @returns {Promise<boolean>} Access status
+     */
+    static async hasAccessToPathway(userId, pathwayId) {
+        try {
+            // 1. Get user with institution info
+            const user = await knex('users as u')
+                .select('u.id', 'u.institution_id', 'u.active_subscription_id')
+                .where('u.id', userId)
+                .first();
+
+            if (!user) return false;
+
+            // 2. Get pathway info
+            const pathway = await knex('pathways')
+                .select('id', 'institution_id', 'subscription_tier_id', 'price')
+                .where('id', pathwayId)
+                .first();
+
+            if (!pathway) return false;
+
+            // 3. Check if pathway belongs to user's institution
+            if (user.institution_id && pathway.institution_id === user.institution_id) {
+                return true;
+            }
+
+            // 4. Check if user is already enrolled
+            const enrollment = await knex('pathway_enrollments')
+                .where({ user_id: userId, pathway_id: pathwayId, status: 'active' })
+                .first();
+            if (enrollment) return true;
+
+            // 5. Check personal subscription
+            if (user.active_subscription_id) {
+                const sub = await knex('user_subscriptions as us')
+                    .join('subscription_tiers as st', 'us.tier_id', 'st.id')
+                    .select('st.sort_order')
+                    .where({ 'us.id': user.active_subscription_id, 'us.status': 'active' })
+                    .where('us.expires_at', '>', new Date())
+                    .first();
+
+                const pathwayTier = await knex('subscription_tiers')
+                    .select('sort_order')
+                    .where('id', pathway.subscription_tier_id)
+                    .first();
+
+                if (sub && pathwayTier && sub.sort_order >= pathwayTier.sort_order) {
+                    return true;
+                }
+            }
+
+            // 6. Check institutional subscription overlay
+            if (user.institution_id) {
+                const institution = await knex('institutions as i')
+                    .join('subscription_tiers as st', 'i.subscription_tier_id', 'st.id')
+                    .select('st.sort_order')
+                    .where('i.id', user.institution_id)
+                    .first();
+
+                const pathwayTier = await knex('subscription_tiers')
+                    .select('sort_order')
+                    .where('id', pathway.subscription_tier_id)
+                    .first();
+
+                if (institution && pathwayTier && institution.sort_order >= pathwayTier.sort_order) {
+                    return true;
+                }
+            }
+
+            // 7. Free pathways (if subscription_tier_id is null and price is 0)
+            if (!pathway.subscription_tier_id && parseFloat(pathway.price) === 0) {
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            logger.error('Error checking pathway access', { userId, pathwayId, error: error.message });
+            return false;
+        }
+    }
+
+    /**
+     * Check if user has access to a course based on personal or institutional subscription
+     * @param {string} userId - User ID
+     * @param {string} courseId - Course ID
+     * @returns {Promise<boolean>} Access status
+     */
+    static async hasAccessToCourse(userId, courseId) {
+        try {
+            // 1. Get user with institution info
+            const user = await knex('users as u')
+                .select('u.id', 'u.institution_id', 'u.active_subscription_id')
+                .where('u.id', userId)
+                .first();
+
+            if (!user) return false;
+
+            // 2. Get course info
+            const course = await knex('courses')
+                .select('id', 'subscription_tier_id', 'price')
+                .where('id', courseId)
+                .first();
+
+            if (!course) return false;
+
+            // 3. Check if user is already enrolled
+            const enrollment = await knex('enrollments')
+                .where({ user_id: userId, course_id: courseId })
+                .first();
+            if (enrollment) return true;
+
+            // 4. Check if course is part of a pathway belonging to user's institution
+            if (user.institution_id) {
+                const institutionalPathwayCourse = await knex('pathway_courses as pc')
+                    .join('pathways as p', 'pc.pathway_id', 'p.id')
+                    .where('pc.course_id', courseId)
+                    .andWhere('p.institution_id', user.institution_id)
+                    .first();
+
+                if (institutionalPathwayCourse) return true;
+            }
+
+            // 5. Check personal subscription
+            if (user.active_subscription_id) {
+                const sub = await knex('user_subscriptions as us')
+                    .join('subscription_tiers as st', 'us.tier_id', 'st.id')
+                    .select('st.sort_order')
+                    .where({ 'us.id': user.active_subscription_id, 'us.status': 'active' })
+                    .where('us.expires_at', '>', new Date())
+                    .first();
+
+                if (sub && course.subscription_tier_id) {
+                    const courseTier = await knex('subscription_tiers')
+                        .select('sort_order')
+                        .where('id', course.subscription_tier_id)
+                        .first();
+
+                    if (courseTier && sub.sort_order >= courseTier.sort_order) {
+                        return true;
+                    }
+                }
+            }
+
+            // 6. Check institutional subscription overlay
+            if (user.institution_id) {
+                const institution = await knex('institutions as i')
+                    .join('subscription_tiers as st', 'i.subscription_tier_id', 'st.id')
+                    .select('st.sort_order')
+                    .where('i.id', user.institution_id)
+                    .first();
+
+                if (institution && course.subscription_tier_id) {
+                    const courseTier = await knex('subscription_tiers')
+                        .select('sort_order')
+                        .where('id', course.subscription_tier_id)
+                        .first();
+
+                    if (courseTier && institution.sort_order >= courseTier.sort_order) {
+                        return true;
+                    }
+                }
+            }
+
+            // 7. Free courses (if subscription_tier_id is null and price is 0)
+            if (!course.subscription_tier_id && parseFloat(course.price) === 0) {
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            logger.error('Error checking course access', { userId, courseId, error: error.message });
+            return false;
+        }
     }
 
     /**
