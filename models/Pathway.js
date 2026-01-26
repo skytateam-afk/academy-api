@@ -29,11 +29,12 @@ class Pathway {
                 maxPrice,
                 sortBy = 'created_at',
                 sortOrder = 'DESC',
-                institutionId // New parameter to filter by institution
+                institutionId, // New parameter to filter by institution
+                enrolledByUserId // New parameter to filter by enrollment
             } = options;
 
             const offset = (page - 1) * limit;
-            
+
             // Build base query
             let query = knex('pathways as p')
                 .leftJoin('categories as cat', 'p.category_id', 'cat.id')
@@ -58,10 +59,29 @@ class Pathway {
             // Filter by institution if provided (restrict pathways to user's institution)
             if (institutionId) {
                 query = query.where('p.institution_id', institutionId);
+            } else {
+                // By default, exclude pathways that belong to an institution from global lists
+                query = query.whereNull('p.institution_id');
+            }
+
+            if (enrolledByUserId) {
+                // Get user's institution_id
+                const user = await knex('users').select('institution_id').where('id', enrolledByUserId).first();
+                const userInstitutionId = user?.institution_id;
+
+                query = query.leftJoin('pathway_enrollments as pe_filter', function () {
+                    this.on('p.id', '=', 'pe_filter.pathway_id')
+                        .andOn('pe_filter.user_id', '=', knex.raw('?', [enrolledByUserId]));
+                }).where(function () {
+                    this.whereNotNull('pe_filter.id'); // Explicitly enrolled
+                    if (userInstitutionId) {
+                        this.orWhere('p.institution_id', userInstitutionId); // Belongs to user's institution
+                    }
+                });
             }
 
             if (search) {
-                query = query.where(function() {
+                query = query.where(function () {
                     this.where('p.title', 'ilike', `%${search}%`)
                         .orWhere('p.description', 'ilike', `%${search}%`)
                         .orWhere('p.career_focus', 'ilike', `%${search}%`);
@@ -109,7 +129,7 @@ class Pathway {
             const validSortFields = ['created_at', 'title', 'price', 'rating_average', 'enrollment_count', 'course_count'];
             const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at';
             const order = sortOrder.toUpperCase() === 'ASC' ? 'asc' : 'desc';
-            
+
             query = query.orderBy(`p.${sortField}`, order)
                 .limit(limit)
                 .offset(offset);
@@ -180,7 +200,7 @@ class Pathway {
                 )
                 .where('pc.pathway_id', id)
                 .orderBy('pc.sequence_order', 'asc');
-            
+
             pathway.courses = courses;
 
             return pathway;
@@ -220,7 +240,7 @@ class Pathway {
      */
     static async create(pathwayData) {
         const trx = await knex.transaction();
-        
+
         try {
             const {
                 title,
@@ -296,7 +316,7 @@ class Pathway {
      */
     static async update(id, updateData) {
         const trx = await knex.transaction();
-        
+
         try {
             const pathway = await this.getById(id);
             if (!pathway) {
@@ -376,7 +396,7 @@ class Pathway {
      */
     static async delete(id) {
         const trx = await knex.transaction();
-        
+
         try {
             const pathway = await this.getById(id);
             if (!pathway) {
@@ -411,7 +431,7 @@ class Pathway {
      */
     static async addCourse(pathwayId, courseData) {
         const trx = await knex.transaction();
-        
+
         try {
             const { courseId, sequenceOrder, isRequired, description, learningObjectives, prerequisiteCourseId } = courseData;
 

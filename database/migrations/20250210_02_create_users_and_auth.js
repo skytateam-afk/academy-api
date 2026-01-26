@@ -10,7 +10,7 @@ exports.up = async function(knex) {
     table.uuid('user_id').notNullable();
     table.uuid('tier_id').notNullable().references('id').inTable('subscription_tiers').onDelete('CASCADE');
     table.string('status', 255).defaultTo('pending');
-    table.timestamp('started_at').defaultTo(new Date()
+    table.timestamp('started_at').defaultTo(new Date());
     table.timestamp('expires_at');
     table.timestamp('cancelled_at');
     table.string('payment_provider', 255).defaultTo('manual');

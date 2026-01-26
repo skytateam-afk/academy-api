@@ -28,6 +28,11 @@ class PathwayApplication {
                 throw new Error('Pathway not found or not available');
             }
 
+            // Institutional pathways cannot be applied for by students
+            if (pathway.institution_id) {
+                throw new Error('This pathway is managed by your institution and cannot be applied for manually.');
+            }
+
             // Check if user has already applied
             // If table doesn't exist or columns are wrong, skip this check (allow application)
             let existingApplication = null;

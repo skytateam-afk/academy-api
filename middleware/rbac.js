@@ -167,8 +167,9 @@ const requirePermission = (requiredPermissions, options = {}) => {
             }
 
             const userId = req.user.userId;
-            const permissions = Array.isArray(requiredPermissions) 
-                ? requiredPermissions 
+            const userInstitutionId = req.user.institution_id;
+            const permissions = Array.isArray(requiredPermissions)
+                ? requiredPermissions
                 : [requiredPermissions];
 
             // Check if user is accessing their own resource
@@ -177,6 +178,17 @@ const requirePermission = (requiredPermissions, options = {}) => {
                 if (resourceOwnerId && resourceOwnerId === userId) {
                     return next();
                 }
+            }
+
+            // Check institutional isolation if applicable
+            // If the request has an institution_id (e.g. in body or query), 
+            // and the user has an institution_id, they must match.
+            const targetInstitutionId = req.body.institution_id || req.query.institution_id || req.params.institution_id;
+            if (userInstitutionId && targetInstitutionId && userInstitutionId !== targetInstitutionId) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Institutional access denied'
+                });
             }
 
             // Check permissions
@@ -236,7 +248,7 @@ const requireRole = (allowedRoles) => {
                 .where('u.id', req.user.userId)
                 .select('r.name as role_name')
                 .first();
-            
+
             if (!result) {
                 return res.status(403).json({
                     success: false,

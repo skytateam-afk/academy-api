@@ -486,6 +486,22 @@ const openApiSpec = {
           created_at: { type: 'string', format: 'date-time' },
           updated_at: { type: 'string', format: 'date-time' }
         }
+      },
+      PathwayApplication: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          user_id: { type: 'string', format: 'uuid' },
+          pathway_id: { type: 'string', format: 'uuid' },
+          application_message: { type: 'string', nullable: true },
+          status: { type: 'string', enum: ['pending', 'approved', 'rejected', 'cannot_reapply'], default: 'pending' },
+          reviewed_by: { type: 'string', format: 'uuid', nullable: true },
+          reviewed_at: { type: 'string', format: 'date-time', nullable: true },
+          review_notes: { type: 'string', nullable: true },
+          prevent_reapplication: { type: 'boolean', default: false },
+          created_at: { type: 'string', format: 'date-time' },
+          updated_at: { type: 'string', format: 'date-time' }
+        }
       }
     }
   },
@@ -15899,8 +15915,612 @@ const openApiSpec = {
           }
         }
       }
+    },
+    '/api/dashboard/institution/stats': {
+      get: {
+        tags: ['Institution Dashboard'],
+        summary: 'Get institution overview statistics',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Statistics retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        totalStudents: { type: 'integer' },
+                        activePathways: { type: 'integer' },
+                        totalEnrollments: { type: 'integer' },
+                        completions: { type: 'integer' },
+                        completionRate: { type: 'string' },
+                        avgProgress: { type: 'string' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/dashboard/institution/students': {
+      get: {
+        tags: ['Institution Dashboard'],
+        summary: 'Get institution students',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'search', in: 'query', schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Students retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/User' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        total: { type: 'integer' },
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        pages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/dashboard/institution/students/bulk-upload': {
+      post: {
+        tags: ['Institution Dashboard'],
+        summary: 'Bulk upload students via CSV',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  file: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'CSV file containing student data (headers: email, first_name, last_name, student_id, department, level)'
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Upload processed',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        success: { type: 'integer' },
+                        failed: { type: 'integer' },
+                        errors: { type: 'array', items: { type: 'string' } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/dashboard/institution/students/{id}': {
+      put: {
+        tags: ['Institution Dashboard'],
+        summary: 'Update student details',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  student_id: { type: 'string' },
+                  department: { type: 'string' },
+                  level: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Student updated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/dashboard/institution/students/{id}/status': {
+      patch: {
+        tags: ['Institution Dashboard'],
+        summary: 'Update student account status',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['isActive'],
+                properties: {
+                  isActive: { type: 'boolean' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Status updated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/dashboard/institution/pathways': {
+      get: {
+        tags: ['Institution Dashboard'],
+        summary: 'Get institution pathways',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
+        ],
+        responses: {
+          '200': {
+            description: 'Pathways retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Pathway' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        total: { type: 'integer' },
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        pages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/dashboard/institution/pathways/assign': {
+      post: {
+        tags: ['Institution Dashboard'],
+        summary: 'Assign students to pathway',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['pathwayId', 'studentIds'],
+                properties: {
+                  pathwayId: { type: 'string', format: 'uuid' },
+                  studentIds: {
+                    type: 'array',
+                    items: { type: 'string', format: 'uuid' }
+                  }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Assignment processed',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        success: { type: 'integer' },
+                        alreadyEnrolled: { type: 'integer' },
+                        errors: { type: 'array', items: { type: 'string' } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/pathways/apply': {
+      post: {
+        tags: ['Pathways'],
+        summary: 'Apply for a pathway',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['pathwayId'],
+                properties: {
+                  pathwayId: { type: 'string', format: 'uuid' },
+                  applicationMessage: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Application submitted',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: { $ref: '#/components/schemas/PathwayApplication' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/pathways/applications/my': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get my applications',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['pending', 'approved', 'rejected', 'cannot_reapply'] } }
+        ],
+        responses: {
+          '200': {
+            description: 'My applications retrieved',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/PathwayApplication' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        total: { type: 'integer' },
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        pages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/pathways/applications/stats': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get application statistics (Admin/Staff)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Statistics retrieved',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        total_applications: { type: 'integer' },
+                        pending_count: { type: 'integer' },
+                        approved_count: { type: 'integer' },
+                        rejected_count: { type: 'integer' },
+                        cannot_reapply_count: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/pathways/applications': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get all applications (Admin/Staff)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'status', in: 'query', schema: { type: 'string' } },
+          { name: 'pathwayId', in: 'query', schema: { type: 'string', format: 'uuid' } },
+          { name: 'userId', in: 'query', schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Applications retrieved',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/PathwayApplication' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        total: { type: 'integer' },
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        pages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/pathways/{id}/application-check': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Check if user can apply for a pathway',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Check result',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    canApply: { type: 'boolean' },
+                    hasPending: { type: 'boolean' },
+                    isEnrolled: { type: 'boolean' },
+                    rejectionReason: { type: 'string', nullable: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/pathways/applications/{id}/review': {
+      patch: {
+        tags: ['Pathways'],
+        summary: 'Review an application',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['status'],
+                properties: {
+                  status: { type: 'string', enum: ['approved', 'rejected', 'cannot_reapply'] },
+                  reviewNotes: { type: 'string' },
+                  preventReapplication: { type: 'boolean', default: false }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Application reviewed',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: { $ref: '#/components/schemas/PathwayApplication' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/pathways/applications/{id}': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get application by ID',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Application details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: { $ref: '#/components/schemas/PathwayApplication' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: ['Pathways'],
+        summary: 'Delete application (Admin)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Application deleted',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/pathways/{id}/applications': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get applications for a pathway',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'status', in: 'query', schema: { type: 'string' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Applications retrieved',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/PathwayApplication' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        total: { type: 'integer' },
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        pages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
-  },
+  }
 };
 
 module.exports = openApiSpec;

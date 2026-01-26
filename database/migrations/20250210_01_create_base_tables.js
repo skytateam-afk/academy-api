@@ -55,8 +55,8 @@ exports.up = async function(knex) {
     table.string('email', 255).notNullable().unique();
     table.string('phone', 255);
     table.text('address');
-    table.timestamp('created_at').defaultTo(new Date()otNullable();
-    table.timestamp('updated_at').defaultTo(new Date()e();
+    table.timestamp('created_at').defaultTo(new Date()).notNullable();
+    table.timestamp('updated_at').defaultTo(new Date()).notNullable();
   });
 
   // Create categories table
@@ -69,8 +69,8 @@ exports.up = async function(knex) {
     table.text('icon_url');
     table.integer('display_order').defaultTo(0);
     table.boolean('is_active').defaultTo(true);
-    table.timestamp('created_at').defaultTo(new Date()
-    table.timestamp('updated_at').defaultTo(new Date()
+    table.timestamp('created_at').defaultTo(new Date())
+    table.timestamp('updated_at').defaultTo(new Date())
 
     table.index('parent_id', 'idx_categories_parent_id');
   });
