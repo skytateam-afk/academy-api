@@ -7,13 +7,21 @@ const Institution = require('../../../models/Institution');
 const logger = require('../../../config/winston');
 const { z } = require('zod');
 
+const User = require('../../../models/User');
+
 // Validation schemas
 const createInstitutionSchema = z.object({
     name: z.string().min(3).max(255),
     official_email: z.string().email().optional().nullable(),
     address: z.string().optional().nullable(),
     phone_number: z.string().optional().nullable(),
-    subscription_tier_id: z.string().uuid().optional().nullable()
+    subscription_tier_id: z.string().uuid().optional().nullable(),
+    // Admin details
+    admin_email: z.string().email(),
+    admin_password: z.string().min(6),
+    admin_first_name: z.string().min(2),
+    admin_last_name: z.string().min(2),
+    admin_username: z.string().min(3).optional()
 });
 
 const updateInstitutionSchema = z.object({
@@ -25,7 +33,7 @@ const updateInstitutionSchema = z.object({
 });
 
 /**
- * Create a new institution
+ * Create a new institution and admin user
  */
 exports.createInstitution = async (req, res) => {
     try {
@@ -39,8 +47,10 @@ exports.createInstitution = async (req, res) => {
             });
         }
 
+        const data = validationResult.data;
+
         // Check if institution already exists
-        const exists = await Institution.exists(validationResult.data.name);
+        const exists = await Institution.exists(data.name);
         if (exists) {
             return res.status(409).json({
                 success: false,
@@ -48,24 +58,71 @@ exports.createInstitution = async (req, res) => {
             });
         }
 
-        const institution = await Institution.create(validationResult.data);
+        // Check if admin email already exists
+        const existingUser = await User.findByEmail(data.admin_email);
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                error: 'User with this admin email already exists'
+            });
+        }
 
-        logger.info('Institution created successfully', {
-            institutionId: institution.id,
-            name: institution.name,
-            userId: req.user?.userId
+        // 1. Create Institution
+        const institution = await Institution.create({
+            name: data.name,
+            official_email: data.official_email,
+            address: data.address,
+            phone_number: data.phone_number,
+            subscription_tier_id: data.subscription_tier_id
         });
 
-        res.status(201).json({
-            success: true,
-            message: 'Institution created successfully',
-            data: institution
-        });
+        try {
+            // 2. Create Admin User linked to institution
+            const adminUser = await User.create({
+                email: data.admin_email,
+                password: data.admin_password,
+                first_name: data.admin_first_name,
+                last_name: data.admin_last_name,
+                username: data.admin_username, // Optional, will auto-generate if missing
+                institution_id: institution.id,
+                role_name: 'institution_admin',
+                is_active: true
+            });
+
+            logger.info('Institution and Admin User created successfully', {
+                institutionId: institution.id,
+                userId: adminUser.id,
+                operatorId: req.user?.userId
+            });
+
+            res.status(201).json({
+                success: true,
+                message: 'Institution and admin account created successfully',
+                data: {
+                    institution,
+                    admin: {
+                        id: adminUser.id,
+                        email: adminUser.email,
+                        username: adminUser.username
+                    }
+                }
+            });
+
+        } catch (userError) {
+            logger.error('Failed to create admin user, rolling back institution', { error: userError.message });
+            // Rollback: Delete the created institution
+            await Institution.delete(institution.id);
+            throw userError;
+        }
+
     } catch (error) {
         logger.error('Error in createInstitution', { error: error.message, stack: error.stack });
-        res.status(500).json({
+
+        // Return appropriate error message
+        const status = error.message.includes('exists') ? 409 : 500;
+        res.status(status).json({
             success: false,
-            error: 'Failed to create institution'
+            error: error.message || 'Failed to create institution'
         });
     }
 };

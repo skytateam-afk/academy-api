@@ -36,6 +36,28 @@ router.get(
   dashboardController.getAnalyticsData
 );
 
+/**
+ * @route   GET /api/dashboard/pathways
+ * @desc    Get pathway analytics (top/worst)
+ * @access  Private (requires analytics.view permission)
+ */
+router.get(
+  '/pathways',
+  authenticateToken,
+  dashboardController.getPathwayAnalytics
+);
+
+/**
+ * @route   GET /api/dashboard/student-activity
+ * @desc    Get student activity feed
+ * @access  Private
+ */
+router.get(
+  '/student-activity',
+  authenticateToken,
+  dashboardController.getStudentActivity
+);
+
 // Institution Dashboard Routes
 router.use('/institution', institutionDashboardRoutes);
 
