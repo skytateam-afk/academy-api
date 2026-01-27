@@ -239,6 +239,112 @@ exports.getDashboardStats = async (req, res, next) => {
 };
 
 /**
+ * Get Pathway Analytics (Top/Worst Performing)
+ */
+exports.getPathwayAnalytics = async (req, res, next) => {
+  try {
+    const { limit = 5, type = 'top' } = req.query;
+
+    // Validate type
+    if (!['top', 'worst'].includes(type)) {
+      return res.status(400).json({ success: false, error: 'Invalid type. Use "top" or "worst".' });
+    }
+
+    const orderDirection = type === 'top' ? 'desc' : 'asc';
+
+    // Query pathways with enrollment counts
+    const pathways = await knex('pathways as p')
+      .leftJoin('pathway_enrollments as pe', 'p.id', 'pe.pathway_id')
+      .leftJoin('pathway_courses as pc', 'p.id', 'pc.pathway_id')
+      .select(
+        'p.id',
+        'p.title',
+        'p.created_at',
+        knex.raw('COUNT(DISTINCT pe.id) as enrollment_count'),
+        knex.raw('COUNT(DISTINCT pc.course_id) as course_count')
+      )
+      .groupBy('p.id', 'p.title', 'p.created_at')
+      .orderBy('enrollment_count', orderDirection)
+      .limit(limit);
+
+    res.json({
+      success: true,
+      data: pathways.map(p => ({
+        ...p,
+        enrollment_count: parseInt(p.enrollment_count) || 0,
+        course_count: parseInt(p.course_count) || 0
+      }))
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get Student Activity Feed
+ */
+exports.getStudentActivity = async (req, res, next) => {
+  try {
+    const { limit = 20 } = req.query;
+
+    // Fetch recent enrollments as activity
+    const enrollmentActivity = await knex('enrollments as e')
+      .join('users as u', 'e.user_id', 'u.id')
+      .join('courses as c', 'e.course_id', 'c.id')
+      .select(
+        'u.username',
+        'u.avatar_url',
+        'c.title as item_title',
+        'e.created_at',
+        knex.raw("'enrolled_in_course' as type")
+      )
+      .orderBy('e.created_at', 'desc')
+      .limit(limit);
+
+    // Fetch pathway enrollments
+    const pathwayActivity = await knex('pathway_enrollments as pe')
+      .join('users as u', 'pe.user_id', 'u.id')
+      .join('pathways as p', 'pe.pathway_id', 'p.id')
+      .select(
+        'u.username',
+        'u.avatar_url',
+        'p.title as item_title',
+        'pe.created_at',
+        knex.raw("'enrolled_in_pathway' as type")
+      )
+      .orderBy('pe.created_at', 'desc')
+      .limit(limit);
+
+    // Fetch completions (if completed_at is set)
+    const completionActivity = await knex('enrollments as e')
+      .join('users as u', 'e.user_id', 'u.id')
+      .join('courses as c', 'e.course_id', 'c.id')
+      .whereNotNull('e.completed_at')
+      .select(
+        'u.username',
+        'u.avatar_url',
+        'c.title as item_title',
+        'e.completed_at as created_at',
+        knex.raw("'completed_course' as type")
+      )
+      .orderBy('e.completed_at', 'desc')
+      .limit(limit);
+
+    // Combine and sort
+    const allActivity = [...enrollmentActivity, ...pathwayActivity, ...completionActivity]
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, parseInt(limit));
+
+    res.json({
+      success: true,
+      data: allActivity
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get comprehensive analytics data
  */
 exports.getAnalyticsData = async (req, res, next) => {
