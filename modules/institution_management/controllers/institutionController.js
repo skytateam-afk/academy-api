@@ -18,7 +18,7 @@ const createInstitutionSchema = z.object({
     subscription_tier_id: z.string().uuid().optional().nullable(),
     // Admin details
     admin_email: z.string().email(),
-    admin_password: z.string().min(6),
+    admin_password: z.string().min(6).optional(),
     admin_first_name: z.string().min(2),
     admin_last_name: z.string().min(2),
     admin_username: z.string().min(3).optional()
@@ -67,6 +67,13 @@ exports.createInstitution = async (req, res) => {
             });
         }
 
+        // Password handling
+        let adminPassword = data.admin_password;
+        if (!adminPassword) {
+            const crypto = require('crypto');
+            adminPassword = crypto.randomBytes(12).toString('base64').slice(0, 12);
+        }
+
         // 1. Create Institution
         const institution = await Institution.create({
             name: data.name,
@@ -80,14 +87,25 @@ exports.createInstitution = async (req, res) => {
             // 2. Create Admin User linked to institution
             const adminUser = await User.create({
                 email: data.admin_email,
-                password: data.admin_password,
+                password: adminPassword,
                 first_name: data.admin_first_name,
                 last_name: data.admin_last_name,
                 username: data.admin_username, // Optional, will auto-generate if missing
                 institution_id: institution.id,
-                role_name: 'institution_admin',
+                role_name: 'institution',
                 is_active: true
             });
+
+            // Send account created email with credentials
+            const emailService = require('../../../services/emailService');
+            emailService.sendAccountCreatedEmail({
+                email: adminUser.email,
+                username: adminUser.username,
+                password: adminPassword,
+                firstName: adminUser.first_name,
+                lastName: adminUser.last_name,
+                roleName: 'Institution Admin'
+            }).catch(err => logger.error('Failed to send institution admin welcome email', { error: err.message }));
 
             logger.info('Institution and Admin User created successfully', {
                 institutionId: institution.id,

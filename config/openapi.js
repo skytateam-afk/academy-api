@@ -48,7 +48,8 @@ const openApiSpec = {
     { name: 'Settings', description: 'System and institution settings management' },
     { name: 'Promotions', description: 'Marketing promotions and campaigns' },
     { name: 'Announcements', description: 'System announcements and notifications' },
-    { name: 'Pathways', description: 'Learning pathway management' }
+    { name: 'Pathways', description: 'Learning pathway management' },
+    { name: 'Jobs', description: 'Job board and application management' }
   ],
   components: {
     securitySchemes: {
@@ -487,18 +488,25 @@ const openApiSpec = {
           updated_at: { type: 'string', format: 'date-time' }
         }
       },
-      PathwayApplication: {
+      Job: {
         type: 'object',
         properties: {
           id: { type: 'string', format: 'uuid' },
-          user_id: { type: 'string', format: 'uuid' },
-          pathway_id: { type: 'string', format: 'uuid' },
-          application_message: { type: 'string', nullable: true },
-          status: { type: 'string', enum: ['pending', 'approved', 'rejected', 'cannot_reapply'], default: 'pending' },
-          reviewed_by: { type: 'string', format: 'uuid', nullable: true },
-          reviewed_at: { type: 'string', format: 'date-time', nullable: true },
-          review_notes: { type: 'string', nullable: true },
-          prevent_reapplication: { type: 'boolean', default: false },
+          title: { type: 'string', example: 'Senior Software Engineer' },
+          description: { type: 'string', description: 'Full HTML/Markdown description' },
+          short_description: { type: 'string', nullable: true },
+          location: { type: 'string', example: 'Remote' },
+          type: { type: 'string', enum: ['full-time', 'part-time', 'contract', 'remote', 'internship', 'freelance'], default: 'full-time' },
+          is_external: { type: 'boolean', default: false },
+          external_url: { type: 'string', nullable: true },
+          is_active: { type: 'boolean', default: true },
+          requirements: { type: 'array', items: { type: 'string' } },
+          responsibilities: { type: 'array', items: { type: 'string' } },
+          min_salary: { type: 'number', nullable: true },
+          max_salary: { type: 'number', nullable: true },
+          currency: { type: 'string', default: 'USD' },
+          company_name: { type: 'string', example: 'Acme Corp' },
+          company_logo_url: { type: 'string', nullable: true },
           created_at: { type: 'string', format: 'date-time' },
           updated_at: { type: 'string', format: 'date-time' }
         }
@@ -15802,6 +15810,60 @@ const openApiSpec = {
           },
           '403': {
             description: 'Permission denied'
+          }
+        }
+      }
+    },
+    // ===== Job Management =====
+    '/api/admin/jobs/{id}': {
+      put: {
+        tags: ['Jobs'],
+        summary: 'Update job details',
+        description: 'Update an existing job posting (Admin only)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        requestBody: {
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  short_description: { type: 'string' },
+                  location: { type: 'string' },
+                  type: { type: 'string', enum: ['full-time', 'part-time', 'contract', 'remote', 'internship', 'freelance'] },
+                  is_external: { type: 'boolean' },
+                  external_url: { type: 'string' },
+                  is_active: { type: 'boolean' },
+                  requirements: { type: 'array', items: { type: 'string' } },
+                  responsibilities: { type: 'array', items: { type: 'string' } },
+                  min_salary: { type: 'number' },
+                  max_salary: { type: 'number' },
+                  currency: { type: 'string' },
+                  company_name: { type: 'string' },
+                  company_logo: { type: 'string', format: 'binary', description: 'Company logo image file' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Job updated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/Job' }
+                  }
+                }
+              }
+            }
           }
         }
       }

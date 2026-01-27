@@ -27,15 +27,15 @@ exports.up = async function (knex) {
 
     await knex('permissions').insert(permissions).onConflict(['resource', 'action']).ignore();
 
-    // 2. Add institution_admin role
+    // 2. Add institution role
     const [role] = await knex('roles').insert({
-        name: 'institution_admin',
+        name: 'institution',
         description: 'Administrator for a specific institution',
         is_system_role: true
     }).onConflict('name').ignore().returning('*');
 
     // If the role already existed and ignore() worked, we need to fetch the ID
-    const roleId = role?.id || (await knex('roles').where('name', 'institution_admin').first())?.id;
+    const roleId = role?.id || (await knex('roles').where('name', 'institution').first())?.id;
 
     if (roleId) {
         // 3. Assign permissions to the role
@@ -48,7 +48,7 @@ exports.up = async function (knex) {
             permission_id: p.id
         }));
 
-        // Also give some existing permissions to institution_admin
+        // Also give some existing permissions to institution
         const additionalPermissionNames = [
             'user.read',
             'course.read',
@@ -80,7 +80,7 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function (knex) {
-    const role = await knex('roles').where('name', 'institution_admin').first();
+    const role = await knex('roles').where('name', 'institution').first();
     if (role) {
         await knex('role_permissions').where('role_id', role.id).del();
         await knex('roles').where('id', role.id).del();
