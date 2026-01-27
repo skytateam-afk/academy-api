@@ -287,7 +287,7 @@ exports.createPathway = async (req, res) => {
             ...req.body,
             createdBy: req.body.createdBy || userId,
             // Force institution_id for institution admins
-            institution_id: (req.user.role === 'institution_admin' || req.user.role_name === 'institution_admin') && req.user.institution_id
+            institution_id: (req.user.role === 'institution' || req.user.role_name === 'institution') && req.user.institution_id
                 ? req.user.institution_id
                 : req.body.institution_id
         };
@@ -457,7 +457,7 @@ exports.updatePathway = async (req, res) => {
         logger.info('Validation passed successfully');
 
         // Check ownership for institution admins
-        if (req.user.role === 'institution_admin' || req.user.role_name === 'institution_admin') {
+        if (req.user.role === 'institution' || req.user.role_name === 'institution') {
             const existingPathway = await Pathway.getById(id);
             if (!existingPathway) {
                 return res.status(404).json({ success: false, error: 'Pathway not found' });

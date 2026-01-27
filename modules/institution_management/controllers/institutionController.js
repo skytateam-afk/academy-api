@@ -92,7 +92,7 @@ exports.createInstitution = async (req, res) => {
                 last_name: data.admin_last_name,
                 username: data.admin_username, // Optional, will auto-generate if missing
                 institution_id: institution.id,
-                role_name: 'institution_admin',
+                role_name: 'institution',
                 is_active: true
             });
 
