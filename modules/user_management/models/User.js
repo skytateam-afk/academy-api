@@ -351,6 +351,7 @@ class User {
             search = '',
             role = null,
             is_active = null,
+            institution_id = null,
             sort_by = 'created_at',
             sort_order = 'DESC'
         } = options;
@@ -377,6 +378,10 @@ class User {
 
         if (is_active !== null) {
             query = query.where('u.is_active', is_active);
+        }
+
+        if (institution_id) {
+            query = query.where('u.institution_id', institution_id);
         }
 
         // Count total
