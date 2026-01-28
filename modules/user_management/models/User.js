@@ -538,16 +538,9 @@ class User {
                 .first();
             if (enrollment) return true;
 
-            // 4. Check if course is part of a pathway belonging to user's institution
-            if (user.institution_id) {
-                const institutionalPathwayCourse = await knex('pathway_courses as pc')
-                    .join('pathways as p', 'pc.pathway_id', 'p.id')
-                    .where('pc.course_id', courseId)
-                    .andWhere('p.institution_id', user.institution_id)
-                    .first();
+            // 4. (REMOVED) Check if course is part of a pathway belonging to user's institution
+            // Institutional access is now handled via explicit enrollment when a pathway is assigned.
 
-                if (institutionalPathwayCourse) return true;
-            }
 
             // 5. Check personal subscription
             if (user.active_subscription_id) {
@@ -590,10 +583,7 @@ class User {
                 }
             }
 
-            // 7. Free courses (if subscription_tier_id is null and price is 0)
-            if (!course.subscription_tier_id && parseFloat(course.price) === 0) {
-                return true;
-            }
+            return false;
 
             return false;
         } catch (error) {

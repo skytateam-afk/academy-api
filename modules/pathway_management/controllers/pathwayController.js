@@ -193,30 +193,15 @@ exports.getPathwayById = async (req, res) => {
             });
         }
 
-        // Implicit enrollment for institutional students
-        if (req.user && req.user.institution_id && pathway.institution_id === req.user.institution_id) {
-            const knex = require('../../../config/knex');
-            const existingEnrollment = await knex('pathway_enrollments')
-                .where({ pathway_id: id, user_id: req.user.userId })
-                .first();
+        // Institutional enrollment check - only show enrollment status if already enrolled
+        // (Removed auto-enrollment on view)
+        const knex = require('../../../config/knex');
+        const existingEnrollment = await knex('pathway_enrollments')
+            .where({ pathway_id: id, user_id: req.user.userId })
+            .first();
 
-            if (!existingEnrollment) {
-                try {
-                    await knex('pathway_enrollments').insert({
-                        pathway_id: id,
-                        user_id: req.user.userId,
-                        status: 'active',
-                        enrolled_at: new Date()
-                    });
-
-                    // Also enroll in all courses of the pathway
-                    await Pathway.enrollMemberInAllPathwayCourses(id, req.user.userId);
-                    logger.info('Auto-enrolled institutional student in pathway', { userId: req.user.userId, pathwayId: id });
-                } catch (enrollError) {
-                    logger.warn('Failed to auto-enroll institutional student', { error: enrollError.message });
-                }
-            }
-        }
+        pathway.is_enrolled = !!existingEnrollment;
+        pathway.enrollment_date = existingEnrollment ? existingEnrollment.enrolled_at : null;
 
         res.json({
             success: true,

@@ -18,7 +18,6 @@ const createInstitutionSchema = z.object({
     subscription_tier_id: z.string().uuid().optional().nullable(),
     // Admin details
     admin_email: z.string().email(),
-    admin_password: z.string().min(6).optional(),
     admin_first_name: z.string().min(2),
     admin_last_name: z.string().min(2),
     admin_username: z.string().min(3).optional()
@@ -68,11 +67,9 @@ exports.createInstitution = async (req, res) => {
         }
 
         // Password handling
-        let adminPassword = data.admin_password;
-        if (!adminPassword) {
-            const crypto = require('crypto');
-            adminPassword = crypto.randomBytes(12).toString('base64').slice(0, 12);
-        }
+        let adminPassword;
+        const crypto = require('crypto');
+        adminPassword = crypto.randomBytes(12).toString('base64').slice(0, 12);
 
         // 1. Create Institution
         const institution = await Institution.create({
