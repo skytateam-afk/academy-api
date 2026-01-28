@@ -1040,8 +1040,8 @@ CREATE TABLE "result_batches" (
 );
 CREATE TABLE "role_permissions" (
 	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-	"role_id" uuid NOT NULL UNIQUE,
-	"permission_id" uuid NOT NULL UNIQUE,
+	"role_id" uuid NOT NULL,
+	"permission_id" uuid NOT NULL,
 	"created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT "unique_role_permission" UNIQUE("role_id","permission_id")
 );
@@ -1432,8 +1432,8 @@ CREATE TABLE "transactions" (
 );
 CREATE TABLE "user_permissions" (
 	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-	"user_id" uuid NOT NULL UNIQUE,
-	"permission_id" uuid NOT NULL UNIQUE,
+	"user_id" uuid NOT NULL,
+	"permission_id" uuid NOT NULL,
 	"granted" boolean DEFAULT true,
 	"created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT "unique_user_permission" UNIQUE("user_id","permission_id")
@@ -1542,8 +1542,8 @@ CREATE TABLE "users" (
 );
 CREATE TABLE "users_permissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	"user_id" uuid UNIQUE,
-	"permission_id" uuid UNIQUE,
+	"user_id" uuid,
+	"permission_id" uuid,
 	"granted_by" uuid,
 	"granted_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT "users_permissions_user_id_permission_id_unique" UNIQUE("user_id","permission_id")

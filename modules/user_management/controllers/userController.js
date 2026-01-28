@@ -27,12 +27,16 @@ class UserController {
                 sort_order = 'DESC'
             } = req.query;
 
+            const isSuperAdmin = req.user.role === 'super_admin';
+            const userInstitutionId = req.user.institution_id;
+
             const result = await User.getAll({
                 page: parseInt(page),
                 limit: parseInt(limit),
                 search,
                 role,
                 is_active: is_active !== null ? is_active === 'true' : null,
+                institution_id: !isSuperAdmin ? userInstitutionId : null,
                 sort_by,
                 sort_order
             });
@@ -107,7 +111,18 @@ class UserController {
                 institution_id = null
             } = req.body;
 
-            // Validate required fields (username and password are now optional, will be auto-generated)
+            // Ensure institution admin can only create users for their own institution
+            if (req.user.institution_id) {
+                if (institution_id && parseInt(institution_id) !== parseInt(req.user.institution_id)) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'You can only create users for your own institution'
+                    });
+                }
+                institution_id = req.user.institution_id;
+            }
+
+            // Validate required fields
             if (!email) {
                 return res.status(400).json({
                     success: false,
@@ -687,7 +702,7 @@ class UserController {
             // Validate headers
             const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
             const requiredHeaders = ['email', 'first_name', 'last_name', 'phone'];
-            
+
             const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
             if (missingHeaders.length > 0) {
                 return res.status(400).json({
@@ -716,7 +731,7 @@ class UserController {
                 if (!line) continue;
 
                 const columns = line.split(',').map(c => c.trim());
-                
+
                 const email = columns[emailIndex] || '';
                 const first_name = columns[firstNameIndex] || '';
                 const last_name = columns[lastNameIndex] || '';
@@ -751,23 +766,23 @@ class UserController {
                         firstName: user.first_name,
                         lastName: user.last_name,
                         roleName: 'student'
-                    }).catch(err => logger.error('Failed to send welcome email', { 
+                    }).catch(err => logger.error('Failed to send welcome email', {
                         error: err.message,
-                        userId: user.id 
+                        userId: user.id
                     }));
 
                     results.success++;
                 } catch (error) {
                     results.failed++;
                     let errorMessage = error.message;
-                    
+
                     // Make error messages more user-friendly
                     if (errorMessage.includes('Email already exists')) {
                         errorMessage = `Email already exists: ${email}`;
                     } else if (errorMessage.includes('Username already exists')) {
                         errorMessage = `Username conflict for: ${email}`;
                     }
-                    
+
                     results.errors.push(`Row ${i + 1}: ${errorMessage}`);
                 }
             }
