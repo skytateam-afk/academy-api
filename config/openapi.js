@@ -15818,6 +15818,58 @@ const openApiSpec = {
         }
       }
     },
+    '/api/institutions/my/students': {
+      get: {
+        tags: ['Institutions'],
+        summary: 'Get students for the current institution',
+        description: 'Retrieve a list of students belonging to the authenticated user\'s institution (requires institution.students.manage permission)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 20 } },
+          { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Search by student name or email' },
+          { name: 'is_active', in: 'query', schema: { type: 'boolean' }, description: 'Filter by active status' },
+          { name: 'sort_by', in: 'query', schema: { type: 'string', default: 'created_at' } },
+          { name: 'sort_order', in: 'query', schema: { type: 'string', enum: ['ASC', 'DESC'], default: 'DESC' } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of students in the institution',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/User' }
+                    },
+                    pagination: {
+                      type: 'object',
+                      properties: {
+                        total: { type: 'integer' },
+                        page: { type: 'integer' },
+                        limit: { type: 'integer' },
+                        pages: { type: 'integer' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '403': {
+            description: 'Permission denied or user not associated with an institution',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
     // ===== Job Management =====
     '/api/admin/jobs/{id}': {
       put: {
