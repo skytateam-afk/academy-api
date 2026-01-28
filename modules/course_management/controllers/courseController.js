@@ -261,19 +261,18 @@ exports.getEnrollmentStatus = async (req, res) => {
             })
             .first();
 
-        let isEnrolled = !!enrollment;
+        const isEnrolled = !!enrollment;
 
-        // If not explicitly enrolled, check if they have implicit access (institutional/subscription)
-        if (!isEnrolled) {
-            isEnrolled = await User.hasAccessToCourse(req.user.userId, id);
-        }
+        // Check if user has access even if not enrolled (subscriptions, etc.)
+        const hasAccess = isEnrolled || await User.hasAccessToCourse(req.user.userId, id);
 
         res.json({
             success: true,
             data: {
                 is_enrolled: isEnrolled,
+                has_access: hasAccess,
                 enrollment_date: enrollment ? enrollment.enrolled_at : null,
-                is_implicit: !enrollment && isEnrolled
+                is_implicit: !enrollment && hasAccess
             }
         });
     } catch (error) {
