@@ -371,6 +371,7 @@ class User {
             search = '',
             role = null,
             is_active = null,
+            institution_id = null,
             sort_by = 'created_at',
             sort_order = 'DESC'
         } = options;
@@ -406,6 +407,13 @@ class User {
             paramCount++;
         }
 
+        // Institution filter
+        if (institution_id) {
+            conditions.push(`u.institution_id = $${paramCount}`);
+            values.push(institution_id);
+            paramCount++;
+        }
+
         const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
         // Count total
@@ -422,7 +430,8 @@ class User {
         // Get users
         const query = `
             SELECT 
-                u.id, u.username, u.email, u.first_name, u.last_name,
+                u.id, u.username, u.email, u.first_name, u.last_name, u.institution_id,
+                u.student_id, u.department, u.level,
                 u.avatar_url, u.phone, u.is_active, u.is_verified,
                 u.last_login, u.created_at,
                 r.name as role_name

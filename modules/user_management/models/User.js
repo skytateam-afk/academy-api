@@ -356,6 +356,13 @@ class User {
             sort_order = 'DESC'
         } = options;
 
+        logger.info('User.getAll called with options:', {
+            role,
+            institution_id,
+            search,
+            has_institution_id: !!institution_id
+        });
+
         const offset = (page - 1) * limit;
 
         // Build base query

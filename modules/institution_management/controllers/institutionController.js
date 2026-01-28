@@ -362,21 +362,20 @@ exports.getMyStudents = async (req, res) => {
             sort_order
         });
 
+        // Handle potential empty result safely
+        const students = result.users || [];
+        const pagination = result.pagination || { total: 0, page: parseInt(page), limit: parseInt(limit), totalPages: 0 };
+
         logger.info('Retrieved institution students', {
             institution_id,
-            count: result.results.length,
-            total: result.total
+            count: students.length,
+            total: pagination.total
         });
 
         res.json({
             success: true,
-            data: result.results,
-            pagination: {
-                total: result.total,
-                page: result.page,
-                limit: result.limit,
-                pages: Math.ceil(result.total / result.limit)
-            }
+            data: students,
+            pagination
         });
 
     } catch (error) {
