@@ -40,6 +40,13 @@ router.put(
     institutionController.updateInstitution
 );
 
+// Get institution students (Institution Admin only)
+router.get(
+    '/my/students',
+    requirePermission('institution.students.manage'),
+    institutionController.getMyStudents
+);
+
 // Delete institution (Admin only)
 router.delete(
     '/:id',

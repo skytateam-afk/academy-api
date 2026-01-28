@@ -327,3 +327,63 @@ exports.deleteInstitution = async (req, res) => {
         });
     }
 };
+
+/**
+ * Get students belonging to the current user's institution
+ */
+exports.getMyStudents = async (req, res) => {
+    try {
+        const {
+            page = 1,
+            limit = 20,
+            search = '',
+            is_active = null,
+            sort_by = 'created_at',
+            sort_order = 'DESC'
+        } = req.query;
+
+        const institution_id = req.user.institution_id;
+
+        if (!institution_id) {
+            return res.status(403).json({
+                success: false,
+                message: 'You are not associated with any institution'
+            });
+        }
+
+        const result = await User.getAll({
+            page: parseInt(page),
+            limit: parseInt(limit),
+            search,
+            role: 'student',
+            is_active: is_active !== null ? is_active === 'true' : null,
+            institution_id: institution_id,
+            sort_by,
+            sort_order
+        });
+
+        logger.info('Retrieved institution students', {
+            institution_id,
+            count: result.results.length,
+            total: result.total
+        });
+
+        res.json({
+            success: true,
+            data: result.results,
+            pagination: {
+                total: result.total,
+                page: result.page,
+                limit: result.limit,
+                pages: Math.ceil(result.total / result.limit)
+            }
+        });
+
+    } catch (error) {
+        logger.error('Error in getMyStudents', { error: error.message, institution_id: req.user.institution_id });
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch institution students'
+        });
+    }
+};
