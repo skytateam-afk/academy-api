@@ -15780,13 +15780,17 @@ const openApiSpec = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['name'],
+                required: ['name', 'admin_email', 'admin_first_name', 'admin_last_name'],
                 properties: {
                   name: { type: 'string', example: 'Skyta Academy', description: 'Institution name' },
                   official_email: { type: 'string', format: 'email', example: 'info@skyta.edu', description: 'Official institution email' },
                   address: { type: 'string', example: '123 Education Street, Learning City', description: 'Institution address' },
                   phone_number: { type: 'string', example: '+1-555-123-4567', description: 'Institution phone number' },
-                  subscription_tier_id: { type: 'string', format: 'uuid', description: 'Subscription tier ID' }
+                  subscription_tier_id: { type: 'string', format: 'uuid', description: 'Subscription tier ID' },
+                  admin_email: { type: 'string', format: 'email', example: 'admin@skyta.edu', description: 'Admin user email' },
+                  admin_first_name: { type: 'string', example: 'Admin', description: 'Admin first name' },
+                  admin_last_name: { type: 'string', example: 'User', description: 'Admin last name' },
+                  admin_username: { type: 'string', example: 'admin_skyta', description: 'Optional admin username' }
                 }
               }
             }
