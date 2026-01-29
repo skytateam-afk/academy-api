@@ -129,7 +129,9 @@ exports.getAllPathways = async (req, res) => {
             // Filter by user's institution if they are a student OR an institution admin
             institutionId: ((req.user?.role === 'student' || req.user?.role_name === 'student') || (req.user?.role === 'institution' || req.user?.role_name === 'institution')) && req.user?.institution_id ? req.user.institution_id : undefined,
             // For students, only show assigned pathways
-            enrolledByUserId: (req.user?.role === 'student' || req.user?.role_name === 'student') ? req.user.userId : undefined
+            enrolledByUserId: (req.user?.role === 'student' || req.user?.role_name === 'student') ? req.user.userId : undefined,
+            // Allow super_admin to see all pathways (including institution-specific ones)
+            ignoreInstitutionFilter: req.user?.role === 'super_admin' || req.user?.role_name === 'super_admin'
         };
 
 
