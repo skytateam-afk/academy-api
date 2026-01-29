@@ -362,9 +362,14 @@ exports.getMyStudents = async (req, res) => {
             sort_order
         });
 
-        // Handle potential empty result safely
-        const students = result.users || [];
-        const pagination = result.pagination || { total: 0, page: parseInt(page), limit: parseInt(limit), totalPages: 0 };
+        // Handle potential empty result safely with comprehensive checks
+        const students = (result && Array.isArray(result.users)) ? result.users : [];
+        const pagination = (result && result.pagination) ? result.pagination : {
+            total: 0,
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalPages: 0
+        };
 
         logger.info('Retrieved institution students', {
             institution_id,
