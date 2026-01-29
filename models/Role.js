@@ -258,6 +258,7 @@ class Role {
      * @returns {Promise<boolean>} Success status
      */
     static async syncPermissions(roleId, permissionIds) {
+        const client = await db.getClient();
         try {
             await client.query('BEGIN');
 
@@ -269,7 +270,7 @@ class Role {
 
             // Add new permissions
             if (permissionIds.length > 0) {
-                const values = permissionIds.map((permId, index) => 
+                const values = permissionIds.map((permId, index) =>
                     `($1, $${index + 2})`
                 ).join(', ');
 
