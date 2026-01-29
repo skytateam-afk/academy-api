@@ -126,8 +126,8 @@ exports.getAllPathways = async (req, res) => {
             maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
             sortBy,
             sortOrder,
-            // Filter by user's institution ONLY if student - all other roles see all pathways
-            institutionId: (req.user?.role === 'student' || req.user?.role_name === 'student') && req.user?.institution_id ? req.user.institution_id : undefined,
+            // Filter by user's institution if they are a student OR an institution admin
+            institutionId: ((req.user?.role === 'student' || req.user?.role_name === 'student') || (req.user?.role === 'institution' || req.user?.role_name === 'institution')) && req.user?.institution_id ? req.user.institution_id : undefined,
             // For students, only show assigned pathways
             enrolledByUserId: (req.user?.role === 'student' || req.user?.role_name === 'student') ? req.user.userId : undefined
         };

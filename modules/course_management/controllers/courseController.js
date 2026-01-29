@@ -56,7 +56,7 @@ const updateCourseSchema = z.object({
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-        fileSize: 200 * 1024 * 1024, // 200MB limit for videos and thumbnails
+        fileSize: 500 * 1024 * 1024, // 200MB limit for videos and thumbnails
     },
     fileFilter: (req, file, cb) => {
         const allowedMimes = [
