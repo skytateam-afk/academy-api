@@ -57,7 +57,9 @@ class Pathway {
 
             // Apply filters
             // Filter by institution if provided (restrict pathways to user's institution)
-            if (institutionId) {
+            if (options.ignoreInstitutionFilter) {
+                // Do not apply any institution filter - show all pathways
+            } else if (institutionId) {
                 query = query.where('p.institution_id', institutionId);
             } else {
                 // By default, exclude pathways that belong to an institution from global lists
