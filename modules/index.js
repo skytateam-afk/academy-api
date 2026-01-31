@@ -40,5 +40,6 @@ module.exports = {
   results,
   menuVisibility,
   contactManagement,
-  search
+  search,
+  partnership: require('./partnership/partner.routes')
 };
