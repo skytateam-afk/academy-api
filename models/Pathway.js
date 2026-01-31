@@ -395,9 +395,10 @@ class Pathway {
             if (certificationCriteria !== undefined) updates.certification_criteria = certificationCriteria;
             if (enrollmentLimit !== undefined) updates.enrollment_limit = enrollmentLimit;
             if (metadata !== undefined) updates.metadata = metadata ? JSON.stringify(metadata) : null;
-            if (institution_id !== undefined && !Array.isArray(institution_id)) {
+            if (institution_id !== undefined) {
                 // Backward compatibility for single institution_id column
-                updates.institution_id = institution_id || null;
+                // If array, use first element as primary institution
+                updates.institution_id = Array.isArray(institution_id) ? (institution_id[0] || null) : (institution_id || null);
             }
 
             await trx('pathways')
