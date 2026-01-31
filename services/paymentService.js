@@ -339,7 +339,7 @@ class PaymentService {
             let providerData = {};
 
             if (provider === 'stripe') {
-                verificationResult = await this.verifyStripePayment(transaction.provider_transaction_id, this.providers.get('stripe'));
+                verificationResult = await this.verifyStripePayment(transaction.provider_transaction_id, await this.getProvider('stripe'));
                 verified = verificationResult.verified;
                 if (verified) {
                     const stripe = await this.getProvider('stripe');
