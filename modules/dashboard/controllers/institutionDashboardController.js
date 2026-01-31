@@ -413,7 +413,7 @@ class InstitutionDashboardController {
      */
     async updateStudent(req, res) {
         try {
-            const { institutionId } = req.user;
+            const institutionId = req.user.institution_id || req.user.institutionId;
             const { id } = req.params;
             const { student_id, department, level } = req.body;
 
@@ -446,7 +446,7 @@ class InstitutionDashboardController {
      */
     async updateStudentStatus(req, res) {
         try {
-            const { institutionId } = req.user;
+            const institutionId = req.user.institution_id || req.user.institutionId;
             const { id } = req.params;
             const { isActive } = req.body;
 
