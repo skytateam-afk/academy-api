@@ -184,11 +184,16 @@ const requirePermission = (requiredPermissions, options = {}) => {
             // If the request has an institution_id (e.g. in body or query), 
             // and the user has an institution_id, they must match.
             const targetInstitutionId = req.body.institution_id || req.query.institution_id || req.params.institution_id;
-            if (userInstitutionId && targetInstitutionId && userInstitutionId !== targetInstitutionId) {
-                return res.status(403).json({
-                    success: false,
-                    message: 'Institutional access denied'
-                });
+
+            // Check if user's institution matches the target(s)
+            if (userInstitutionId && targetInstitutionId) {
+                const targetIds = Array.isArray(targetInstitutionId) ? targetInstitutionId : [targetInstitutionId];
+                if (!targetIds.includes(userInstitutionId)) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'Institutional access denied'
+                    });
+                }
             }
 
             // Check permissions
