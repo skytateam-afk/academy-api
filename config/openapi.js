@@ -16172,7 +16172,11 @@ const openApiSpec = {
                 properties: {
                   student_id: { type: 'string' },
                   department: { type: 'string' },
-                  level: { type: 'string' }
+                  level: { type: 'string' },
+                  first_name: { type: 'string' },
+                  last_name: { type: 'string' },
+                  phone: { type: 'string' },
+                  username: { type: 'string' }
                 }
               }
             }
