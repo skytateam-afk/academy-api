@@ -49,7 +49,8 @@ const openApiSpec = {
     { name: 'Promotions', description: 'Marketing promotions and campaigns' },
     { name: 'Announcements', description: 'System announcements and notifications' },
     { name: 'Pathways', description: 'Learning pathway management' },
-    { name: 'Jobs', description: 'Job board and application management' }
+    { name: 'Jobs', description: 'Job board and application management' },
+    { name: 'Partnership', description: 'Partnership inquiry management' }
   ],
   components: {
     securitySchemes: {
@@ -510,6 +511,20 @@ const openApiSpec = {
           created_at: { type: 'string', format: 'date-time' },
           updated_at: { type: 'string', format: 'date-time' }
         }
+      },
+      Partner: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          inquiry_type: { type: 'string', example: 'sponsorship' },
+          full_name: { type: 'string', example: 'Jane Doe' },
+          organization: { type: 'string', example: 'Acme Corp' },
+          email_address: { type: 'string', format: 'email', example: 'jane@acme.com' },
+          message: { type: 'string', example: 'We would like to sponsor an event.' },
+          status: { type: 'string', enum: ['new', 'read', 'replied'], default: 'new' },
+          created_at: { type: 'string', format: 'date-time' },
+          updated_at: { type: 'string', format: 'date-time' }
+        }
       }
     }
   },
@@ -766,6 +781,101 @@ const openApiSpec = {
             content: {
               'application/json': {
                 schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/partners': {
+      post: {
+        tags: ['Partnership'],
+        summary: 'Submit a partnership inquiry',
+        description: 'Create a new partnership inquiry. Public endpoint.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['inquiry_type', 'full_name', 'organization', 'email_address', 'message'],
+                properties: {
+                  inquiry_type: { type: 'string', example: 'sponsorship' },
+                  full_name: { type: 'string', example: 'Jane Doe' },
+                  organization: { type: 'string', example: 'Acme Corp' },
+                  email_address: { type: 'string', format: 'email', example: 'jane@acme.com' },
+                  message: { type: 'string', example: 'We would like to sponsor an event.' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Inquiry submitted successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string', example: 'Partnership inquiry submitted successfully' },
+                    data: { $ref: '#/components/schemas/Partner' }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Validation error',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          }
+        }
+      },
+      get: {
+        tags: ['Partnership'],
+        summary: 'Get all partnership inquiries',
+        description: 'Retrieve a paginated list of partnership inquiries. Requires admin privileges ("view.partners" permission).',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'page', in: 'query', schema: { type: 'integer', default: 1 } },
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } },
+          { name: 'sort_by', in: 'query', schema: { type: 'string', default: 'created_at' } },
+          { name: 'sort_order', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'], default: 'desc' } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of partnership inquiries',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        partners: {
+                          type: 'array',
+                          items: { $ref: '#/components/schemas/Partner' }
+                        },
+                        pagination: {
+                          type: 'object',
+                          properties: {
+                            page: { type: 'integer' },
+                            limit: { type: 'integer' },
+                            total: { type: 'integer' },
+                            total_pages: { type: 'integer' }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -14495,6 +14605,50 @@ const openApiSpec = {
                 }
               }
             }
+          }
+        }
+      }
+    },
+
+    '/api/pathways/my-pathways': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get my pathways',
+        description: 'Retrieve a list of pathways the authenticated student is enrolled in.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'My pathways retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', format: 'uuid' },
+                          title: { type: 'string' },
+                          description: { type: 'string' },
+                          thumbnail_url: { type: 'string' },
+                          progress: { type: 'number' },
+                          status: { type: 'string' },
+                          enrolled_at: { type: 'string', format: 'date-time' },
+                          completed_at: { type: 'string', format: 'date-time' },
+                          last_accessed_at: { type: 'string', format: 'date-time' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized'
           }
         }
       }

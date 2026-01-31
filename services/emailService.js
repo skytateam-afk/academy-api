@@ -45,7 +45,7 @@ class EmailService {
         if (!Array.isArray(array) || array.length === 0) {
           return '';
         }
-        
+
         return array.map(item => {
           let itemContent = loopContent;
           Object.keys(item).forEach(key => {
@@ -725,6 +725,48 @@ class EmailService {
       logger.error('✗ Email service configuration error:', error.message);
       return false;
     }
+  }
+  /**
+   * Send partnership confirmation email
+   * @param {Object} partnerData
+   */
+  async sendPartnerConfirmationEmail(partnerData) {
+    const { email_address, full_name, inquiry_type, id } = partnerData;
+
+    return this.sendEmail({
+      to: email_address,
+      subject: 'Partnership Inquiry Received - Skyta Academy',
+      template: 'partner-confirmation',
+      variables: {
+        name: full_name,
+        inquiryType: inquiry_type,
+        id
+      },
+    });
+  }
+
+  /**
+   * Send partnership admin notification email
+   * @param {Object} partnerData
+   */
+  async sendPartnerAdminNotificationEmail(partnerData) {
+    const { email_address, full_name, organization, inquiry_type, message } = partnerData;
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@skyta.edu'; // Use env var or fallback
+    const dashboardUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+    return this.sendEmail({
+      to: adminEmail,
+      subject: `New Partnership Inquiry: ${organization} - Skyta Academy`,
+      template: 'partner-admin-notification',
+      variables: {
+        name: full_name,
+        organization,
+        email: email_address,
+        inquiryType: inquiry_type,
+        message,
+        dashboardUrl
+      },
+    });
   }
 }
 

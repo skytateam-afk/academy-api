@@ -9,6 +9,43 @@ const logger = require('../../../config/winston');
 const { z } = require('zod');
 const notificationService = require('../../notifications/services/notificationService');
 const storageService = require('../../../services/storageService');
+const knex = require('../../../config/knex');
+
+
+
+/**
+ * Get pathways for the authenticated student
+ */
+exports.getMyStudentPathways = async (req, res) => {
+    try {
+        const studentId = req.user.userId || req.user.id; // Get ID from token
+
+        // Reuse logic or query directly
+        const pathways = await knex('pathway_enrollments as pe')
+            .join('pathways as p', 'pe.pathway_id', 'p.id')
+            .where('pe.user_id', studentId)
+            .select(
+                'p.id',
+                'p.title',
+                'p.description',
+                'p.thumbnail_url',
+                'pe.progress_percent as progress',
+                'pe.status',
+                'pe.enrolled_at',
+                'pe.completed_at',
+                'pe.last_accessed_at'
+            )
+            .orderBy('pe.last_accessed_at', 'desc');
+
+        res.json({
+            success: true,
+            data: pathways
+        });
+    } catch (error) {
+        logger.error('Error fetching my pathways', { error: error.message });
+        res.status(500).json({ success: false, message: 'Error fetching your pathways' });
+    }
+};
 
 // Validation schemas
 const createPathwaySchema = z.object({

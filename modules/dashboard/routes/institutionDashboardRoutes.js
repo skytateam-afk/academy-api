@@ -16,6 +16,11 @@ const upload = multer({
 
 // All routes require authentication and institution dashboard view permission
 router.use(authenticateToken);
+
+// Public-ish routes (Self-access allowed)
+
+
+// Institution Dashboard View Permission (Global for remaining routes)
 router.use(requirePermission('institution.dashboard.view'));
 
 // Overview Stats
@@ -59,9 +64,8 @@ router.get('/analytics/pathways/attention',
     institutionDashboardController.getPathwaysNeedingAttention
 );
 
-router.get('/students/:studentId/pathways',
-    requirePermission('institution.students.manage'),
-    institutionDashboardController.getStudentPathways
-);
+
+
+
 
 module.exports = router;
