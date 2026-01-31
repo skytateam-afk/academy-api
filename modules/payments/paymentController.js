@@ -61,6 +61,17 @@ class PaymentController {
                     });
                 }
 
+                // Check if user already has access (via subscription or institution)
+                const User = require('../../modules/user_management/models/User');
+                const hasAccess = await User.hasAccessToCourse(userId, courseId);
+
+                if (hasAccess) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'You already have access to this course through your subscription or institution'
+                    });
+                }
+
                 amount = parseFloat(course.price);
                 currency = requestedCurrency || course.currency || 'USD';
                 metadata.courseTitle = course.title;
