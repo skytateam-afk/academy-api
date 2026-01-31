@@ -8,6 +8,7 @@ const UserSubscription = require('../../../models/UserSubscription');
 const logger = require('../../../config/winston');
 const knex = require('../../../config/knex');
 const { z } = require('zod');
+const PaymentService = require('../../../services/paymentService');
 
 // Validation schemas
 const createTierSchema = z.object({
@@ -43,7 +44,7 @@ const updateTierSchema = z.object({
 
 const subscribeSchema = z.object({
     tierId: z.string().uuid(),
-    paymentProvider: z.enum(['stripe', 'paypal', 'manual']).default('manual'),
+    paymentProvider: z.enum(['stripe', 'paystack', 'manual']).default('manual'),
     subscriptionId: z.string().optional()
 });
 
@@ -410,18 +411,69 @@ exports.subscribe = async (req, res) => {
 
         const { tierId, paymentProvider, subscriptionId } = validationResult.data;
 
+        // Get tier details to check if it's free
+        const tier = await SubscriptionTier.getById(tierId);
+        if (!tier) {
+            return res.status(404).json({
+                success: false,
+                error: 'Subscription tier not found'
+            });
+        }
+
+        const isFree = tier.price === 0;
+        const initialStatus = isFree ? 'active' : 'pending';
+
         const subscription = await UserSubscription.subscribeUser(userId, tierId, {
-            paymentProvider,
-            subscriptionId
+            paymentProvider: isFree ? 'none' : paymentProvider,
+            subscriptionId: isFree ? null : subscriptionId,
+            status: initialStatus
         });
 
-        logger.info('User subscribed successfully', { userId, tierId, subscriptionId: subscription.id });
+        // If free, we are done
+        if (isFree) {
+            logger.info('User subscribed to free tier', { userId, tierId, subscriptionId: subscription.id });
+            return res.status(201).json({
+                success: true,
+                message: 'Subscription created successfully',
+                data: subscription
+            });
+        }
 
-        res.status(201).json({
-            success: true,
-            message: 'Subscription created successfully',
-            data: subscription
-        });
+        // If paid, initiate payment
+        try {
+            const paymentResult = await PaymentService.createPayment({
+                userId,
+                amount: tier.price,
+                currency: tier.currency,
+                provider: paymentProvider,
+                metadata: {
+                    type: 'subscription_payment',
+                    subscriptionId: subscription.id,
+                    tierId: tierId
+                }
+            });
+
+            logger.info('Subscription payment initiated', { userId, tierId, transactionId: paymentResult.transactionId });
+
+            return res.status(201).json({
+                success: true,
+                message: 'Subscription pending payment',
+                data: {
+                    subscription,
+                    payment: paymentResult
+                }
+            });
+
+        } catch (paymentError) {
+            logger.error('Payment initiation failed', { error: paymentError.message, userId, subscriptionId: subscription.id });
+            // Optionally cancel the pending subscription or leave it to expire
+            return res.status(500).json({
+                success: false,
+                error: 'Failed to initiate payment',
+                details: paymentError.message
+            });
+        }
+
     } catch (error) {
         logger.error('Error in subscribe', { error: error.message, userId: req.user?.id });
 
@@ -794,7 +846,7 @@ exports.getSubscriptionStats = async (req, res) => {
             )
             .count('user_subscriptions.id as subscription_count')
             .from('subscription_tiers')
-            .leftJoin('user_subscriptions', function() {
+            .leftJoin('user_subscriptions', function () {
                 this.on('subscription_tiers.id', '=', 'user_subscriptions.tier_id')
                     .andOn('user_subscriptions.status', '=', knex.raw("'active'"));
             })
