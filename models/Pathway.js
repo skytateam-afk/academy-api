@@ -309,7 +309,7 @@ class Pathway {
                 const uniqueInstitutions = [...new Map(institutionsToInsert.map(item => [item.institution_id, item])).values()];
 
                 await trx('pathway_institutions').insert(uniqueInstitutions);
-            } else if (institution_id) {
+            } else if (institution_id && !Array.isArray(institution_id)) {
                 // Backward compatibility
                 await trx('pathway_institutions').insert({
                     pathway_id: pathway.id,
