@@ -768,6 +768,30 @@ class EmailService {
       },
     });
   }
+
+  /**
+   * Send pathway invitation email to institution
+   * @param {Object} institutionData - Institution data
+   * @param {Object} pathwayData - Pathway data
+   * @returns {Promise<Object>} - Email send result
+   */
+  async sendPathwayInviteEmail(institutionData, pathwayData) {
+    const { email, name } = institutionData;
+    const { title, id } = pathwayData;
+    const dashboardUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+    return this.sendEmail({
+      to: email,
+      subject: `Pathway Invitation: ${title} - Skyta Academy`,
+      template: 'pathway-invite',
+      variables: {
+        institutionName: name,
+        pathwayTitle: title,
+        actionUrl: `${dashboardUrl}/pathways/${id}`,
+        actionText: 'View Pathway'
+      },
+    });
+  }
 }
 
 module.exports = new EmailService();

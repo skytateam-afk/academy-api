@@ -84,7 +84,7 @@ class Institution {
             // Get total count
             const [{ total }] = await knex('institutions')
                 .leftJoin('subscription_tiers as st', 'institutions.subscription_tier_id', 'st.id')
-                .where(function() {
+                .where(function () {
                     if (search) {
                         this.where('institutions.name', 'ilike', `%${search}%`);
                     }
@@ -124,6 +124,9 @@ class Institution {
                 .select(
                     'institutions.id',
                     'institutions.name',
+                    'institutions.official_email',
+                    'institutions.address',
+                    'institutions.phone_number',
                     'institutions.subscription_tier_id',
                     'st.name as subscription_tier_name',
                     'st.slug as subscription_tier_slug',

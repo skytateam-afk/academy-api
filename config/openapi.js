@@ -14435,7 +14435,11 @@ const openApiSpec = {
                   certificationCriteria: { type: 'string', description: 'Certification criteria' },
                   enrollmentLimit: { type: 'integer', description: 'Maximum enrollments allowed' },
                   createdBy: { type: 'string', format: 'uuid', description: 'Creator user ID' },
-                  institution_id: { type: 'string', format: 'uuid', nullable: true, description: 'Institution ID (optional - pathway will belong to this institution)' },
+                  institution_id: {
+                    type: 'array',
+                    items: { type: 'string', format: 'uuid' },
+                    description: 'List of Institution IDs (optional - pathway will be associated with these institutions)'
+                  },
                   thumbnailUrl: { type: 'string', format: 'uri', description: 'Thumbnail image URL' },
                   bannerUrl: { type: 'string', format: 'uri', description: 'Banner image URL' }
                 }

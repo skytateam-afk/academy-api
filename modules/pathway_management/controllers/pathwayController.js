@@ -10,6 +10,8 @@ const { z } = require('zod');
 const notificationService = require('../../notifications/services/notificationService');
 const storageService = require('../../../services/storageService');
 const knex = require('../../../config/knex');
+const Institution = require('../../../models/Institution');
+const emailService = require('../../../services/emailService');
 
 
 
@@ -68,7 +70,7 @@ const createPathwaySchema = z.object({
     certificationCriteria: z.string().optional(),
     enrollmentLimit: z.preprocess((val) => val ? parseInt(val) : undefined, z.number().int().positive().optional()),
     createdBy: z.string().uuid(),
-    institution_id: z.string().uuid().optional(),
+    institution_id: z.array(z.string().uuid()).optional(),
     metadata: z.record(z.any()).optional()
 });
 
@@ -313,9 +315,9 @@ exports.createPathway = async (req, res) => {
         const requestBody = {
             ...req.body,
             createdBy: req.body.createdBy || userId,
-            // Force institution_id for institution admins
+            // Force institution_id for institution admins (add their institution if not present)
             institution_id: (req.user.role === 'institution' || req.user.role_name === 'institution') && req.user.institution_id
-                ? req.user.institution_id
+                ? (Array.isArray(req.body.institution_id) ? [...new Set([...req.body.institution_id, req.user.institution_id])] : [req.user.institution_id])
                 : req.body.institution_id
         };
 
@@ -399,6 +401,34 @@ exports.createPathway = async (req, res) => {
         // Send pathway created notification to creator (don't block response)
         notificationService.sendPathwayCreatedNotification(userId, pathway.title)
             .catch(err => logger.error('Failed to send pathway created notification', { error: err.message }));
+
+        // Notify associated institutions
+        const institutionIdsToNotify = new Set();
+        if (pathwayData.institution_id && Array.isArray(pathwayData.institution_id)) {
+            pathwayData.institution_id.forEach(id => institutionIdsToNotify.add(id));
+        }
+
+        if (institutionIdsToNotify.size > 0) {
+            // Process notifications in background
+            (async () => {
+                for (const instId of institutionIdsToNotify) {
+                    try {
+                        const institution = await Institution.getById(instId);
+                        if (institution && institution.official_email) {
+                            await emailService.sendPathwayInviteEmail({
+                                email: institution.official_email,
+                                name: institution.name
+                            }, {
+                                title: pathway.title,
+                                id: pathway.id
+                            });
+                        }
+                    } catch (err) {
+                        logger.error('Failed to notify institution', { institutionId: instId, error: err.message });
+                    }
+                }
+            })();
+        }
 
         logger.info('Pathway created successfully', {
             pathwayId: pathway.id,
@@ -490,13 +520,20 @@ exports.updatePathway = async (req, res) => {
                 return res.status(404).json({ success: false, error: 'Pathway not found' });
             }
             if (existingPathway.institution_id !== req.user.institution_id) {
-                logger.warn('Unauthorized pathway update attempt', {
-                    userId: req.user.userId,
-                    pathwayId: id,
-                    userInstitution: req.user.institution_id,
-                    pathwayInstitution: existingPathway.institution_id
-                });
-                return res.status(403).json({ success: false, error: 'Unauthorized to update this pathway' });
+                // Check if institution is associated via pathway_institutions table
+                const isAssociated = await knex('pathway_institutions')
+                    .where({ pathway_id: id, institution_id: req.user.institution_id })
+                    .first();
+
+                if (!isAssociated) {
+                    logger.warn('Unauthorized pathway update attempt', {
+                        userId: req.user.userId,
+                        pathwayId: id,
+                        userInstitution: req.user.institution_id,
+                        pathwayInstitution: existingPathway.institution_id
+                    });
+                    return res.status(403).json({ success: false, error: 'Unauthorized to update this pathway' });
+                }
             }
         }
 
@@ -931,6 +968,8 @@ exports.getMyApplications = async (req, res) => {
         };
 
         const result = await PathwayApplication.getByUser(userId, options);
+
+
 
         res.json({
             success: true,
