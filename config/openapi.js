@@ -50,7 +50,8 @@ const openApiSpec = {
     { name: 'Announcements', description: 'System announcements and notifications' },
     { name: 'Pathways', description: 'Learning pathway management' },
     { name: 'Jobs', description: 'Job board and application management' },
-    { name: 'Partnership', description: 'Partnership inquiry management' }
+    { name: 'Partnership', description: 'Partnership inquiry management' },
+    { name: 'Subscriptions', description: 'Subscription tiers and user subscription management' }
   ],
   components: {
     securitySchemes: {
@@ -525,10 +526,201 @@ const openApiSpec = {
           created_at: { type: 'string', format: 'date-time' },
           updated_at: { type: 'string', format: 'date-time' }
         }
+      },
+    SubscriptionTier: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', format: 'uuid' },
+        name: { type: 'string' },
+        slug: { type: 'string' },
+        description: { type: 'string', nullable: true },
+        shortDescription: { type: 'string', nullable: true },
+        price: { type: 'number', format: 'decimal' },
+        currency: { type: 'string', default: 'USD' },
+        billingCycleMonths: { type: 'integer', default: 1 },
+        billingCycleDays: { type: 'integer', default: 30 },
+        features: { type: 'array', items: { type: 'string' }, nullable: true },
+        maxUsers: { type: 'integer', default: -1 },
+        isPopular: { type: 'boolean', default: false },
+        isActive: { type: 'boolean', default: true },
+        sortOrder: { type: 'integer', default: 0 },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    },
+    UserSubscription: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', format: 'uuid' },
+        userId: { type: 'string', format: 'uuid' },
+        tierId: { type: 'string', format: 'uuid' },
+        status: { type: 'string', enum: ['active', 'cancelled', 'expired', 'pending', 'past_due'], default: 'active' },
+        startDate: { type: 'string', format: 'date-time' },
+        endDate: { type: 'string', format: 'date-time' },
+        cancelledAt: { type: 'string', format: 'date-time', nullable: true },
+        cancellationReason: { type: 'string', nullable: true },
+        paymentProvider: { type: 'string', nullable: true },
+        subscriptionId: { type: 'string', nullable: true },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' },
+        tier: { $ref: '#/components/schemas/SubscriptionTier' }
       }
     }
-  },
+  }
+},
   paths: {
+    '/api/subscriptions/tiers': {
+      get: {
+        tags: ['Subscriptions'],
+        summary: 'Get all subscription tiers',
+        description: 'Retrieve a list of available subscription tiers.',
+        parameters: [
+          { name: 'isActive', in: 'query', schema: { type: 'boolean' } }
+        ],
+        responses: {
+          '200': {
+            description: 'List of subscription tiers',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { type: 'array', items: { $ref: '#/components/schemas/SubscriptionTier' } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/subscriptions/subscribe': {
+      post: {
+        tags: ['Subscriptions'],
+        summary: 'Subscribe to a tier',
+        description: 'Subscribe the current user to a subscription tier.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['tierId'],
+                properties: {
+                  tierId: { type: 'string', format: 'uuid' },
+                  paymentProvider: { type: 'string', enum: ['stripe', 'paypal', 'manual'], default: 'manual' },
+                  subscriptionId: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Subscription created successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    data: { $ref: '#/components/schemas/UserSubscription' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/subscriptions/my-subscriptions': {
+      get: {
+        tags: ['Subscriptions'],
+        summary: 'Get my subscriptions',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'User subscriptions',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { type: 'array', items: { $ref: '#/components/schemas/UserSubscription' } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/subscriptions/my-active-subscription': {
+      get: {
+        tags: ['Subscriptions'],
+        summary: 'Get my active subscription',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Active subscription',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: { $ref: '#/components/schemas/UserSubscription' }
+                  }
+                }
+              }
+            }
+          },
+          '404': {
+            description: 'No active subscription found'
+          }
+        }
+      }
+    },
+    '/api/subscriptions/cancel-subscription': {
+      patch: {
+        tags: ['Subscriptions'],
+        summary: 'Cancel active subscription',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  reason: { type: 'string' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Subscription cancelled',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    data: { $ref: '#/components/schemas/UserSubscription' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     '/api/auth/signup': {
       post: {
         tags: ['Authentication'],
