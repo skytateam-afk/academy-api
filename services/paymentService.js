@@ -362,13 +362,25 @@ class PaymentService {
             }
 
             if (verified) {
-                // Update transaction status
+                // Merge existing metadata with provider data
+                let existingMetadata = {};
+                try {
+                    existingMetadata = typeof transaction.payment_metadata === 'string'
+                        ? JSON.parse(transaction.payment_metadata)
+                        : transaction.payment_metadata || {};
+                } catch (e) {
+                    existingMetadata = {};
+                }
+
                 await db('transactions')
                     .where({ id: transactionId })
                     .update({
                         status: 'completed',
                         paid_at: new Date(),
-                        payment_metadata: JSON.stringify(providerData)
+                        payment_metadata: JSON.stringify({
+                            ...existingMetadata,
+                            ...providerData
+                        })
                     });
 
                 // Handle Course Enrollment

@@ -70,6 +70,7 @@ class UserSubscription {
                 'subscription_tiers.slug as tier_slug',
                 'subscription_tiers.price as tier_price',
                 'subscription_tiers.currency as tier_currency',
+                'subscription_tiers.billing_cycle_months as tier_billing_cycle_months',
                 'subscription_tiers.features as tier_features',
                 'users.first_name as user_first_name',
                 'users.last_name as user_last_name',
@@ -100,6 +101,7 @@ class UserSubscription {
                 'subscription_tiers.slug as tier_slug',
                 'subscription_tiers.price as tier_price',
                 'subscription_tiers.currency as tier_currency',
+                'subscription_tiers.billing_cycle_months as tier_billing_cycle_months',
                 'subscription_tiers.features as tier_features',
                 'users.first_name as user_first_name',
                 'users.last_name as user_last_name',
@@ -501,6 +503,7 @@ class UserSubscription {
                 slug: subscription.tier_slug,
                 price: subscription.tier_price,
                 currency: subscription.tier_currency,
+                billingCycleMonths: subscription.tier_billing_cycle_months,
                 features: subscription.tier_features
             },
             // User details

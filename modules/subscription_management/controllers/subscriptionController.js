@@ -44,7 +44,7 @@ const updateTierSchema = z.object({
 
 const subscribeSchema = z.object({
     tierId: z.string().uuid(),
-    paymentProvider: z.enum(['stripe', 'paypal', 'manual']).default('manual'),
+    paymentProvider: z.enum(['stripe', 'paystack', 'manual']).default('manual'),
     subscriptionId: z.string().optional()
 });
 
