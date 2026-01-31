@@ -358,7 +358,9 @@ class Pathway {
                 hasCertification,
                 certificationCriteria,
                 enrollmentLimit,
-                metadata
+
+                metadata,
+                institution_id
             } = updateData;
 
             // Generate new slug if title changed
@@ -393,10 +395,35 @@ class Pathway {
             if (certificationCriteria !== undefined) updates.certification_criteria = certificationCriteria;
             if (enrollmentLimit !== undefined) updates.enrollment_limit = enrollmentLimit;
             if (metadata !== undefined) updates.metadata = metadata ? JSON.stringify(metadata) : null;
+            if (institution_id !== undefined && !Array.isArray(institution_id)) {
+                // Backward compatibility for single institution_id column
+                updates.institution_id = institution_id || null;
+            }
 
             await trx('pathways')
                 .where('id', id)
                 .update(updates);
+
+            // Handle many-to-many institution relationship if provided
+            if (institution_id !== undefined) {
+                // First remove existing associations
+                await trx('pathway_institutions').where('pathway_id', id).delete();
+
+                if (Array.isArray(institution_id) && institution_id.length > 0) {
+                    const institutionsToInsert = institution_id.map(instId => ({
+                        pathway_id: id,
+                        institution_id: instId
+                    }));
+                    // Dedup
+                    const uniqueInstitutions = [...new Map(institutionsToInsert.map(item => [item.institution_id, item])).values()];
+                    await trx('pathway_institutions').insert(uniqueInstitutions);
+                } else if (institution_id && !Array.isArray(institution_id)) {
+                    await trx('pathway_institutions').insert({
+                        pathway_id: id,
+                        institution_id: institution_id
+                    });
+                }
+            }
 
             await trx.commit();
 

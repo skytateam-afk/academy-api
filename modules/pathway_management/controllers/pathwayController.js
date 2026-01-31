@@ -93,6 +93,7 @@ const updatePathwaySchema = z.object({
     }, z.boolean().optional()),
     certificationCriteria: z.string().optional().nullable(),
     enrollmentLimit: z.preprocess((val) => val ? parseInt(val) : undefined, z.number().int().positive().optional().nullable()),
+    institution_id: z.union([z.string().uuid(), z.array(z.string().uuid())]).optional().nullable(),
     metadata: z.record(z.any()).optional().nullable()
 });
 
