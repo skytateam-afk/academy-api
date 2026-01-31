@@ -415,7 +415,8 @@ class InstitutionDashboardController {
         try {
             const institutionId = req.user.institution_id || req.user.institutionId;
             const { id } = req.params;
-            const { student_id, department, level } = req.body;
+            const { student_id, studentId, department, level } = req.body;
+            const finalStudentId = student_id || studentId;
 
             const student = await knex('users')
                 .where({ id, institution_id: institutionId })
@@ -428,7 +429,7 @@ class InstitutionDashboardController {
             await knex('users')
                 .where({ id })
                 .update({
-                    student_id,
+                    student_id: finalStudentId,
                     department,
                     level,
                     updated_at: new Date()
