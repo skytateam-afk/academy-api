@@ -43,4 +43,25 @@ router.post('/pathways/assign-single',
     institutionDashboardController.assignSinglePathway
 );
 
+// Analytics Routes
+router.get('/analytics/activity',
+    requirePermission('institution.dashboard.view'),
+    institutionDashboardController.getRecentStudentActivity
+);
+
+router.get('/analytics/pathways/top',
+    requirePermission('institution.dashboard.view'),
+    institutionDashboardController.getTopPerformingPathways
+);
+
+router.get('/analytics/pathways/attention',
+    requirePermission('institution.dashboard.view'),
+    institutionDashboardController.getPathwaysNeedingAttention
+);
+
+router.get('/students/:studentId/pathways',
+    requirePermission('institution.students.manage'),
+    institutionDashboardController.getStudentPathways
+);
+
 module.exports = router;

@@ -334,7 +334,7 @@ class InstitutionDashboardController {
      */
     async assignSinglePathway(req, res) {
         try {
-            const { institutionId } = req.user;
+            const institutionId = req.user.institution_id || req.user.institutionId;
             const { pathway_id, student_id } = req.body;
 
             // Normalize input names if they come in differently (e.g. camelCase vs snake_case)
@@ -415,7 +415,8 @@ class InstitutionDashboardController {
         try {
             const institutionId = req.user.institution_id || req.user.institutionId;
             const { id } = req.params;
-            const { student_id, department, level } = req.body;
+            const { student_id, studentId, department, level } = req.body;
+            const finalStudentId = student_id || studentId;
 
             const student = await knex('users')
                 .where({ id, institution_id: institutionId })
@@ -428,7 +429,7 @@ class InstitutionDashboardController {
             await knex('users')
                 .where({ id })
                 .update({
-                    student_id,
+                    student_id: finalStudentId,
                     department,
                     level,
                     updated_at: new Date()
@@ -481,6 +482,169 @@ class InstitutionDashboardController {
         } catch (error) {
             logger.error('Error updating student status', { error: error.message });
             res.status(500).json({ success: false, message: 'Error updating student status' });
+        }
+    }
+    /**
+     * Get recent student activity across all pathways
+     */
+    async getRecentStudentActivity(req, res) {
+        try {
+            const institutionId = req.user.institution_id || req.user.institutionId;
+            const { limit = 10 } = req.query;
+
+            const activity = await knex('pathway_enrollments as pe')
+                .join('users as u', 'pe.user_id', 'u.id')
+                .join('pathways as p', 'pe.pathway_id', 'p.id')
+                .where('u.institution_id', institutionId)
+                .select(
+                    'u.id as student_id',
+                    'u.first_name',
+                    'u.last_name',
+                    'u.avatar_url',
+                    'p.id as pathway_id',
+                    'p.title as pathway_title',
+                    'pe.progress',
+                    'pe.last_accessed_at',
+                    'pe.status'
+                )
+                .orderBy('pe.last_accessed_at', 'desc')
+                .limit(parseInt(limit));
+
+            res.json({
+                success: true,
+                data: activity
+            });
+        } catch (error) {
+            logger.error('Error fetching student activity', { error: error.message });
+            res.status(500).json({ success: false, message: 'Error fetching student activity' });
+        }
+    }
+
+    /**
+     * Get top performing pathways based on completion rate
+     */
+    async getTopPerformingPathways(req, res) {
+        try {
+            const institutionId = req.user.institution_id || req.user.institutionId;
+            const { limit = 5 } = req.query;
+
+            // Calculate average progress for each pathway in this institution
+            const pathways = await knex('pathways as p')
+                .leftJoin('pathway_enrollments as pe', 'p.id', 'pe.pathway_id')
+                .where('p.institution_id', institutionId)
+                .select(
+                    'p.id',
+                    'p.title',
+                    knex.raw('COUNT(pe.id) as total_enrolled'),
+                    knex.raw('COALESCE(AVG(pe.progress), 0) as avg_progress'),
+                    knex.raw("COUNT(CASE WHEN pe.status = 'completed' THEN 1 END) as completion_count")
+                )
+                .groupBy('p.id')
+                .orderBy('avg_progress', 'desc')
+                .limit(parseInt(limit));
+
+            res.json({
+                success: true,
+                data: pathways.map(p => ({
+                    ...p,
+                    avg_progress: Math.round(parseFloat(p.avg_progress || 0)),
+                    total_enrolled: parseInt(p.total_enrolled),
+                    completion_count: parseInt(p.completion_count)
+                }))
+            });
+        } catch (error) {
+            logger.error('Error fetching top pathways', { error: error.message });
+            res.status(500).json({ success: false, message: 'Error fetching top pathways' });
+        }
+    }
+
+    /**
+     * Get pathways needing attention (low engagement/progress)
+     */
+    async getPathwaysNeedingAttention(req, res) {
+        try {
+            const institutionId = req.user.institution_id || req.user.institutionId;
+            const { limit = 5 } = req.query;
+
+            // Find pathways with lowest average progress, but only if they have enrollments
+            const pathways = await knex('pathways as p')
+                .join('pathway_enrollments as pe', 'p.id', 'pe.pathway_id')
+                .where('p.institution_id', institutionId)
+                .select(
+                    'p.id',
+                    'p.title',
+                    knex.raw('COUNT(pe.id) as total_enrolled'),
+                    knex.raw('COALESCE(AVG(pe.progress), 0) as avg_progress'),
+                    knex.raw("count(CASE WHEN pe.last_accessed_at < NOW() - INTERVAL '7 days' THEN 1 END) as inactive_count")
+                )
+                .groupBy('p.id')
+                .having(knex.raw('COUNT(pe.id)'), '>', 0) // Only consider active pathways
+                .orderBy('avg_progress', 'asc')
+                .limit(parseInt(limit));
+
+            res.json({
+                success: true,
+                data: pathways.map(p => ({
+                    ...p,
+                    avg_progress: Math.round(parseFloat(p.avg_progress || 0)),
+                    total_enrolled: parseInt(p.total_enrolled),
+                    inactive_count: parseInt(p.inactive_count)
+                }))
+            });
+        } catch (error) {
+            logger.error('Error fetching pathways needing attention', { error: error.message });
+            res.status(500).json({ success: false, message: 'Error fetching pathway attention data' });
+        }
+    }
+
+    /**
+     * Get detailed pathway progress for a specific student
+     */
+    async getStudentPathways(req, res) {
+        try {
+            const institutionId = req.user.institution_id || req.user.institutionId;
+            const { studentId } = req.params;
+
+            // Verify student belongs to institution
+            const student = await knex('users')
+                .where({ id: studentId, institution_id: institutionId })
+                .first();
+
+            if (!student) {
+                return res.status(404).json({ success: false, message: 'Student not found in your institution' });
+            }
+
+            const pathways = await knex('pathway_enrollments as pe')
+                .join('pathways as p', 'pe.pathway_id', 'p.id')
+                .where('pe.user_id', studentId)
+                .select(
+                    'p.id',
+                    'p.title',
+                    'p.description',
+                    'pe.progress',
+                    'pe.status',
+                    'pe.enrolled_at',
+                    'pe.completed_at',
+                    'pe.last_accessed_at'
+                )
+                .orderBy('pe.last_accessed_at', 'desc');
+
+            res.json({
+                success: true,
+                data: {
+                    student: {
+                        id: student.id,
+                        first_name: student.first_name,
+                        last_name: student.last_name,
+                        email: student.email,
+                        avatar_url: student.avatar_url
+                    },
+                    pathways
+                }
+            });
+        } catch (error) {
+            logger.error('Error fetching student pathways', { error: error.message });
+            res.status(500).json({ success: false, message: 'Error fetching student pathways' });
         }
     }
 }
