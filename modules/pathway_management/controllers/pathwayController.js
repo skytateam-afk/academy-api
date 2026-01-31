@@ -501,7 +501,16 @@ exports.updatePathway = async (req, res) => {
         }
 
         logger.info('Validating request body against updatePathwaySchema...');
-        const validationResult = updatePathwaySchema.safeParse(req.body);
+
+        // Force institution_id for institution admins if they are providing it
+        const requestBody = { ...req.body };
+        if ((req.user.role === 'institution' || req.user.role_name === 'institution') && req.user.institution_id && req.body.institution_id) {
+            requestBody.institution_id = Array.isArray(req.body.institution_id)
+                ? [...new Set([...req.body.institution_id, req.user.institution_id])]
+                : [req.body.institution_id, req.user.institution_id];
+        }
+
+        const validationResult = updatePathwaySchema.safeParse(requestBody);
 
         if (!validationResult.success) {
             logger.error('Validation failed:', JSON.stringify(validationResult.error.errors, null, 2));
@@ -510,6 +519,26 @@ exports.updatePathway = async (req, res) => {
                 error: 'Validation failed',
                 details: validationResult.error.errors
             });
+        }
+
+        // Validate that all provided institution IDs exist
+        if (requestBody.institution_id) {
+            const institutionIdsToCheck = Array.isArray(requestBody.institution_id)
+                ? requestBody.institution_id
+                : [requestBody.institution_id];
+
+            for (const instId of institutionIdsToCheck) {
+                // Skip if it's not a valid UUID format (although zod should have caught this)
+                if (!z.string().uuid().safeParse(instId).success) continue;
+
+                const institutionExists = await Institution.getById(instId);
+                if (!institutionExists) {
+                    return res.status(400).json({
+                        success: false,
+                        error: `Institution with ID ${instId} does not exist`
+                    });
+                }
+            }
         }
 
         logger.info('Validation passed successfully');

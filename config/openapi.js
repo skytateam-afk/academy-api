@@ -452,14 +452,26 @@ const openApiSpec = {
           title: { type: 'string', example: 'Full Stack Web Development' },
           slug: { type: 'string', example: 'full-stack-web-development' },
           description: { type: 'string', nullable: true },
-          imageUrl: { type: 'string', nullable: true },
-          duration: { type: 'string', nullable: true, description: 'Estimated duration (e.g., "3 months")' },
-          level: { type: 'string', enum: ['beginner', 'intermediate', 'advanced', 'all'], default: 'beginner' },
-          isPublished: { type: 'boolean', default: false },
-          isFeatured: { type: 'boolean', default: false },
-          enrollmentCount: { type: 'integer', default: 0 },
-          institutionId: { type: 'string', format: 'uuid', nullable: true, description: 'Institution this pathway belongs to' },
-          createdBy: { type: 'string', format: 'uuid' },
+          short_description: { type: 'string', nullable: true },
+          thumbnail_url: { type: 'string', nullable: true },
+          banner_url: { type: 'string', nullable: true },
+          career_focus: { type: 'string', nullable: true },
+          category_id: { type: 'string', format: 'uuid', nullable: true },
+          category_name: { type: 'string', nullable: true },
+          subscription_tier_id: { type: 'string', format: 'uuid', nullable: true },
+          subscription_tier_name: { type: 'string', nullable: true },
+          level: { type: 'string', enum: ['beginner', 'intermediate', 'advanced', 'all'], default: 'all' },
+          price: { type: 'number', format: 'decimal' },
+          currency: { type: 'string', default: 'USD' },
+          has_certification: { type: 'boolean', default: false },
+          certification_criteria: { type: 'string', nullable: true },
+          enrollment_limit: { type: 'integer', nullable: true },
+          is_published: { type: 'boolean', default: false },
+          is_featured: { type: 'boolean', default: false },
+          enrollment_count_actual: { type: 'integer', default: 0 },
+          institution_id: { type: 'string', format: 'uuid', nullable: true },
+          created_by: { type: 'string', format: 'uuid' },
+          creator_username: { type: 'string', nullable: true },
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' },
           courses: {
@@ -467,9 +479,13 @@ const openApiSpec = {
             items: {
               type: 'object',
               properties: {
-                courseId: { type: 'string', format: 'uuid' },
-                orderIndex: { type: 'integer' },
-                isRequired: { type: 'boolean' }
+                id: { type: 'string', format: 'uuid' },
+                pathway_id: { type: 'string', format: 'uuid' },
+                course_id: { type: 'string', format: 'uuid' },
+                sequence_order: { type: 'integer' },
+                is_required: { type: 'boolean' },
+                title: { type: 'string' },
+                slug: { type: 'string' }
               }
             }
           }
@@ -527,47 +543,47 @@ const openApiSpec = {
           updated_at: { type: 'string', format: 'date-time' }
         }
       },
-    SubscriptionTier: {
-      type: 'object',
-      properties: {
-        id: { type: 'string', format: 'uuid' },
-        name: { type: 'string' },
-        slug: { type: 'string' },
-        description: { type: 'string', nullable: true },
-        shortDescription: { type: 'string', nullable: true },
-        price: { type: 'number', format: 'decimal' },
-        currency: { type: 'string', default: 'USD' },
-        billingCycleMonths: { type: 'integer', default: 1 },
-        billingCycleDays: { type: 'integer', default: 30 },
-        features: { type: 'array', items: { type: 'string' }, nullable: true },
-        maxUsers: { type: 'integer', default: -1 },
-        isPopular: { type: 'boolean', default: false },
-        isActive: { type: 'boolean', default: true },
-        sortOrder: { type: 'integer', default: 0 },
-        createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' }
-      }
-    },
-    UserSubscription: {
-      type: 'object',
-      properties: {
-        id: { type: 'string', format: 'uuid' },
-        userId: { type: 'string', format: 'uuid' },
-        tierId: { type: 'string', format: 'uuid' },
-        status: { type: 'string', enum: ['active', 'cancelled', 'expired', 'pending', 'past_due'], default: 'active' },
-        startDate: { type: 'string', format: 'date-time' },
-        endDate: { type: 'string', format: 'date-time' },
-        cancelledAt: { type: 'string', format: 'date-time', nullable: true },
-        cancellationReason: { type: 'string', nullable: true },
-        paymentProvider: { type: 'string', nullable: true },
-        subscriptionId: { type: 'string', nullable: true },
-        createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' },
-        tier: { $ref: '#/components/schemas/SubscriptionTier' }
+      SubscriptionTier: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          name: { type: 'string' },
+          slug: { type: 'string' },
+          description: { type: 'string', nullable: true },
+          shortDescription: { type: 'string', nullable: true },
+          price: { type: 'number', format: 'decimal' },
+          currency: { type: 'string', default: 'USD' },
+          billingCycleMonths: { type: 'integer', default: 1 },
+          billingCycleDays: { type: 'integer', default: 30 },
+          features: { type: 'array', items: { type: 'string' }, nullable: true },
+          maxUsers: { type: 'integer', default: -1 },
+          isPopular: { type: 'boolean', default: false },
+          isActive: { type: 'boolean', default: true },
+          sortOrder: { type: 'integer', default: 0 },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      },
+      UserSubscription: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          userId: { type: 'string', format: 'uuid' },
+          tierId: { type: 'string', format: 'uuid' },
+          status: { type: 'string', enum: ['active', 'cancelled', 'expired', 'pending', 'past_due'], default: 'active' },
+          startDate: { type: 'string', format: 'date-time' },
+          endDate: { type: 'string', format: 'date-time' },
+          cancelledAt: { type: 'string', format: 'date-time', nullable: true },
+          cancellationReason: { type: 'string', nullable: true },
+          paymentProvider: { type: 'string', nullable: true },
+          subscriptionId: { type: 'string', nullable: true },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+          tier: { $ref: '#/components/schemas/SubscriptionTier' }
+        }
       }
     }
-  }
-},
+  },
   paths: {
     '/api/subscriptions/tiers': {
       get: {
@@ -14632,8 +14648,31 @@ const openApiSpec = {
                     items: { type: 'string', format: 'uuid' },
                     description: 'List of Institution IDs (optional - pathway will be associated with these institutions)'
                   },
-                  thumbnailUrl: { type: 'string', format: 'uri', description: 'Thumbnail image URL' },
-                  bannerUrl: { type: 'string', format: 'uri', description: 'Banner image URL' }
+                  thumbnailUrl: { type: 'string', format: 'uri', description: 'Thumbnail image URL (if not uploading file)' },
+                  bannerUrl: { type: 'string', format: 'uri', description: 'Banner image URL (if not uploading file)' }
+                }
+              }
+            },
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                required: ['title', 'description', 'createdBy'],
+                properties: {
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  shortDescription: { type: 'string' },
+                  careerFocus: { type: 'string' },
+                  categoryId: { type: 'string', format: 'uuid' },
+                  level: { type: 'string', enum: ['beginner', 'intermediate', 'advanced', 'all'] },
+                  price: { type: 'number' },
+                  currency: { type: 'string' },
+                  hasCertification: { type: 'boolean' },
+                  certificationCriteria: { type: 'string' },
+                  enrollmentLimit: { type: 'integer' },
+                  createdBy: { type: 'string', format: 'uuid' },
+                  institution_id: { type: 'array', items: { type: 'string', format: 'uuid' } },
+                  thumbnail: { type: 'string', format: 'binary', description: 'Thumbnail image file' },
+                  banner: { type: 'string', format: 'binary', description: 'Banner image file' }
                 }
               }
             }
@@ -14750,12 +14789,58 @@ const openApiSpec = {
               schema: {
                 type: 'object',
                 properties: {
+                  title: { type: 'string', description: 'Pathway title' },
+                  description: { type: 'string', description: 'Pathway description' },
+                  shortDescription: { type: 'string', description: 'Short description (max 500 chars)' },
+                  careerFocus: { type: 'string', example: 'Full Stack Development', description: 'Career focus area' },
+                  categoryId: { type: 'string', format: 'uuid', description: 'Category ID' },
+                  level: { type: 'string', enum: ['beginner', 'intermediate', 'advanced', 'all'], description: 'Difficulty level' },
+                  price: { type: 'number', example: 99.99, description: 'Pathway price' },
+                  currency: { type: 'string', example: 'USD', description: 'Currency code (3 chars)' },
+                  hasCertification: { type: 'boolean', description: 'Whether pathway offers certification' },
+                  certificationCriteria: { type: 'string', description: 'Certification criteria' },
+                  enrollmentLimit: { type: 'integer', description: 'Maximum enrollments allowed' },
+                  institution_id: {
+                    oneOf: [
+                      { type: 'string', format: 'uuid' },
+                      {
+                        type: 'array',
+                        items: { type: 'string', format: 'uuid' }
+                      }
+                    ],
+                    description: 'Institution ID or list of Institution IDs (optional)'
+                  },
+                  isPublished: { type: 'boolean' },
+                  isFeatured: { type: 'boolean' }
+                }
+              }
+            },
+            'multipart/form-data': {
+              schema: {
+                type: 'object',
+                properties: {
                   title: { type: 'string' },
                   description: { type: 'string' },
-                  slug: { type: 'string' },
-                  imageUrl: { type: 'string' },
-                  duration: { type: 'string' },
-                  difficulty: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'] },
+                  shortDescription: { type: 'string' },
+                  careerFocus: { type: 'string' },
+                  categoryId: { type: 'string', format: 'uuid' },
+                  level: { type: 'string', enum: ['beginner', 'intermediate', 'advanced', 'all'] },
+                  price: { type: 'number' },
+                  currency: { type: 'string' },
+                  hasCertification: { type: 'boolean' },
+                  certificationCriteria: { type: 'string' },
+                  enrollmentLimit: { type: 'integer' },
+                  institution_id: {
+                    oneOf: [
+                      { type: 'string', format: 'uuid' },
+                      {
+                        type: 'array',
+                        items: { type: 'string', format: 'uuid' }
+                      }
+                    ]
+                  },
+                  thumbnail: { type: 'string', format: 'binary', description: 'Thumbnail image file' },
+                  banner: { type: 'string', format: 'binary', description: 'Banner image file' },
                   isPublished: { type: 'boolean' },
                   isFeatured: { type: 'boolean' }
                 }
