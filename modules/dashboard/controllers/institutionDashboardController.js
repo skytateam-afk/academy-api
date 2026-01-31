@@ -524,7 +524,7 @@ class InstitutionDashboardController {
                     'u.avatar_url',
                     'p.id as pathway_id',
                     'p.title as pathway_title',
-                    'pe.progress',
+                    'pe.progress_percent as progress',
                     'pe.last_accessed_at',
                     'pe.status'
                 )
@@ -557,7 +557,7 @@ class InstitutionDashboardController {
                     'p.id',
                     'p.title',
                     knex.raw('COUNT(pe.id) as total_enrolled'),
-                    knex.raw('COALESCE(AVG(pe.progress), 0) as avg_progress'),
+                    knex.raw('COALESCE(AVG(pe.progress_percent), 0) as avg_progress'),
                     knex.raw("COUNT(CASE WHEN pe.status = 'completed' THEN 1 END) as completion_count")
                 )
                 .groupBy('p.id')
@@ -595,7 +595,7 @@ class InstitutionDashboardController {
                     'p.id',
                     'p.title',
                     knex.raw('COUNT(pe.id) as total_enrolled'),
-                    knex.raw('COALESCE(AVG(pe.progress), 0) as avg_progress'),
+                    knex.raw('COALESCE(AVG(pe.progress_percent), 0) as avg_progress'),
                     knex.raw("count(CASE WHEN pe.last_accessed_at < NOW() - INTERVAL '7 days' THEN 1 END) as inactive_count")
                 )
                 .groupBy('p.id')
@@ -642,7 +642,7 @@ class InstitutionDashboardController {
                     'p.id',
                     'p.title',
                     'p.description',
-                    'pe.progress',
+                    'pe.progress_percent as progress',
                     'pe.status',
                     'pe.enrolled_at',
                     'pe.completed_at',
