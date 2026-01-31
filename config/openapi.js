@@ -16395,6 +16395,184 @@ const openApiSpec = {
         }
       }
     },
+    '/api/dashboard/institution/analytics/activity': {
+      get: {
+        tags: ['Institution Dashboard'],
+        summary: 'Get recent student activity',
+        description: 'Get recent activity for students in the institution across all pathways',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 } }
+        ],
+        responses: {
+          '200': {
+            description: 'Activity retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          student_id: { type: 'string', format: 'uuid' },
+                          first_name: { type: 'string' },
+                          last_name: { type: 'string' },
+                          avatar_url: { type: 'string', nullable: true },
+                          pathway_id: { type: 'string', format: 'uuid' },
+                          pathway_title: { type: 'string' },
+                          progress: { type: 'integer' },
+                          last_accessed_at: { type: 'string', format: 'date-time' },
+                          status: { type: 'string' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/dashboard/institution/analytics/pathways/top': {
+      get: {
+        tags: ['Institution Dashboard'],
+        summary: 'Get top performing pathways',
+        description: 'Get pathways with the highest average completion rates',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 5 } }
+        ],
+        responses: {
+          '200': {
+            description: 'Top pathways retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', format: 'uuid' },
+                          title: { type: 'string' },
+                          total_enrolled: { type: 'integer' },
+                          avg_progress: { type: 'integer' },
+                          completion_count: { type: 'integer' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/dashboard/institution/analytics/pathways/attention': {
+      get: {
+        tags: ['Institution Dashboard'],
+        summary: 'Get pathways needing attention',
+        description: 'Get pathways with low engagement or progress',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'limit', in: 'query', schema: { type: 'integer', default: 5 } }
+        ],
+        responses: {
+          '200': {
+            description: 'Pathways retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', format: 'uuid' },
+                          title: { type: 'string' },
+                          total_enrolled: { type: 'integer' },
+                          avg_progress: { type: 'integer' },
+                          inactive_count: { type: 'integer' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/dashboard/institution/students/{studentId}/pathways': {
+      get: {
+        tags: ['Institution Dashboard'],
+        summary: 'Get student pathway details',
+        description: 'Get detailed progress for a specific student across their enrolled pathways',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'studentId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }
+        ],
+        responses: {
+          '200': {
+            description: 'Student pathways retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        student: {
+                          type: 'object',
+                          properties: {
+                            id: { type: 'string', format: 'uuid' },
+                            first_name: { type: 'string' },
+                            last_name: { type: 'string' },
+                            email: { type: 'string' },
+                            avatar_url: { type: 'string', nullable: true }
+                          }
+                        },
+                        pathways: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              id: { type: 'string', format: 'uuid' },
+                              title: { type: 'string' },
+                              description: { type: 'string' },
+                              progress: { type: 'integer' },
+                              status: { type: 'string' },
+                              enrolled_at: { type: 'string', format: 'date-time' },
+                              completed_at: { type: 'string', format: 'date-time', nullable: true },
+                              last_accessed_at: { type: 'string', format: 'date-time' }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     '/api/pathways/apply': {
       post: {
         tags: ['Pathways'],
