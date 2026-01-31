@@ -520,13 +520,20 @@ exports.updatePathway = async (req, res) => {
                 return res.status(404).json({ success: false, error: 'Pathway not found' });
             }
             if (existingPathway.institution_id !== req.user.institution_id) {
-                logger.warn('Unauthorized pathway update attempt', {
-                    userId: req.user.userId,
-                    pathwayId: id,
-                    userInstitution: req.user.institution_id,
-                    pathwayInstitution: existingPathway.institution_id
-                });
-                return res.status(403).json({ success: false, error: 'Unauthorized to update this pathway' });
+                // Check if institution is associated via pathway_institutions table
+                const isAssociated = await knex('pathway_institutions')
+                    .where({ pathway_id: id, institution_id: req.user.institution_id })
+                    .first();
+
+                if (!isAssociated) {
+                    logger.warn('Unauthorized pathway update attempt', {
+                        userId: req.user.userId,
+                        pathwayId: id,
+                        userInstitution: req.user.institution_id,
+                        pathwayInstitution: existingPathway.institution_id
+                    });
+                    return res.status(403).json({ success: false, error: 'Unauthorized to update this pathway' });
+                }
             }
         }
 
