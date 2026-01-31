@@ -14568,10 +14568,10 @@ const openApiSpec = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['courseId', 'order'],
+                required: ['courseId', 'sequenceOrder'],
                 properties: {
                   courseId: { type: 'string', format: 'uuid' },
-                  order: { type: 'integer', description: 'Order of course in pathway' }
+                  sequenceOrder: { type: 'integer', description: 'Order of course in pathway' }
                 }
               }
             }
@@ -16318,6 +16318,77 @@ const openApiSpec = {
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/dashboard/institution/pathways/assign-single': {
+      post: {
+        tags: ['Institution Dashboard'],
+        summary: 'Assign pathway to single student',
+        description: 'Assign a pathway to a single student within the institution',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['pathway_id', 'student_id'],
+                properties: {
+                  pathway_id: { type: 'string', format: 'uuid' },
+                  student_id: { type: 'string', format: 'uuid' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Assignment successful',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string' },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        pathway_id: { type: 'string', format: 'uuid' },
+                        student_id: { type: 'string', format: 'uuid' },
+                        status: { type: 'string', example: 'active' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Invalid input',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '404': {
+            description: 'Student or Pathway not found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
+              }
+            }
+          },
+          '409': {
+            description: 'Already enrolled',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Error' }
               }
             }
           }

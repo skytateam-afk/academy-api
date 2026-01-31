@@ -37,5 +37,10 @@ router.post('/pathways/assign',
     requirePermission('institution.pathways.manage'),
     institutionDashboardController.assignPathway
 );
+// New: Assign Single Student
+router.post('/pathways/assign-single',
+    requirePermission('institution.pathways.manage'),
+    institutionDashboardController.assignSinglePathway
+);
 
 module.exports = router;

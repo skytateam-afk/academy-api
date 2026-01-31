@@ -16,7 +16,9 @@ class InstitutionDashboardController {
      */
     async getOverviewStats(req, res) {
         try {
-            const { institutionId } = req.user;
+            // Fix: Token contains institution_id (snake_case), map to camelCase for internal use
+            const institutionId = req.user.institution_id || req.user.institutionId;
+
             if (!institutionId) {
                 return res.status(403).json({
                     success: false,
@@ -37,6 +39,24 @@ class InstitutionDashboardController {
                 .count('* as count')
                 .first();
 
+            // 3. Total Enrollments (Fix: was missing)
+            const totalEnrollments = await knex('pathway_enrollments as pe')
+                .join('pathways as p', 'pe.pathway_id', 'p.id')
+                .where('p.institution_id', institutionId)
+                .count('* as count')
+                .first();
+
+            // 4. Completions (Fix: was missing)
+            const completions = await knex('pathway_enrollments as pe')
+                .join('pathways as p', 'pe.pathway_id', 'p.id')
+                .where('p.institution_id', institutionId)
+                .where(q => {
+                    q.where('pe.status', 'completed')
+                        .orWhere('pe.progress_percent', 100);
+                })
+                .count('* as count')
+                .first();
+
             // 5. Average Progress
             const avgProgress = await knex('pathway_enrollments as pe')
                 .join('pathways as p', 'pe.pathway_id', 'p.id')
@@ -47,13 +67,13 @@ class InstitutionDashboardController {
             res.json({
                 success: true,
                 data: {
-                    totalStudents: parseInt(totalStudents.count) || 0,
-                    activePathways: parseInt(activePathways.count) || 0,
-                    totalEnrollments: parseInt(totalEnrollments.count) || 0,
-                    completions: parseInt(completions.count) || 0,
-                    completionRate: totalEnrollments.count > 0
-                        ? ((parseInt(completions.count) / parseInt(totalEnrollments.count)) * 100).toFixed(2)
-                        : 0,
+                    totalStudents: parseInt(totalStudents?.count || 0),
+                    activePathways: parseInt(activePathways?.count || 0),
+                    totalEnrollments: parseInt(totalEnrollments?.count || 0),
+                    completions: parseInt(completions?.count || 0),
+                    completionRate: parseInt(totalEnrollments?.count) > 0
+                        ? ((parseInt(completions?.count || 0) / parseInt(totalEnrollments?.count)) * 100).toFixed(2)
+                        : "0.00",
                     avgProgress: parseFloat(avgProgress?.avgProgress || 0).toFixed(2)
                 }
             });
@@ -72,7 +92,8 @@ class InstitutionDashboardController {
      */
     async getStudents(req, res) {
         try {
-            const { institutionId } = req.user;
+            // Fix: Token contains institution_id (snake_case)
+            const institutionId = req.user.institution_id || req.user.institutionId;
             const { page = 1, limit = 10, search = '' } = req.query;
             const offset = (page - 1) * limit;
 
@@ -126,7 +147,8 @@ class InstitutionDashboardController {
      */
     async bulkUploadStudents(req, res) {
         try {
-            const { institutionId } = req.user;
+            // Fix: Token contains institution_id (snake_case)
+            const institutionId = req.user.institution_id || req.user.institutionId;
             if (!req.file) {
                 return res.status(400).json({ success: false, message: 'No file uploaded' });
             }
@@ -218,7 +240,8 @@ class InstitutionDashboardController {
      */
     async getPathways(req, res) {
         try {
-            const { institutionId } = req.user;
+            // Fix: Token contains institution_id (snake_case)
+            const institutionId = req.user.institution_id || req.user.institutionId;
             const { page = 1, limit = 10 } = req.query;
 
             const pathways = await Pathway.getAll({
@@ -243,7 +266,8 @@ class InstitutionDashboardController {
      */
     async assignPathway(req, res) {
         try {
-            const { institutionId } = req.user;
+            // Fix: Token contains institution_id (snake_case)
+            const institutionId = req.user.institution_id || req.user.institutionId;
             const { pathwayId, studentIds } = req.body;
 
             if (!pathwayId || !studentIds || !Array.isArray(studentIds)) {
@@ -302,6 +326,85 @@ class InstitutionDashboardController {
         } catch (error) {
             logger.error('Pathway assignment error', { error: error.message });
             res.status(500).json({ success: false, message: 'Error assigning pathway' });
+        }
+    }
+
+    /**
+     * Assign a single student to a pathway (New Feature)
+     */
+    async assignSinglePathway(req, res) {
+        try {
+            const { institutionId } = req.user;
+            const { pathway_id, student_id } = req.body;
+
+            // Normalize input names if they come in differently (e.g. camelCase vs snake_case)
+            const pathwayId = pathway_id || req.body.pathwayId;
+            const studentId = student_id || req.body.studentId;
+
+            if (!pathwayId || !studentId) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Both pathway_id and student_id are required'
+                });
+            }
+
+            // Verify pathway belongs to institution
+            const pathway = await Pathway.getById(pathwayId);
+            if (!pathway || pathway.institution_id !== institutionId) {
+                return res.status(403).json({ success: false, message: 'Unauthorized pathway access or pathway not found' });
+            }
+
+            // Verify student belongs to institution
+            const student = await knex('users')
+                .where({ id: studentId, institution_id: institutionId })
+                .first();
+
+            if (!student) {
+                return res.status(404).json({ success: false, message: 'Student not found in your institution' });
+            }
+
+            // Check existing enrollment
+            const existing = await knex('pathway_enrollments')
+                .where({ pathway_id: pathwayId, user_id: studentId })
+                .first();
+
+            if (existing) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'Student is already enrolled in this pathway'
+                });
+            }
+
+            // Perform enrollment
+            await knex('pathway_enrollments').insert({
+                pathway_id: pathwayId,
+                user_id: studentId,
+                status: 'active',
+                enrolled_at: new Date()
+            });
+
+            // Enroll in all courses within the pathway
+            await Pathway.enrollMemberInAllPathwayCourses(pathwayId, studentId);
+
+            // Send notification (optional - similar to existing)
+            // notificationService.sendAssignedNotification(...)
+
+            res.json({
+                success: true,
+                message: 'Student assigned to pathway successfully',
+                data: {
+                    pathway_id: pathwayId,
+                    student_id: studentId,
+                    status: 'active'
+                }
+            });
+        } catch (error) {
+            logger.error('Single pathway assignment error', { error: error.message });
+            res.status(500).json({
+                success: false,
+                message: 'Error assigning student to pathway',
+                error: error.message
+            });
         }
     }
 
