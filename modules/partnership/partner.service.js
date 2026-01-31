@@ -16,6 +16,11 @@ class PartnerService {
             throw new Error('All fields are required');
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email_address)) {
+            throw new Error('Invalid email format');
+        }
+
         // Check for duplicate email (open inquiry)
         const existingPartner = await knex('partners')
             .where('email_address', email_address)
@@ -60,6 +65,9 @@ class PartnerService {
         const { page = 1, limit = 10, sort_by = 'created_at', sort_order = 'desc' } = params;
         const offset = (page - 1) * limit;
 
+        const validSortFields = ['id', 'inquiry_type', 'full_name', 'organization', 'email_address', 'status', 'created_at', 'updated_at'];
+        const safeSortBy = validSortFields.includes(sort_by) ? sort_by : 'created_at';
+
         const query = knex('partners').select('*');
 
         // Get total count
@@ -68,7 +76,7 @@ class PartnerService {
 
         // Get paginated results
         const partners = await query
-            .orderBy(sort_by, sort_order)
+            .orderBy(safeSortBy, sort_order)
             .limit(limit)
             .offset(offset);
 

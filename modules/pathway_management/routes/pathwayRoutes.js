@@ -69,6 +69,9 @@ router.get('/:id/applications', (req, res, next) => {
 // Get all pathways (filtered based on permissions)
 router.get('/', pathwayController.getAllPathways);
 
+// Get my pathways (Student self-service)
+router.get('/my-pathways', pathwayController.getMyStudentPathways);
+
 // Get pathway by ID
 router.get('/:id', pathwayController.getPathwayById);
 

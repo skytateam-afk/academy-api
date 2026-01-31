@@ -668,6 +668,8 @@ class InstitutionDashboardController {
             res.status(500).json({ success: false, message: 'Error fetching student pathways' });
         }
     }
+
+
 }
 
 module.exports = new InstitutionDashboardController();

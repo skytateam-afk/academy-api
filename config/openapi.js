@@ -14610,6 +14610,50 @@ const openApiSpec = {
       }
     },
 
+    '/api/pathways/my-pathways': {
+      get: {
+        tags: ['Pathways'],
+        summary: 'Get my pathways',
+        description: 'Retrieve a list of pathways the authenticated student is enrolled in.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'My pathways retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', format: 'uuid' },
+                          title: { type: 'string' },
+                          description: { type: 'string' },
+                          thumbnail_url: { type: 'string' },
+                          progress: { type: 'number' },
+                          status: { type: 'string' },
+                          enrolled_at: { type: 'string', format: 'date-time' },
+                          completed_at: { type: 'string', format: 'date-time' },
+                          last_accessed_at: { type: 'string', format: 'date-time' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized'
+          }
+        }
+      }
+    },
+
     '/api/pathways/{id}/publish': {
       patch: {
         tags: ['Pathways'],
