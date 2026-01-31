@@ -6,7 +6,7 @@ exports.up = function (knex) {
     return knex.schema.createTable('pathway_institutions', function (table) {
         table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.uuid('pathway_id').notNullable().references('id').inTable('pathways').onDelete('CASCADE');
-        table.integer('institution_id').notNullable().references('id').inTable('institutions').onDelete('CASCADE');
+        table.uuid('institution_id').notNullable().references('id').inTable('institutions').onDelete('CASCADE');
         table.timestamp('created_at').defaultTo(knex.fn.now());
 
         // Unique constraint to prevent duplicate links
