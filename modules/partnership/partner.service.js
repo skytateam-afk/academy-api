@@ -67,6 +67,7 @@ class PartnerService {
 
         const validSortFields = ['id', 'inquiry_type', 'full_name', 'organization', 'email_address', 'status', 'created_at', 'updated_at'];
         const safeSortBy = validSortFields.includes(sort_by) ? sort_by : 'created_at';
+        const safeSortOrder = ['asc', 'desc'].includes(sort_order?.toLowerCase()) ? sort_order : 'desc';
 
         const query = knex('partners').select('*');
 
@@ -76,7 +77,7 @@ class PartnerService {
 
         // Get paginated results
         const partners = await query
-            .orderBy(safeSortBy, sort_order)
+            .orderBy(safeSortBy, safeSortOrder)
             .limit(limit)
             .offset(offset);
 
