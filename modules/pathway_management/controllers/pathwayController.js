@@ -962,13 +962,7 @@ exports.getMyApplications = async (req, res) => {
 
         const result = await PathwayApplication.getByUser(userId, options);
 
-        // Force status to true as requested
-        if (result.applications) {
-            result.applications = result.applications.map(app => ({
-                ...app,
-                status: true
-            }));
-        }
+
 
         res.json({
             success: true,

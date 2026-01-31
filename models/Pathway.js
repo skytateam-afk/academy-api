@@ -294,7 +294,7 @@ class Pathway {
                     certification_criteria: certificationCriteria || null,
                     enrollment_limit: enrollmentLimit || null,
                     created_by: createdBy,
-                    institution_id: institution_id || null,
+                    institution_id: Array.isArray(institution_id) ? (institution_id[0] || null) : (institution_id || null),
                     metadata: metadata ? JSON.stringify(metadata) : null
                 })
                 .returning('*');
