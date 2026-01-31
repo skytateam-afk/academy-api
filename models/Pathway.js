@@ -260,7 +260,7 @@ class Pathway {
                 certificationCriteria,
                 enrollmentLimit,
                 createdBy,
-                institution_id,
+                institution_id, // Deprecated, kept for DB schema compatibility if needed but ignored
                 metadata
             } = pathwayData;
 
@@ -298,6 +298,24 @@ class Pathway {
                     metadata: metadata ? JSON.stringify(metadata) : null
                 })
                 .returning('*');
+
+            if (pathwayData.institution_id && Array.isArray(pathwayData.institution_id) && pathwayData.institution_id.length > 0) {
+                const institutionsToInsert = pathwayData.institution_id.map(instId => ({
+                    pathway_id: pathway.id,
+                    institution_id: instId
+                }));
+
+                // Dedup based on institution_id
+                const uniqueInstitutions = [...new Map(institutionsToInsert.map(item => [item.institution_id, item])).values()];
+
+                await trx('pathway_institutions').insert(uniqueInstitutions);
+            } else if (institution_id) {
+                // Backward compatibility
+                await trx('pathway_institutions').insert({
+                    pathway_id: pathway.id,
+                    institution_id: institution_id
+                });
+            }
 
             await trx.commit();
 
