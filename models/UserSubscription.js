@@ -281,32 +281,83 @@ class UserSubscription {
             throw new Error('User already has an active subscription to this tier');
         }
 
-        // Calculate expiration date
-        const startDate = new Date();
-        const expirationDate = new Date(startDate);
-        expirationDate.setMonth(expirationDate.getMonth() + tier.billingCycleMonths);
+        const status = options.status || 'active';
+
+        // Calculate expiration date only if active
+        let startDate = null;
+        let expirationDate = null;
+
+        if (status === 'active') {
+            startDate = new Date();
+            expirationDate = new Date(startDate);
+            expirationDate.setMonth(expirationDate.getMonth() + tier.billingCycleMonths);
+        }
 
         const subscriptionData = {
             userId,
             tierId,
-            status: 'active',
+            status: status,
             startedAt: startDate,
             expiresAt: expirationDate,
             paymentProvider: options.paymentProvider || 'manual',
             subscriptionId: options.subscriptionId,
-            amountPaid: tier.price,
+            amountPaid: status === 'active' ? tier.price : 0, // Set amount paid only if active immediately
             currency: tier.currency,
             metadata: options.metadata || {}
         };
 
         const subscription = await this.create(subscriptionData);
 
-        // Update user's active subscription
-        await knex('users')
-            .where('id', userId)
-            .update({ active_subscription_id: subscription.id, updated_at: new Date() });
+        // Update user's active subscription only if active
+        if (status === 'active') {
+            await knex('users')
+                .where('id', userId)
+                .update({ active_subscription_id: subscription.id, updated_at: new Date() });
+        }
 
         return subscription;
+    }
+
+    static async activateSubscription(subscriptionId, transactionDetails = {}) {
+        const subscription = await this.getById(subscriptionId);
+        if (!subscription) {
+            throw new Error('Subscription not found');
+        }
+
+        if (subscription.status === 'active') {
+            return subscription; // Already active
+        }
+
+        // Calculate usage dates
+        const startDate = new Date();
+        const expirationDate = new Date(startDate);
+        expirationDate.setMonth(expirationDate.getMonth() + subscription.tier.billingCycleMonths);
+
+        // Prepare update data
+        const updateData = {
+            status: 'active',
+            started_at: startDate,
+            expires_at: expirationDate,
+            updated_at: new Date()
+        };
+
+        // Add payment details if provided
+        if (transactionDetails.amountPaid) updateData.amount_paid = transactionDetails.amountPaid;
+        if (transactionDetails.paymentProvider) updateData.payment_provider = transactionDetails.paymentProvider;
+        if (transactionDetails.subscriptionId) updateData.subscription_id = transactionDetails.subscriptionId;
+
+        // Perform update
+        const [result] = await knex('user_subscriptions')
+            .where({ id: subscriptionId })
+            .update(updateData)
+            .returning('*');
+
+        // Update user's active subscription
+        await knex('users')
+            .where('id', subscription.userId)
+            .update({ active_subscription_id: subscription.id, updated_at: new Date() });
+
+        return this.formatSubscription(result);
     }
 
     static async cancelSubscription(subscriptionId, reason) {

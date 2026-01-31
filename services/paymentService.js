@@ -8,6 +8,7 @@ const Paystack = require('paystack-node');
 const db = require('../config/knex');
 const PaymentProviderService = require('../modules/payments/paymentProviderService');
 const logger = require('../config/winston');
+const UserSubscription = require('../models/UserSubscription');
 
 class PaymentService {
     constructor() {
@@ -373,6 +374,27 @@ class PaymentService {
                 // Handle Course Enrollment
                 if (transaction.course_id) {
                     await this.createEnrollment(transaction.user_id, transaction.course_id, transactionId);
+                }
+
+                // Handle Subscription Activation
+                let metadata = {};
+                if (typeof transaction.payment_metadata === 'string') {
+                    try {
+                        metadata = JSON.parse(transaction.payment_metadata);
+                    } catch (e) {
+                        // ignore
+                    }
+                } else {
+                    metadata = transaction.payment_metadata || {};
+                }
+
+                if (metadata.type === 'subscription_payment' && metadata.subscriptionId) {
+                    await UserSubscription.activateSubscription(metadata.subscriptionId, {
+                        amountPaid: transaction.amount,
+                        paymentProvider: provider,
+                        subscriptionId: transaction.provider_transaction_id || transaction.provider_reference
+                    });
+                    logger.info('Subscription activated via payment', { subscriptionId: metadata.subscriptionId, transactionId });
                 }
 
                 // Handle Order Completion
