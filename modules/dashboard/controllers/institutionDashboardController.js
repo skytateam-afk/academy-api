@@ -415,9 +415,15 @@ class InstitutionDashboardController {
         try {
             const institutionId = req.user.institution_id || req.user.institutionId;
             const { id } = req.params;
-            const { student_id, studentId, department, level } = req.body;
-            const finalStudentId = student_id || studentId;
+            const {
+                student_id, studentId,
+                department, level,
+                first_name, last_name, phone, username
+            } = req.body;
 
+            const finalStudentId = student_id !== undefined ? student_id : studentId;
+
+            // 1. Verify student exists in institution
             const student = await knex('users')
                 .where({ id, institution_id: institutionId })
                 .first();
@@ -426,17 +432,32 @@ class InstitutionDashboardController {
                 return res.status(404).json({ success: false, message: 'Student not found in your institution' });
             }
 
+            // 2. Build update object (only include defined fields)
+            const updateData = {
+                updated_at: new Date()
+            };
+
+            if (finalStudentId !== undefined) updateData.student_id = finalStudentId;
+            if (department !== undefined) updateData.department = department;
+            if (level !== undefined) updateData.level = level;
+            if (first_name !== undefined) updateData.first_name = first_name;
+            if (last_name !== undefined) updateData.last_name = last_name;
+            if (phone !== undefined) updateData.phone = phone;
+            if (username !== undefined) updateData.username = username;
+
+            // 3. Perform Update
             await knex('users')
                 .where({ id })
-                .update({
-                    student_id: finalStudentId,
-                    department,
-                    level,
-                    updated_at: new Date()
-                });
+                .update(updateData);
 
             res.json({ success: true, message: 'Student details updated successfully' });
         } catch (error) {
+            // Handle unique constraint violations
+            if (error.code === '23505') {
+                if (error.constraint === 'users_username_key') {
+                    return res.status(409).json({ success: false, message: 'Username already exists' });
+                }
+            }
             logger.error('Error updating student', { error: error.message });
             res.status(500).json({ success: false, message: 'Error updating student' });
         }
