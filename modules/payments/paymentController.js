@@ -61,7 +61,7 @@ class PaymentController {
                     });
                 }
 
-                // Check if user already has access (via subscription or institution)
+                // Check if user already has access (through subscription or institution)
                 const User = require('../../modules/user_management/models/User');
                 const hasAccess = await User.hasAccessToCourse(userId, courseId);
 
