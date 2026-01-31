@@ -618,56 +618,7 @@ class InstitutionDashboardController {
         }
     }
 
-    /**
-     * Get detailed pathway progress for a specific student
-     */
-    async getStudentPathways(req, res) {
-        try {
-            const institutionId = req.user.institution_id || req.user.institutionId;
-            const { studentId } = req.params;
 
-            // Verify student belongs to institution
-            const student = await knex('users')
-                .where({ id: studentId, institution_id: institutionId })
-                .first();
-
-            if (!student) {
-                return res.status(404).json({ success: false, message: 'Student not found in your institution' });
-            }
-
-            const pathways = await knex('pathway_enrollments as pe')
-                .join('pathways as p', 'pe.pathway_id', 'p.id')
-                .where('pe.user_id', studentId)
-                .select(
-                    'p.id',
-                    'p.title',
-                    'p.description',
-                    'pe.progress_percent as progress',
-                    'pe.status',
-                    'pe.enrolled_at',
-                    'pe.completed_at',
-                    'pe.last_accessed_at'
-                )
-                .orderBy('pe.last_accessed_at', 'desc');
-
-            res.json({
-                success: true,
-                data: {
-                    student: {
-                        id: student.id,
-                        first_name: student.first_name,
-                        last_name: student.last_name,
-                        email: student.email,
-                        avatar_url: student.avatar_url
-                    },
-                    pathways
-                }
-            });
-        } catch (error) {
-            logger.error('Error fetching student pathways', { error: error.message });
-            res.status(500).json({ success: false, message: 'Error fetching student pathways' });
-        }
-    }
 
 
 }
