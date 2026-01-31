@@ -596,8 +596,6 @@ class User {
             }
 
             return false;
-
-            return false;
         } catch (error) {
             logger.error('Error checking course access', { userId, courseId, error: error.message });
             return false;
