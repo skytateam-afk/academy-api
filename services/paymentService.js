@@ -201,6 +201,14 @@ class PaymentService {
         }
 
         try {
+            // Define fallbacks for Redirect URLs
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+            const successUrlBase = process.env.PAYMENT_SUCCESS_URL || `${frontendUrl}/payment/success`;
+            const cancelUrlBase = process.env.PAYMENT_CANCEL_URL || `${frontendUrl}/payment/cancel`;
+
+            const successUrl = `${successUrlBase}${successUrlBase.includes('?') ? '&' : '?'}session_id={CHECKOUT_SESSION_ID}&transactionId=${transactionId}`;
+            const cancelUrl = `${cancelUrlBase}${cancelUrlBase.includes('?') ? '&' : '?'}transactionId=${transactionId}`;
+
             // 1. Create Payment Intent for embedded flow
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: Math.round(amount * 100), // Convert to cents
@@ -232,8 +240,8 @@ class PaymentService {
                     quantity: 1,
                 }],
                 mode: 'payment',
-                success_url: process.env.PAYMENT_SUCCESS_URL + `?session_id={CHECKOUT_SESSION_ID}&transactionId=${transactionId}`,
-                cancel_url: process.env.PAYMENT_CANCEL_URL + `?transactionId=${transactionId}`,
+                success_url: successUrl,
+                cancel_url: cancelUrl,
                 metadata: {
                     transactionId,
                     userId,
@@ -280,11 +288,8 @@ class PaymentService {
 
             // Get Paystack config to retrieve callback URL
             const config = await PaymentProviderService.getProviderConfig('paystack');
-            const callbackUrl = config?.configuration?.callback_url || process.env.PAYMENT_SUCCESS_URL;
-
-            if (!callbackUrl) {
-                throw new Error('Paystack callback URL is not configured in database or environment variables');
-            }
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+            const callbackUrl = config?.configuration?.callback_url || process.env.PAYMENT_SUCCESS_URL || `${frontendUrl}/payment/success`;
 
             const response = await paystack.initializeTransaction({
                 amount: Math.round(amount * 100), // Convert to kobo/cents
