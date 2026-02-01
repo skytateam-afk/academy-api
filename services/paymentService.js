@@ -468,14 +468,14 @@ class PaymentService {
                     if (subscription) {
                         try {
                             const user = await db('users').where({ id: transaction.user_id }).first();
-                            const tier = await db('subscription_tiers').where({ id: subscription.tier_id || metadata.tierId }).first();
+                            const tier = await db('subscription_tiers').where({ id: subscription.tierId || metadata.tierId }).first();
 
                             if (user && tier) {
                                 // 1. In-app Notification
                                 await notificationService.sendSubscriptionActivationNotification(
                                     user.id,
                                     tier.name,
-                                    subscription.expires_at || subscription.expiresAt
+                                    subscription.expiresAt
                                 );
 
                                 // 2. Email Confirmation
@@ -483,7 +483,7 @@ class PaymentService {
                                     email: user.email,
                                     username: user.username || user.first_name,
                                     tierName: tier.name,
-                                    expiresAt: subscription.expires_at || subscription.expiresAt,
+                                    expiresAt: subscription.expiresAt,
                                     amount: transaction.amount,
                                     currency: transaction.currency
                                 });

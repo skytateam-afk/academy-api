@@ -222,7 +222,7 @@ class PaymentController {
                             await notificationService.sendSubscriptionActivationNotification(
                                 user.id,
                                 tier.name,
-                                subscription.expiresAt || subscription.expires_at
+                                subscription.expiresAt
                             );
 
                             // 2. Email Confirmation
@@ -230,7 +230,7 @@ class PaymentController {
                                 email: user.email,
                                 username: user.username || user.first_name,
                                 tierName: tier.name,
-                                expiresAt: subscription.expiresAt || subscription.expires_at,
+                                expiresAt: subscription.expiresAt,
                                 amount: 0,
                                 currency: currency
                             });
