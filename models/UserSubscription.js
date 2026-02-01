@@ -304,7 +304,7 @@ class UserSubscription {
             expiresAt: expirationDate,
             paymentProvider: options.paymentProvider || 'manual',
             subscriptionId: options.subscriptionId,
-            amountPaid: status === 'active' ? tier.price : 0, // Set amount paid only if active immediately
+            amountPaid: options.amountPaid !== undefined ? options.amountPaid : (status === 'active' ? tier.price : 0), // Set amount paid only if active immediately
             currency: tier.currency,
             metadata: options.metadata || {}
         };
@@ -345,7 +345,7 @@ class UserSubscription {
         };
 
         // Add payment details if provided
-        if (transactionDetails.amountPaid) updateData.amount_paid = transactionDetails.amountPaid;
+        if (transactionDetails.amountPaid !== undefined) updateData.amount_paid = transactionDetails.amountPaid;
         if (transactionDetails.paymentProvider) updateData.payment_provider = transactionDetails.paymentProvider;
         if (transactionDetails.subscriptionId) updateData.subscription_id = transactionDetails.subscriptionId;
 
@@ -370,7 +370,7 @@ class UserSubscription {
             .update({
                 status: 'cancelled',
                 cancelled_at: now,
-                metadata: knex.raw(`metadata || ?`, [JSON.stringify({ cancellation_reason: reason, cancelled_at: now })]),
+                metadata: knex.raw("COALESCE(metadata, '{}'::jsonb) || ?::jsonb", [JSON.stringify({ cancellation_reason: reason, cancelled_at: now })]),
                 updated_at: now
             })
             .returning('*');

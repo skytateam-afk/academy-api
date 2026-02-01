@@ -21,13 +21,13 @@ class PaymentController {
      */
     async initializePayment(req, res) {
         try {
-            const { courseId, orderId, provider: requestedProvider, currency: requestedCurrency } = req.body;
+            const { courseId, orderId, subscriptionId, tierId, provider: requestedProvider, currency: requestedCurrency } = req.body;
             const userId = req.user.userId;
 
-            if (!courseId && !orderId) {
+            if (!courseId && !orderId && !subscriptionId && !tierId) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Course ID or Order ID is required'
+                    error: 'Course ID, Order ID, Subscription ID, or Tier ID is required'
                 });
             }
 
@@ -104,6 +104,219 @@ class PaymentController {
                 amount = parseFloat(order.total_amount);
                 currency = requestedCurrency || order.currency || 'USD';
                 metadata.orderNumber = order.order_number;
+            }
+            // Handle Subscription Payment
+            else if (subscriptionId) {
+                const subscription = await db('user_subscriptions').where({ id: subscriptionId }).first();
+
+                if (!subscription) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Subscription not found'
+                    });
+                }
+
+                if (subscription.user_id !== userId) {
+                    return res.status(403).json({
+                        success: false,
+                        error: 'Unauthorized access to subscription'
+                    });
+                }
+
+                if (subscription.status === 'active') {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Subscription is already active'
+                    });
+                }
+
+                // Get tier details for price
+                const tier = await db('subscription_tiers').where({ id: subscription.tier_id }).first();
+                if (!tier) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Subscription tier not found'
+                    });
+                }
+
+                amount = parseFloat(tier.price);
+                currency = requestedCurrency || tier.currency || 'USD';
+                metadata.type = 'subscription_payment';
+                metadata.subscriptionId = subscriptionId;
+                metadata.tierId = tier.id;
+            }
+            // Handle Direct Tier Subscription Payment (New Flow)
+            else if (tierId) {
+                const tier = await db('subscription_tiers').where({ id: tierId }).first();
+
+                if (!tier) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Subscription tier not found'
+                    });
+                }
+
+                if (!tier.is_active) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Subscription tier is not active'
+                    });
+                }
+
+                // Check if user already has an active subscription
+                const existingActive = await db('user_subscriptions')
+                    .where({ user_id: userId, status: 'active' })
+                    .first();
+
+                if (existingActive) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'You already have an active subscription. Please cancel it before subscribing to a new one.'
+                    });
+                }
+
+                amount = parseFloat(tier.price);
+                currency = requestedCurrency || tier.currency || 'USD';
+                metadata.type = 'subscription_payment';
+                metadata.tierId = tierId;
+                metadata.tierName = tier.name;
+            }
+
+            // Handle Free Items (0.00 amount) - Activate immediately
+            if (amount === 0) {
+                console.log(`Free item acquisition - Type: ${metadata.type}, User: ${userId}`);
+
+                if (metadata.type === 'subscription_payment') {
+                    // Import services and models here to avoid circular dependencies if any
+                    const UserSubscription = require('../../models/UserSubscription');
+                    const notificationService = require('../notifications/services/notificationService');
+                    const emailService = require('../../services/emailService');
+
+                    let subscription;
+
+                    if (metadata.subscriptionId) {
+                        // Activate existing pending subscription
+                        subscription = await UserSubscription.activateSubscription(metadata.subscriptionId, {
+                            paymentProvider: 'none',
+                            amountPaid: 0
+                        });
+                        console.log(`Free subscription activated for existing record: ${metadata.subscriptionId}`);
+                    } else {
+                        // Create and activate new subscription
+                        subscription = await UserSubscription.subscribeUser(userId, metadata.tierId, {
+                            status: 'active',
+                            paymentProvider: 'none',
+                            amountPaid: 0,
+                            metadata: metadata
+                        });
+                        console.log(`New free subscription created for tier: ${metadata.tierId}`);
+                    }
+
+                    // Send Notifications & Emails for Free Subscription Activation
+                    try {
+                        const user = await db('users').where({ id: userId }).first();
+                        const tier = await db('subscription_tiers').where({ id: metadata.tierId }).first();
+
+                        if (user && tier) {
+                            // 1. In-app Notification
+                            await notificationService.sendSubscriptionActivationNotification(
+                                user.id,
+                                tier.name,
+                                subscription.expiresAt
+                            );
+
+                            // 2. Email Confirmation
+                            await emailService.sendSubscriptionActivationEmail({
+                                email: user.email,
+                                username: user.username || user.first_name,
+                                tierName: tier.name,
+                                expiresAt: subscription.expiresAt,
+                                amount: 0,
+                                currency: currency
+                            });
+                        }
+                    } catch (notifError) {
+                        console.error('Failed to send free subscription notifications:', notifError.message);
+                    }
+
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Subscription activated successfully (Free Tier)',
+                        data: {
+                            subscription,
+                            isFree: true
+                        }
+                    });
+                } else if (courseId) {
+                    const Course = require('../../models/Course');
+                    const notificationService = require('../notifications/services/notificationService');
+
+                    const enrollment = await Course.enrollUser(courseId, userId);
+                    console.log(`Free course enrollment: ${courseId} for user: ${userId}`);
+
+                    // Send notification for free course enrollment
+                    try {
+                        const course = await db('courses').where({ id: courseId }).first();
+                        if (course) {
+                            await notificationService.sendCourseEnrollmentNotification(
+                                userId,
+                                course.id,
+                                course.title
+                            );
+                        }
+                    } catch (notifError) {
+                        console.error('Failed to send free course enrollment notification:', notifError.message);
+                    }
+
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Successfully enrolled in course (Free)',
+                        data: {
+                            enrollment,
+                            isFree: true
+                        }
+                    });
+                } else if (orderId) {
+                    const orderRepository = require('../shop_management/repositories/orderRepository');
+                    const cartRepository = require('../shop_management/repositories/cartRepository');
+                    const notificationService = require('../notifications/services/notificationService');
+
+                    // 1. Mark order as paid immediately
+                    const order = await orderRepository.updatePaymentStatus(orderId, 'paid');
+                    console.log(`Free order activated: ${orderId} for user: ${userId}`);
+
+                    // 2. Clear user's cart
+                    const cart = await cartRepository.getOrCreateCart(userId);
+                    if (cart) {
+                        await cartRepository.clearCart(cart.id);
+                        console.log(`Cart cleared for user ${userId} after free order`);
+                    }
+
+                    // 3. Send notification
+                    try {
+                        const user = await db('users').where({ id: userId }).first();
+                        if (user) {
+                            await notificationService.createNotification(
+                                userId,
+                                'payment_successful',
+                                'Order Completed',
+                                `Your order ${order.order_number} has been completed successfully.`,
+                                { orderId, orderNumber: order.order_number }
+                            );
+                        }
+                    } catch (notifError) {
+                        console.error('Failed to send free order notification:', notifError.message);
+                    }
+
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Order completed successfully (Free)',
+                        data: {
+                            order,
+                            isFree: true
+                        }
+                    });
+                }
             }
 
             // Determine payment provider based on currency

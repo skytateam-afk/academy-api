@@ -62,6 +62,10 @@ class NotificationService {
         COURSE_ADDED_TO_PATHWAY: 'course_added_to_pathway',
         PATHWAY_ASSIGNED: 'pathway_assigned',
 
+        // Subscription related
+        SUBSCRIPTION_ACTIVATED: 'subscription_activated',
+        SUBSCRIPTION_CANCELLED: 'subscription_cancelled',
+
         // General
         SYSTEM_ANNOUNCEMENT: 'system_announcement'
     };
@@ -252,6 +256,32 @@ class NotificationService {
             'Lesson Completed!',
             `Congratulations! You've completed "${lessonTitle}" in "${courseTitle}".`,
             { lessonTitle, courseTitle }
+        );
+    }
+
+    /**
+     * Notify user of successful subscription activation
+     */
+    async sendSubscriptionActivationNotification(userId, tierName, expiresAt) {
+        return this.createNotification(
+            userId,
+            this.constructor.TYPES.SUBSCRIPTION_ACTIVATED,
+            'Subscription Activated!',
+            `Your subscription to "${tierName}" is now active. It will expire on ${new Date(expiresAt).toLocaleDateString()}.`,
+            { tierName, expiresAt }
+        );
+    }
+
+    /**
+     * Notify user of subscription cancellation
+     */
+    async sendSubscriptionCancelledNotification(userId, tierName) {
+        return this.createNotification(
+            userId,
+            this.constructor.TYPES.SUBSCRIPTION_CANCELLED,
+            'Subscription Cancelled',
+            `Your subscription to "${tierName}" has been successfully cancelled.`,
+            { tierName }
         );
     }
 
