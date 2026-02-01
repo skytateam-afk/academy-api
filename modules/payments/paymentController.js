@@ -276,8 +276,47 @@ class PaymentController {
                             isFree: true
                         }
                     });
+                } else if (orderId) {
+                    const orderRepository = require('../shop_management/repositories/orderRepository');
+                    const cartRepository = require('../shop_management/repositories/cartRepository');
+                    const notificationService = require('../notifications/services/notificationService');
+
+                    // 1. Mark order as paid immediately
+                    const order = await orderRepository.updatePaymentStatus(orderId, 'paid');
+                    console.log(`Free order activated: ${orderId} for user: ${userId}`);
+
+                    // 2. Clear user's cart
+                    const cart = await cartRepository.getOrCreateCart(userId);
+                    if (cart) {
+                        await cartRepository.clearCart(cart.id);
+                        console.log(`Cart cleared for user ${userId} after free order`);
+                    }
+
+                    // 3. Send notification
+                    try {
+                        const user = await db('users').where({ id: userId }).first();
+                        if (user) {
+                            await notificationService.createNotification(
+                                userId,
+                                'payment_successful',
+                                'Order Completed',
+                                `Your order ${order.order_number} has been completed successfully.`,
+                                { orderId, orderNumber: order.order_number }
+                            );
+                        }
+                    } catch (notifError) {
+                        console.error('Failed to send free order notification:', notifError.message);
+                    }
+
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Order completed successfully (Free)',
+                        data: {
+                            order,
+                            isFree: true
+                        }
+                    });
                 }
-                // OrderId case for free items can be added if needed, but usually shop items have prices
             }
 
             // Determine payment provider based on currency
