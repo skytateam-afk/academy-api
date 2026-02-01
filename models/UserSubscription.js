@@ -345,7 +345,7 @@ class UserSubscription {
         };
 
         // Add payment details if provided
-        if (transactionDetails.amountPaid) updateData.amount_paid = transactionDetails.amountPaid;
+        if (transactionDetails.amountPaid !== undefined) updateData.amount_paid = transactionDetails.amountPaid;
         if (transactionDetails.paymentProvider) updateData.payment_provider = transactionDetails.paymentProvider;
         if (transactionDetails.subscriptionId) updateData.subscription_id = transactionDetails.subscriptionId;
 
