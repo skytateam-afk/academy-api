@@ -7848,13 +7848,19 @@ const openApiSpec = {
                   type: 'object',
                   properties: {
                     success: { type: 'boolean' },
+                    message: { type: 'string', description: 'Success message, especially for free items' },
                     data: {
                       type: 'object',
                       properties: {
                         transactionId: { type: 'string', format: 'uuid' },
                         clientSecret: { type: 'string', description: 'Stripe client secret' },
                         authorizationUrl: { type: 'string', description: 'Paystack authorization URL' },
-                        provider: { type: 'string' }
+                        checkoutUrl: { type: 'string', description: 'Fallback checkout URL' },
+                        provider: { type: 'string' },
+                        isFree: { type: 'boolean', description: 'Whether the item was free' },
+                        subscription: { type: 'object', description: 'Activated subscription for free tiers' },
+                        enrollment: { type: 'object', description: 'Course enrollment for free courses' },
+                        order: { type: 'object', description: 'Completed order for free orders' }
                       }
                     }
                   }
