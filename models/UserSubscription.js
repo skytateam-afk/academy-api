@@ -370,7 +370,7 @@ class UserSubscription {
             .update({
                 status: 'cancelled',
                 cancelled_at: now,
-                metadata: knex.raw(`metadata || ?`, [JSON.stringify({ cancellation_reason: reason, cancelled_at: now })]),
+                metadata: knex.raw("COALESCE(metadata, '{}'::jsonb) || ?::jsonb", [JSON.stringify({ cancellation_reason: reason, cancelled_at: now })]),
                 updated_at: now
             })
             .returning('*');

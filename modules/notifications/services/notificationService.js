@@ -62,6 +62,10 @@ class NotificationService {
         COURSE_ADDED_TO_PATHWAY: 'course_added_to_pathway',
         PATHWAY_ASSIGNED: 'pathway_assigned',
 
+        // Subscription related
+        SUBSCRIPTION_ACTIVATED: 'subscription_activated',
+        SUBSCRIPTION_CANCELLED: 'subscription_cancelled',
+
         // General
         SYSTEM_ANNOUNCEMENT: 'system_announcement'
     };

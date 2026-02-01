@@ -792,6 +792,58 @@ class EmailService {
       },
     });
   }
+  /**
+   * Send subscription activation email
+   * @param {Object} subscriptionData
+   */
+  async sendSubscriptionActivationEmail(subscriptionData) {
+    const { email, username, tierName, expiresAt, amount, currency } = subscriptionData;
+
+    return this.sendEmail({
+      to: email,
+      subject: `Subscription Activated: ${tierName} - Skyta Academy`,
+      template: 'notification',
+      variables: {
+        title: 'Subscription Activated',
+        username,
+        message: `Your subscription to "${tierName}" is now active. Thank you for your purchase!`,
+        details: [
+          { label: 'Plan', value: tierName },
+          { label: 'Amount', value: `${currency} ${amount}` },
+          { label: 'Expires On', value: new Date(expiresAt).toLocaleDateString() },
+          { label: 'Status', value: 'Active' }
+        ],
+        actionUrl: `${process.env.FRONTEND_URL}/dashboard/subscription`,
+        actionText: 'Manage Subscription',
+      },
+    });
+  }
+
+  /**
+   * Send subscription cancellation email
+   * @param {Object} subscriptionData
+   */
+  async sendSubscriptionCancelledEmail(subscriptionData) {
+    const { email, username, tierName } = subscriptionData;
+
+    return this.sendEmail({
+      to: email,
+      subject: 'Subscription Cancelled - Skyta Academy',
+      template: 'notification',
+      variables: {
+        title: 'Subscription Cancelled',
+        username,
+        message: `Your subscription to "${tierName}" has been successfully cancelled. You will continue to have access until the end of your billing period.`,
+        details: [
+          { label: 'Plan', value: tierName },
+          { label: 'Status', value: 'Cancelled' }
+        ],
+        warning: true,
+        warningTitle: 'Subscription Notice',
+        warningMessage: 'We are sorry to see you go. You can reactivate your subscription at any time from your dashboard.',
+      },
+    });
+  }
 }
 
 module.exports = new EmailService();

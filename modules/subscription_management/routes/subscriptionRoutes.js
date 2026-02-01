@@ -28,7 +28,6 @@ router.patch('/tiers/reorder', requirePermission('subscription.manage'), subscri
 // ============================== USER SUBSCRIPTION ROUTES ==============================
 
 // User subscription management
-router.post('/subscribe', subscriptionController.subscribe);
 router.get('/my-subscriptions', subscriptionController.getMySubscriptions);
 router.get('/my-active-subscription', subscriptionController.getMyActiveSubscription);
 router.patch('/cancel-subscription', subscriptionController.cancelMySubscription);

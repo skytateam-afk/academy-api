@@ -21,13 +21,13 @@ class PaymentController {
      */
     async initializePayment(req, res) {
         try {
-            const { courseId, orderId, provider: requestedProvider, currency: requestedCurrency } = req.body;
+            const { courseId, orderId, subscriptionId, tierId, provider: requestedProvider, currency: requestedCurrency } = req.body;
             const userId = req.user.userId;
 
-            if (!courseId && !orderId) {
+            if (!courseId && !orderId && !subscriptionId && !tierId) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Course ID or Order ID is required'
+                    error: 'Course ID, Order ID, Subscription ID, or Tier ID is required'
                 });
             }
 
@@ -104,6 +104,120 @@ class PaymentController {
                 amount = parseFloat(order.total_amount);
                 currency = requestedCurrency || order.currency || 'USD';
                 metadata.orderNumber = order.order_number;
+            }
+            // Handle Subscription Payment
+            else if (subscriptionId) {
+                const subscription = await db('user_subscriptions').where({ id: subscriptionId }).first();
+
+                if (!subscription) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Subscription not found'
+                    });
+                }
+
+                if (subscription.user_id !== userId) {
+                    return res.status(403).json({
+                        success: false,
+                        error: 'Unauthorized access to subscription'
+                    });
+                }
+
+                if (subscription.status === 'active') {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Subscription is already active'
+                    });
+                }
+
+                // Get tier details for price
+                const tier = await db('subscription_tiers').where({ id: subscription.tier_id }).first();
+                if (!tier) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Subscription tier not found'
+                    });
+                }
+
+                amount = parseFloat(tier.price);
+                currency = requestedCurrency || tier.currency || 'USD';
+                metadata.type = 'subscription_payment';
+                metadata.subscriptionId = subscriptionId;
+                metadata.tierId = tier.id;
+            }
+            // Handle Direct Tier Subscription Payment (New Flow)
+            else if (tierId) {
+                const tier = await db('subscription_tiers').where({ id: tierId }).first();
+
+                if (!tier) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Subscription tier not found'
+                    });
+                }
+
+                if (!tier.is_active) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Subscription tier is not active'
+                    });
+                }
+
+                // Check if user already has an active subscription
+                const existingActive = await db('user_subscriptions')
+                    .where({ user_id: userId, status: 'active' })
+                    .first();
+
+                if (existingActive) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'You already have an active subscription. Please cancel it before subscribing to a new one.'
+                    });
+                }
+
+                amount = parseFloat(tier.price);
+                currency = requestedCurrency || tier.currency || 'USD';
+                metadata.type = 'subscription_payment';
+                metadata.tierId = tierId;
+                metadata.tierName = tier.name;
+            }
+
+            // Handle Free Items (0.00 amount) - Activate immediately
+            if (amount === 0) {
+                console.log(`Free item acquisition - Type: ${metadata.type}, User: ${userId}`);
+
+                if (metadata.type === 'subscription_payment') {
+                    // Import model here to avoid circular dependencies if any
+                    const UserSubscription = require('../../../models/UserSubscription');
+                    const subscription = await UserSubscription.subscribeUser(userId, metadata.tierId, {
+                        status: 'active',
+                        paymentProvider: 'none',
+                        amountPaid: 0,
+                        metadata: metadata
+                    });
+
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Subscription activated successfully (Free Tier)',
+                        data: {
+                            subscription,
+                            isFree: true
+                        }
+                    });
+                } else if (courseId) {
+                    const Course = require('../../../models/Course');
+                    const enrollment = await Course.enrollUser(courseId, userId);
+
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Successfully enrolled in course (Free)',
+                        data: {
+                            enrollment,
+                            isFree: true
+                        }
+                    });
+                }
+                // OrderId case for free items can be added if needed, but usually shop items have prices
             }
 
             // Determine payment provider based on currency

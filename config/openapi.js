@@ -611,47 +611,6 @@ const openApiSpec = {
         }
       }
     },
-    '/api/subscriptions/subscribe': {
-      post: {
-        tags: ['Subscriptions'],
-        summary: 'Subscribe to a tier',
-        description: 'Subscribe the current user to a subscription tier.',
-        security: [{ bearerAuth: [] }],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['tierId'],
-                properties: {
-                  tierId: { type: 'string', format: 'uuid' },
-                  paymentProvider: { type: 'string', enum: ['stripe', 'paystack'] },
-                  subscriptionId: { type: 'string' }
-                }
-              }
-            }
-          }
-        },
-        responses: {
-          '201': {
-            description: 'Subscription created successfully',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean' },
-                    message: { type: 'string' },
-                    data: { $ref: '#/components/schemas/UserSubscription' }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     '/api/subscriptions/my-subscriptions': {
       get: {
         tags: ['Subscriptions'],
@@ -7860,7 +7819,7 @@ const openApiSpec = {
       post: {
         tags: ['Payments'],
         summary: 'Initialize payment',
-        description: 'Initialize payment for a course enrollment',
+        description: 'Initialize payment for a course enrollment, order, or subscription.',
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
@@ -7868,9 +7827,11 @@ const openApiSpec = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['courseId'],
                 properties: {
                   courseId: { type: 'string', format: 'uuid', example: '123e4567-e89b-12d3-a456-426614174000' },
+                  tierId: { type: 'string', format: 'uuid', description: 'Subscription tier ID' },
+                  orderId: { type: 'string', format: 'uuid', description: 'Shop order ID' },
+                  subscriptionId: { type: 'string', format: 'uuid', description: 'Existing subscription ID for retry' },
                   provider: { type: 'string', enum: ['stripe', 'paystack'], default: 'stripe' },
                   currency: { type: 'string', default: 'USD', example: 'USD' }
                 }

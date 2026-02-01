@@ -7,6 +7,8 @@ const Stripe = require('stripe');
 const Paystack = require('paystack-node');
 const db = require('../config/knex');
 const PaymentProviderService = require('../modules/payments/paymentProviderService');
+const emailService = require('./emailService');
+const notificationService = require('../modules/notifications/services/notificationService');
 const logger = require('../config/winston');
 const UserSubscription = require('../models/UserSubscription');
 
@@ -199,6 +201,7 @@ class PaymentService {
         }
 
         try {
+            // 1. Create Payment Intent for embedded flow
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: Math.round(amount * 100), // Convert to cents
                 currency: currency.toLowerCase(),
@@ -214,10 +217,40 @@ class PaymentService {
                 }
             });
 
+            // 2. Create Checkout Session for redirect link flow
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: [{
+                    price_data: {
+                        currency: currency.toLowerCase(),
+                        product_data: {
+                            name: metadata.courseTitle || metadata.tierName || 'Academy Payment',
+                            description: metadata.description || `Payment for transaction ${transactionId}`,
+                        },
+                        unit_amount: Math.round(amount * 100),
+                    },
+                    quantity: 1,
+                }],
+                mode: 'payment',
+                success_url: process.env.PAYMENT_SUCCESS_URL + `?session_id={CHECKOUT_SESSION_ID}&transactionId=${transactionId}`,
+                cancel_url: process.env.PAYMENT_CANCEL_URL + `?transactionId=${transactionId}`,
+                metadata: {
+                    transactionId,
+                    userId,
+                    courseId: courseId || '',
+                    orderId: orderId || '',
+                    ...metadata
+                },
+                client_reference_id: transactionId
+            });
+
             return {
                 id: paymentIntent.id,
                 clientSecret: paymentIntent.client_secret,
+                checkoutUrl: session.url,
+                authorizationUrl: session.url, // Still available for redirect if needed
                 reference: paymentIntent.id,
+                sessionId: session.id,
                 provider: 'stripe'
             };
         } catch (error) {
@@ -410,13 +443,57 @@ class PaymentService {
                     metadata = transaction.payment_metadata || {};
                 }
 
-                if (metadata.type === 'subscription_payment' && metadata.subscriptionId) {
-                    await UserSubscription.activateSubscription(metadata.subscriptionId, {
-                        amountPaid: transaction.amount,
-                        paymentProvider: provider,
-                        subscriptionId: transaction.provider_transaction_id || transaction.provider_reference
-                    });
-                    logger.info('Subscription activated via payment', { subscriptionId: metadata.subscriptionId, transactionId });
+                if (metadata.type === 'subscription_payment') {
+                    let subscription;
+                    if (metadata.subscriptionId) {
+                        subscription = await UserSubscription.activateSubscription(metadata.subscriptionId, {
+                            amountPaid: transaction.amount,
+                            paymentProvider: provider,
+                            subscriptionId: transaction.provider_transaction_id || transaction.provider_reference
+                        });
+                        logger.info('Subscription activated via payment', { subscriptionId: metadata.subscriptionId, transactionId });
+                    } else if (metadata.tierId) {
+                        // Create and activate subscription directly (matches course enrollment flow)
+                        subscription = await UserSubscription.subscribeUser(transaction.user_id, metadata.tierId, {
+                            status: 'active',
+                            paymentProvider: provider,
+                            subscriptionId: transaction.provider_transaction_id || transaction.provider_reference,
+                            amountPaid: transaction.amount,
+                            metadata: metadata
+                        });
+                        logger.info('Subscription created and activated via direct payment (tierId flow)', { subscriptionId: subscription.id, transactionId, tierId: metadata.tierId });
+                    }
+
+                    // Send Notifications & Emails for Subscription
+                    if (subscription) {
+                        try {
+                            const user = await db('users').where({ id: transaction.user_id }).first();
+                            const tier = await db('subscription_tiers').where({ id: subscription.tier_id || metadata.tierId }).first();
+
+                            if (user && tier) {
+                                // 1. In-app Notification
+                                await notificationService.sendSubscriptionActivationNotification(
+                                    user.id,
+                                    tier.name,
+                                    subscription.expires_at || subscription.expiresAt
+                                );
+
+                                // 2. Email Confirmation
+                                await emailService.sendSubscriptionActivationEmail({
+                                    email: user.email,
+                                    username: user.username || user.first_name,
+                                    tierName: tier.name,
+                                    expiresAt: subscription.expires_at || subscription.expiresAt,
+                                    amount: transaction.amount,
+                                    currency: transaction.currency
+                                });
+
+                                logger.info('Subscription confirmation sent', { userId: user.id, tierId: tier.id });
+                            }
+                        } catch (notifError) {
+                            logger.error('Failed to send subscription notifications', { error: notifError.message, transactionId });
+                        }
+                    }
                 }
 
                 // Handle Order Completion
@@ -749,9 +826,9 @@ class PaymentService {
 
             const event = stripe.webhooks.constructEvent(rawBody || JSON.stringify(payload), signature, webhookSecret);
 
-            if (event.type === 'payment_intent.succeeded') {
-                const paymentIntent = event.data.object;
-                const transactionId = paymentIntent.metadata.transactionId;
+            if (event.type === 'payment_intent.succeeded' || event.type === 'checkout.session.completed') {
+                const object = event.data.object;
+                const transactionId = object.metadata?.transactionId || object.client_reference_id;
 
                 if (transactionId) {
                     // Check if already processed to prevent race conditions
@@ -759,6 +836,9 @@ class PaymentService {
                     if (existingTx && (existingTx.status === 'completed' || existingTx.status === 'refunded')) {
                         return { success: true, message: 'Already processed' };
                     }
+
+                    // Log which event triggered the verification
+                    logger.info(`Stripe webhook: ${event.type} triggering verification for transaction ${transactionId}`);
                     await this.verifyPayment(transactionId, 'stripe');
                 }
             }
