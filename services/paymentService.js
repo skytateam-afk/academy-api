@@ -334,6 +334,16 @@ class PaymentService {
                 };
             }
 
+            // Return early if already completed (Prevents race conditions between frontend and webhook)
+            if (transaction.status === 'completed' || transaction.status === 'refunded') {
+                return {
+                    success: true,
+                    message: `Payment already ${transaction.status}`,
+                    transaction,
+                    alreadyProcessed: true
+                };
+            }
+
             let verificationResult;
             let verified = false;
             let providerData = {};
@@ -744,6 +754,11 @@ class PaymentService {
                 const transactionId = paymentIntent.metadata.transactionId;
 
                 if (transactionId) {
+                    // Check if already processed to prevent race conditions
+                    const existingTx = await db('transactions').where({ id: transactionId }).select('status').first();
+                    if (existingTx && (existingTx.status === 'completed' || existingTx.status === 'refunded')) {
+                        return { success: true, message: 'Already processed' };
+                    }
                     await this.verifyPayment(transactionId, 'stripe');
                 }
             }
@@ -790,6 +805,11 @@ class PaymentService {
                 const transactionId = reference.replace('TXN-', '');
 
                 if (transactionId) {
+                    // Check if already processed to prevent race conditions
+                    const existingTx = await db('transactions').where({ id: transactionId }).select('status').first();
+                    if (existingTx && (existingTx.status === 'completed' || existingTx.status === 'refunded')) {
+                        return { success: true, message: 'Already processed' };
+                    }
                     await this.verifyPayment(transactionId, 'paystack');
                 }
             }
