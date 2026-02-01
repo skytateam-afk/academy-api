@@ -626,7 +626,7 @@ const openApiSpec = {
                 required: ['tierId'],
                 properties: {
                   tierId: { type: 'string', format: 'uuid' },
-                  paymentProvider: { type: 'string', enum: ['stripe', 'paypal', 'manual'], default: 'manual' },
+                  paymentProvider: { type: 'string', enum: ['stripe', 'paystack'] },
                   subscriptionId: { type: 'string' }
                 }
               }

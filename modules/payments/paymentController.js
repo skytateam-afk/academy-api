@@ -517,7 +517,7 @@ class PaymentController {
             const signature = req.headers['stripe-signature'];
             const payload = req.body;
 
-            const result = await paymentService.handleWebhook('stripe', payload, signature);
+            const result = await paymentService.handleWebhook('stripe', payload, signature, req.rawBody);
 
             if (result.success) {
                 res.status(200).json({ received: true });
@@ -539,7 +539,7 @@ class PaymentController {
             const signature = req.headers['x-paystack-signature'];
             const payload = req.body;
 
-            const result = await paymentService.handleWebhook('paystack', payload, signature);
+            const result = await paymentService.handleWebhook('paystack', payload, signature, req.rawBody);
 
             if (result.success) {
                 res.status(200).json({ received: true });

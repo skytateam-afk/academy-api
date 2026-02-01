@@ -699,7 +699,7 @@ class PaymentService {
     /**
      * Handle webhook events
      */
-    async handleWebhook(provider, payload, signature) {
+    async handleWebhook(provider, payload, signature, rawBody) {
         try {
             // Log webhook
             await db('payment_webhooks').insert({
@@ -710,9 +710,9 @@ class PaymentService {
             });
 
             if (provider === 'stripe') {
-                return await this.handleStripeWebhook(payload, signature);
+                return await this.handleStripeWebhook(payload, signature, rawBody);
             } else if (provider === 'paystack') {
-                return await this.handlePaystackWebhook(payload, signature);
+                return await this.handlePaystackWebhook(payload, signature, rawBody);
             }
 
             return { success: false, message: 'Unknown provider' };
@@ -725,7 +725,7 @@ class PaymentService {
     /**
      * Handle Stripe webhook
      */
-    async handleStripeWebhook(payload, signature) {
+    async handleStripeWebhook(payload, signature, rawBody) {
         const stripe = await this.getProvider('stripe');
         if (!stripe) return { success: false };
 
@@ -737,7 +737,7 @@ class PaymentService {
                 return { success: false, message: 'Stripe webhook secret not configured' };
             }
 
-            const event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+            const event = stripe.webhooks.constructEvent(rawBody || JSON.stringify(payload), signature, webhookSecret);
 
             if (event.type === 'payment_intent.succeeded') {
                 const paymentIntent = event.data.object;
@@ -758,7 +758,7 @@ class PaymentService {
     /**
      * Handle Paystack webhook
      */
-    async handlePaystackWebhook(payload, signature) {
+    async handlePaystackWebhook(payload, signature, rawBody) {
         try {
             const config = await PaymentProviderService.getProviderConfig('paystack');
             const webhookSecret = config?.webhookSecret;
@@ -767,7 +767,7 @@ class PaymentService {
                 // Verify Paystack signature with webhook secret from database
                 const hash = require('crypto')
                     .createHmac('sha512', webhookSecret)
-                    .update(JSON.stringify(payload))
+                    .update(rawBody || JSON.stringify(payload))
                     .digest('hex');
 
                 if (hash !== signature) {
@@ -777,7 +777,7 @@ class PaymentService {
                 // Fallback verification using environment variable
                 const hash = require('crypto')
                     .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY || '')
-                    .update(JSON.stringify(payload))
+                    .update(rawBody || JSON.stringify(payload))
                     .digest('hex');
 
                 if (hash !== signature) {

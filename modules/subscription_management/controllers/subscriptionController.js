@@ -44,7 +44,7 @@ const updateTierSchema = z.object({
 
 const subscribeSchema = z.object({
     tierId: z.string().uuid(),
-    paymentProvider: z.enum(['stripe', 'paystack', 'manual']).default('manual'),
+    paymentProvider: z.enum(['stripe', 'paystack']).optional(), // Removed default 'manual' and manual option
     subscriptionId: z.string().optional()
 });
 
@@ -424,7 +424,7 @@ exports.subscribe = async (req, res) => {
         const initialStatus = isFree ? 'active' : 'pending';
 
         const subscription = await UserSubscription.subscribeUser(userId, tierId, {
-            paymentProvider: isFree ? 'none' : paymentProvider,
+            paymentProvider: isFree ? 'none' : (paymentProvider || null), // Pass null if undefined to allow Service to auto-select
             subscriptionId: isFree ? null : subscriptionId,
             status: initialStatus
         });
@@ -441,6 +441,7 @@ exports.subscribe = async (req, res) => {
 
         // If paid, initiate payment
         try {
+            // PaymentProvider will be auto-selected by PaymentService if not provided
             const paymentResult = await PaymentService.createPayment({
                 userId,
                 amount: tier.price,
