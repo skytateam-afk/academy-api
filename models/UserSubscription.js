@@ -304,7 +304,7 @@ class UserSubscription {
             expiresAt: expirationDate,
             paymentProvider: options.paymentProvider || 'manual',
             subscriptionId: options.subscriptionId,
-            amountPaid: status === 'active' ? tier.price : 0, // Set amount paid only if active immediately
+            amountPaid: options.amountPaid !== undefined ? options.amountPaid : (status === 'active' ? tier.price : 0), // Set amount paid only if active immediately
             currency: tier.currency,
             metadata: options.metadata || {}
         };
