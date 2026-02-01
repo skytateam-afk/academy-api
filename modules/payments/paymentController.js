@@ -188,7 +188,7 @@ class PaymentController {
 
                 if (metadata.type === 'subscription_payment') {
                     // Import model here to avoid circular dependencies if any
-                    const UserSubscription = require('../../../models/UserSubscription');
+                    const UserSubscription = require('../../models/UserSubscription');
                     const subscription = await UserSubscription.subscribeUser(userId, metadata.tierId, {
                         status: 'active',
                         paymentProvider: 'none',
@@ -205,7 +205,7 @@ class PaymentController {
                         }
                     });
                 } else if (courseId) {
-                    const Course = require('../../../models/Course');
+                    const Course = require('../../models/Course');
                     const enrollment = await Course.enrollUser(courseId, userId);
 
                     return res.status(200).json({

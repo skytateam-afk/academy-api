@@ -260,6 +260,32 @@ class NotificationService {
     }
 
     /**
+     * Notify user of successful subscription activation
+     */
+    async sendSubscriptionActivationNotification(userId, tierName, expiresAt) {
+        return this.createNotification(
+            userId,
+            this.constructor.TYPES.SUBSCRIPTION_ACTIVATED,
+            'Subscription Activated!',
+            `Your subscription to "${tierName}" is now active. It will expire on ${new Date(expiresAt).toLocaleDateString()}.`,
+            { tierName, expiresAt }
+        );
+    }
+
+    /**
+     * Notify user of subscription cancellation
+     */
+    async sendSubscriptionCancelledNotification(userId, tierName) {
+        return this.createNotification(
+            userId,
+            this.constructor.TYPES.SUBSCRIPTION_CANCELLED,
+            'Subscription Cancelled',
+            `Your subscription to "${tierName}" has been successfully cancelled.`,
+            { tierName }
+        );
+    }
+
+    /**
      * Notify enrolled students when course is updated
      */
     async sendCourseUpdatedNotification(userId, courseTitle) {
