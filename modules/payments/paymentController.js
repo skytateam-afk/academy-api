@@ -187,14 +187,57 @@ class PaymentController {
                 console.log(`Free item acquisition - Type: ${metadata.type}, User: ${userId}`);
 
                 if (metadata.type === 'subscription_payment') {
-                    // Import model here to avoid circular dependencies if any
+                    // Import services and models here to avoid circular dependencies if any
                     const UserSubscription = require('../../models/UserSubscription');
-                    const subscription = await UserSubscription.subscribeUser(userId, metadata.tierId, {
-                        status: 'active',
-                        paymentProvider: 'none',
-                        amountPaid: 0,
-                        metadata: metadata
-                    });
+                    const notificationService = require('../notifications/services/notificationService');
+                    const emailService = require('../../services/emailService');
+
+                    let subscription;
+
+                    if (metadata.subscriptionId) {
+                        // Activate existing pending subscription
+                        subscription = await UserSubscription.activateSubscription(metadata.subscriptionId, {
+                            paymentProvider: 'none',
+                            amountPaid: 0
+                        });
+                        console.log(`Free subscription activated for existing record: ${metadata.subscriptionId}`);
+                    } else {
+                        // Create and activate new subscription
+                        subscription = await UserSubscription.subscribeUser(userId, metadata.tierId, {
+                            status: 'active',
+                            paymentProvider: 'none',
+                            amountPaid: 0,
+                            metadata: metadata
+                        });
+                        console.log(`New free subscription created for tier: ${metadata.tierId}`);
+                    }
+
+                    // Send Notifications & Emails for Free Subscription Activation
+                    try {
+                        const user = await db('users').where({ id: userId }).first();
+                        const tier = await db('subscription_tiers').where({ id: metadata.tierId }).first();
+
+                        if (user && tier) {
+                            // 1. In-app Notification
+                            await notificationService.sendSubscriptionActivationNotification(
+                                user.id,
+                                tier.name,
+                                subscription.expiresAt || subscription.expires_at
+                            );
+
+                            // 2. Email Confirmation
+                            await emailService.sendSubscriptionActivationEmail({
+                                email: user.email,
+                                username: user.username || user.first_name,
+                                tierName: tier.name,
+                                expiresAt: subscription.expiresAt || subscription.expires_at,
+                                amount: 0,
+                                currency: currency
+                            });
+                        }
+                    } catch (notifError) {
+                        console.error('Failed to send free subscription notifications:', notifError.message);
+                    }
 
                     return res.status(200).json({
                         success: true,
@@ -206,7 +249,24 @@ class PaymentController {
                     });
                 } else if (courseId) {
                     const Course = require('../../models/Course');
+                    const notificationService = require('../notifications/services/notificationService');
+
                     const enrollment = await Course.enrollUser(courseId, userId);
+                    console.log(`Free course enrollment: ${courseId} for user: ${userId}`);
+
+                    // Send notification for free course enrollment
+                    try {
+                        const course = await db('courses').where({ id: courseId }).first();
+                        if (course) {
+                            await notificationService.sendCourseEnrollmentNotification(
+                                userId,
+                                course.id,
+                                course.title
+                            );
+                        }
+                    } catch (notifError) {
+                        console.error('Failed to send free course enrollment notification:', notifError.message);
+                    }
 
                     return res.status(200).json({
                         success: true,
