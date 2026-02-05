@@ -434,6 +434,25 @@ class PaymentService {
                 // Handle Course Enrollment
                 if (transaction.course_id) {
                     await this.createEnrollment(transaction.user_id, transaction.course_id, transactionId);
+
+                    // Send Payment Success Email
+                    try {
+                        const user = await db('users').where({ id: transaction.user_id }).first();
+                        const course = await db('courses').select('title').where({ id: transaction.course_id }).first();
+
+                        if (user && course) {
+                            await emailService.sendPaymentSuccessEmail({
+                                email: user.email,
+                                username: user.username || user.first_name,
+                                courseName: course.title,
+                                amount: transaction.amount,
+                                currency: transaction.currency
+                            });
+                            logger.info('Payment success email sent', { userId: user.id, courseId: transaction.course_id });
+                        }
+                    } catch (emailError) {
+                        logger.error('Failed to send payment success email', { error: emailError.message, transactionId });
+                    }
                 }
 
                 // Handle Subscription Activation
@@ -524,6 +543,58 @@ class PaymentService {
                 }
 
                 return { success: true, transaction };
+            }
+
+            // Handle explicit failures
+            const failureStatuses = ['failed', 'abandoned', 'canceled', 'requires_payment_method'];
+            if (failureStatuses.includes(verificationResult.status)) {
+                await db('transactions')
+                    .where({ id: transactionId })
+                    .update({
+                        status: 'failed',
+                        payment_metadata: JSON.stringify({
+                            ...verificationResult
+                        })
+                    });
+
+                // Send Failure Email
+                try {
+                    const user = await db('users').where({ id: transaction.user_id }).first();
+                    let itemName = 'Service';
+
+                    let metadata = {};
+                    try {
+                        metadata = typeof transaction.payment_metadata === 'string'
+                            ? JSON.parse(transaction.payment_metadata)
+                            : transaction.payment_metadata || {};
+                    } catch (e) { }
+
+                    if (transaction.course_id) {
+                        const course = await db('courses').select('title').where({ id: transaction.course_id }).first();
+                        if (course) itemName = course.title;
+                    } else if (metadata.type === 'subscription_payment') {
+                        if (metadata.tierName) {
+                            itemName = metadata.tierName;
+                        } else if (metadata.tierId) {
+                            const tier = await db('subscription_tiers').select('name').where({ id: metadata.tierId }).first();
+                            if (tier) itemName = tier.name;
+                        } else {
+                            itemName = 'Subscription';
+                        }
+                    }
+
+                    if (user) {
+                        await emailService.sendPaymentFailedEmail({
+                            email: user.email,
+                            username: user.username || user.first_name,
+                            courseName: itemName, // Reusing field for item name
+                            reason: verificationResult.error || 'Payment failed'
+                        });
+                        logger.info('Payment failure email sent', { userId: user.id, transactionId });
+                    }
+                } catch (emailError) {
+                    logger.error('Failed to send payment failure email', { error: emailError.message, transactionId });
+                }
             }
 
             // Return the specific error from the provider verification
