@@ -205,6 +205,12 @@ class Pathway {
 
             pathway.courses = courses;
 
+            // Add institution_ids array from the junction table
+            const institutionRecords = await knex('pathway_institutions')
+                .select('institution_id')
+                .where('pathway_id', id);
+            pathway.institution_ids = institutionRecords.map(r => r.institution_id);
+
             return pathway;
         } catch (error) {
             logger.error('Error getting pathway by ID', { id, error: error.message });
@@ -320,7 +326,17 @@ class Pathway {
             await trx.commit();
 
             logger.info('Pathway created', { pathwayId: pathway.id, title });
-            return await this.getById(pathway.id);
+
+            // Get the created pathway
+            const createdPathway = await this.getById(pathway.id);
+
+            // Add institution_ids array from the junction table
+            const institutionRecords = await knex('pathway_institutions')
+                .select('institution_id')
+                .where('pathway_id', pathway.id);
+            createdPathway.institution_ids = institutionRecords.map(r => r.institution_id);
+
+            return createdPathway;
         } catch (error) {
             await trx.rollback();
             logger.error('Error creating pathway', { error: error.message });
@@ -429,7 +445,17 @@ class Pathway {
             await trx.commit();
 
             logger.info('Pathway updated', { pathwayId: id });
-            return await this.getById(id);
+
+            // Get the updated pathway
+            const updatedPathway = await this.getById(id);
+
+            // Add institution_ids array from the junction table
+            const institutionRecords = await knex('pathway_institutions')
+                .select('institution_id')
+                .where('pathway_id', id);
+            updatedPathway.institution_ids = institutionRecords.map(r => r.institution_id);
+
+            return updatedPathway;
         } catch (error) {
             await trx.rollback();
             logger.error('Error updating pathway', { id, error: error.message });
