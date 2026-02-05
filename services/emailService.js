@@ -484,22 +484,22 @@ class EmailService {
    */
   async sendPaymentSuccessEmail(paymentData) {
     const { email, username, courseName, amount, currency } = paymentData;
+    const date = new Date();
 
     return this.sendEmail({
       to: email,
-      subject: 'Payment Successful - Skyta Academy',
-      template: 'notification',
+      subject: 'Payment Receipt - Skyta Academy',
+      template: 'payment-success',
       variables: {
-        title: 'Payment Successful',
         username,
-        message: `Your payment for "${courseName}" was successful. You can now access the course.`,
-        details: [
-          { label: 'Course', value: courseName },
-          { label: 'Amount', value: `${currency} ${amount}` },
-          { label: 'Status', value: 'Paid' }
-        ],
-        actionUrl: `${process.env.FRONTEND_URL}/courses/${courseName.toLowerCase().replace(/\s+/g, '-')}`,
-        actionText: 'Access Course',
+        courseName,
+        amount,
+        currency,
+        year: date.getFullYear(),
+        month: date.toLocaleString('default', { month: 'short' }),
+        day: date.getDate(),
+        actionUrl: `${process.env.FRONTEND_URL}/dashboard/enrollments`,
+        actionText: 'Go to Dashboard',
       },
     });
   }
@@ -519,21 +519,13 @@ class EmailService {
     return this.sendEmail({
       to: email,
       subject: 'Payment Failed - Skyta Academy',
-      template: 'notification',
+      template: 'payment-failed',
       variables: {
-        title: 'Payment Failed',
         username,
-        message: `Your payment for "${courseName}" could not be processed.`,
-        details: [
-          { label: 'Course', value: courseName },
-          { label: 'Reason', value: reason || 'Payment gateway error' },
-          { label: 'Status', value: 'Failed' }
-        ],
-        warning: true,
-        warningTitle: 'Payment Issue',
-        warningMessage: 'Please try again or contact support if the issue persists.',
-        actionUrl: `${process.env.FRONTEND_URL}/courses/${courseName.toLowerCase().replace(/\s+/g, '-')}`,
-        actionText: 'Try Again',
+        courseName,
+        reason: reason || 'Payment gateway error',
+        actionUrl: `${process.env.FRONTEND_URL}/dashboard/billing`,
+        actionText: 'Update Payment Method',
       },
     });
   }
@@ -798,21 +790,20 @@ class EmailService {
    */
   async sendSubscriptionActivationEmail(subscriptionData) {
     const { email, username, tierName, expiresAt, amount, currency } = subscriptionData;
+    const date = new Date();
 
     return this.sendEmail({
       to: email,
-      subject: `Subscription Activated: ${tierName} - Skyta Academy`,
-      template: 'notification',
+      subject: `Subscription Receipt: ${tierName} - Skyta Academy`,
+      template: 'payment-success',
       variables: {
-        title: 'Subscription Activated',
         username,
-        message: `Your subscription to "${tierName}" is now active. Thank you for your purchase!`,
-        details: [
-          { label: 'Plan', value: tierName },
-          { label: 'Amount', value: `${currency} ${amount}` },
-          { label: 'Expires On', value: new Date(expiresAt).toLocaleDateString() },
-          { label: 'Status', value: 'Active' }
-        ],
+        courseName: `${tierName} Subscription`,
+        amount: amount || 0,
+        currency: currency || 'USD',
+        year: date.getFullYear(),
+        month: date.toLocaleString('default', { month: 'short' }),
+        day: date.getDate(),
         actionUrl: `${process.env.FRONTEND_URL}/dashboard/subscription`,
         actionText: 'Manage Subscription',
       },

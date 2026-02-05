@@ -1,0 +1,54 @@
+<!-- Payment Failed Email Content -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td align="center" style="padding: 20px 0;">
+            <!-- Failed Icon -->
+            <div
+                style="width: 60px; height: 60px; background-color: #f8d7da; border-radius: 50%; display: inline-block; line-height: 60px; margin-bottom: 20px;">
+                <span style="color: #dc3545; font-size: 30px; line-height: 60px;">✕</span>
+            </div>
+
+            <h2 style="margin: 0 0 10px; font-size: 24px; font-weight: 700; color: #333333;">
+                Payment Failed
+            </h2>
+
+            <p style="margin: 0 0 30px; font-size: 16px; color: #666666;">
+                We couldn't process your payment for <strong style="color: #333333;">{{courseName}}</strong>.
+            </p>
+
+            <!-- Error Box -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                style="background-color: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px; max-width: 500px; margin-bottom: 30px;">
+                <tr>
+                    <td style="padding: 20px; text-align: center;">
+                        <p style="margin: 0; font-size: 15px; color: #856404;font-weight: 600;">
+                            Reason:
+                        </p>
+                        <p style="margin: 5px 0 0; font-size: 14px; color: #856404;">
+                            {{reason}}
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            {{#actionUrl}}
+            <!-- CTA Button -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;">
+                <tr>
+                    <td align="center">
+                        <a href="{{actionUrl}}" class="button"
+                            style="display: inline-block; background-color: #dc3545; color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 4px; font-size: 16px; font-weight: 600; text-align: center; box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);">
+                            {{actionText}}
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            {{/actionUrl}}
+
+            <p style="margin: 30px 0 0; font-size: 14px; color: #666666; line-height: 1.6; max-width: 500px;">
+                Please check your payment details or try a different payment method. If you continue to experience
+                issues, please contact support.
+            </p>
+        </td>
+    </tr>
+</table>
