@@ -435,12 +435,28 @@ class PaymentService {
                 if (transaction.course_id) {
                     await this.createEnrollment(transaction.user_id, transaction.course_id, transactionId);
 
-                    // Send Payment Success Email
+                    // Send Notifications (Email + In-App)
                     try {
                         const user = await db('users').where({ id: transaction.user_id }).first();
-                        const course = await db('courses').select('title').where({ id: transaction.course_id }).first();
+                        const course = await db('courses').select('id', 'title').where({ id: transaction.course_id }).first();
+                        const notificationService = require('../modules/notifications/services/notificationService');
 
                         if (user && course) {
+                            // 1. In-App Notifications
+                            await notificationService.sendPaymentSuccessNotification(
+                                user.id,
+                                course.title,
+                                transaction.amount,
+                                transaction.currency
+                            );
+
+                            await notificationService.sendCourseEnrollmentNotification(
+                                user.id,
+                                course.id,
+                                course.title
+                            );
+
+                            // 2. Email Confirmation
                             await emailService.sendPaymentSuccessEmail({
                                 email: user.email,
                                 username: user.username || user.first_name,
@@ -448,10 +464,10 @@ class PaymentService {
                                 amount: transaction.amount,
                                 currency: transaction.currency
                             });
-                            logger.info('Payment success email sent', { userId: user.id, courseId: transaction.course_id });
+                            logger.info('Payment success notifications sent', { userId: user.id, courseId: transaction.course_id });
                         }
-                    } catch (emailError) {
-                        logger.error('Failed to send payment success email', { error: emailError.message, transactionId });
+                    } catch (notifError) {
+                        logger.error('Failed to send payment success notifications', { error: notifError.message, transactionId });
                     }
                 }
 
@@ -493,6 +509,7 @@ class PaymentService {
                         try {
                             const user = await db('users').where({ id: transaction.user_id }).first();
                             const tier = await db('subscription_tiers').where({ id: subscription.tierId || metadata.tierId }).first();
+                            const notificationService = require('../modules/notifications/services/notificationService');
 
                             if (user && tier) {
                                 // 1. In-app Notification
@@ -547,12 +564,22 @@ class PaymentService {
 
             // Handle explicit failures
             const failureStatuses = ['failed', 'abandoned', 'canceled', 'requires_payment_method'];
-            if (failureStatuses.includes(verificationResult.status)) {
+            if (failureStatuses.includes(verificationResult.status) || (!verificationResult.verified && verificationResult.error)) {
+
+                // Parse existing metadata to ensure we don't lose it
+                let currentMetadata = {};
+                try {
+                    currentMetadata = typeof transaction.payment_metadata === 'string'
+                        ? JSON.parse(transaction.payment_metadata)
+                        : transaction.payment_metadata || {};
+                } catch (e) { }
+
                 await db('transactions')
                     .where({ id: transactionId })
                     .update({
                         status: 'failed',
                         payment_metadata: JSON.stringify({
+                            ...currentMetadata,
                             ...verificationResult
                         })
                     });
@@ -560,23 +587,18 @@ class PaymentService {
                 // Send Failure Email
                 try {
                     const user = await db('users').where({ id: transaction.user_id }).first();
+                    const notificationService = require('../modules/notifications/services/notificationService');
                     let itemName = 'Service';
 
-                    let metadata = {};
-                    try {
-                        metadata = typeof transaction.payment_metadata === 'string'
-                            ? JSON.parse(transaction.payment_metadata)
-                            : transaction.payment_metadata || {};
-                    } catch (e) { }
-
+                    // Use currentMetadata for type checks
                     if (transaction.course_id) {
                         const course = await db('courses').select('title').where({ id: transaction.course_id }).first();
                         if (course) itemName = course.title;
-                    } else if (metadata.type === 'subscription_payment') {
-                        if (metadata.tierName) {
-                            itemName = metadata.tierName;
-                        } else if (metadata.tierId) {
-                            const tier = await db('subscription_tiers').select('name').where({ id: metadata.tierId }).first();
+                    } else if (currentMetadata.type === 'subscription_payment') {
+                        if (currentMetadata.tierName) {
+                            itemName = currentMetadata.tierName;
+                        } else if (currentMetadata.tierId) {
+                            const tier = await db('subscription_tiers').select('name').where({ id: currentMetadata.tierId }).first();
                             if (tier) itemName = tier.name;
                         } else {
                             itemName = 'Subscription';
@@ -584,16 +606,24 @@ class PaymentService {
                     }
 
                     if (user) {
+                        // 1. In-App Notification
+                        await notificationService.sendPaymentFailedNotification(
+                            user.id,
+                            itemName,
+                            verificationResult.error || 'Payment failed'
+                        );
+
+                        // 2. Email Confirmation
                         await emailService.sendPaymentFailedEmail({
                             email: user.email,
                             username: user.username || user.first_name,
                             courseName: itemName, // Reusing field for item name
                             reason: verificationResult.error || 'Payment failed'
                         });
-                        logger.info('Payment failure email sent', { userId: user.id, transactionId });
+                        logger.info('Payment failure notifications sent', { userId: user.id, transactionId });
                     }
-                } catch (emailError) {
-                    logger.error('Failed to send payment failure email', { error: emailError.message, transactionId });
+                } catch (notifError) {
+                    logger.error('Failed to send payment failure notifications', { error: notifError.message, transactionId });
                 }
             }
 
