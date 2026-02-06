@@ -376,16 +376,15 @@ class JobService {
             email,
             phone
         } = applicantData;
-
         // Check for existing application if user_id is provided
         if (user_id) {
             const existingApplication = await knex('job_applications')
                 .where({ job_id: jobId, user_id: user_id })
-                .whereIn('status', ['pending', 'shortlisted'])
+                .whereIn('status', ['pending', 'reviewed', 'shortlisted', 'interview'])
                 .first();
 
             if (existingApplication) {
-                throw { status: 400, message: 'You have already applied for this job and your application is pending or shortlisted.' };
+                throw { status: 400, message: 'You have already applied for this job and your application is active.' };
             }
         }
 
@@ -636,9 +635,9 @@ class JobService {
      */
     async updateApplicationStatus(applicationId, status) {
         // Validate status
-        const validStatuses = ['pending', 'reviewed', 'shortlisted', 'rejected'];
+        const validStatuses = ['pending', 'reviewed', 'shortlisted', 'interview', 'rejected', 'hired', 'withdrawn'];
         if (!validStatuses.includes(status)) {
-            throw { status: 400, message: 'Invalid status. Must be one of: pending, reviewed, shortlisted, rejected' };
+            throw { status: 400, message: 'Invalid status. Must be one of: pending, reviewed, shortlisted, interview, rejected, hired, withdrawn' };
         }
 
         const [application] = await knex('job_applications')
