@@ -21,6 +21,7 @@ const results = require('./results/result.routes');
 const menuVisibility = require('./menu_visibility/menuVisibility.routes');
 const contactManagement = require('./contact_management/contact.routes');
 const search = require('./search/search.routes');
+const legal = require('./legal/routes/policyRoutes');
 
 module.exports = {
   auth,
@@ -41,6 +42,7 @@ module.exports = {
   menuVisibility,
   contactManagement,
   search,
+  legal,
   subscriptionManagement: require('./subscription_management'),
   partnership: require('./partnership/partner.routes')
 };

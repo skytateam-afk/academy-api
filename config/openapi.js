@@ -582,10 +582,66 @@ const openApiSpec = {
           updatedAt: { type: 'string', format: 'date-time' },
           tier: { $ref: '#/components/schemas/SubscriptionTier' }
         }
+      },
+      PolicyAcceptance: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          userId: { type: 'string', format: 'uuid' },
+          policyVersion: { type: 'string', example: 'v1.0' },
+          ipAddress: { type: 'string', example: '192.168.1.1' },
+          userAgent: { type: 'string', example: 'Mozilla/5.0...' },
+          createdAt: { type: 'string', format: 'date-time' }
+        }
       }
     }
   },
   paths: {
+    '/api/legal/accept-policy': {
+      post: {
+        tags: ['Legal'],
+        summary: 'Accept a policy',
+        description: 'Record user acceptance of a policy version. IP and User Agent are automatically captured.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['policy_version'],
+                properties: {
+                  policy_version: { type: 'string', example: 'v1.0' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Policy accepted successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    message: { type: 'string' },
+                    data: { $ref: '#/components/schemas/PolicyAcceptance' }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Missing required fields'
+          },
+          '401': {
+            description: 'Unauthorized'
+          }
+        }
+      }
+    },
     '/api/subscriptions/tiers': {
       get: {
         tags: ['Subscriptions'],

@@ -177,6 +177,7 @@ app.use('/api/menu-visibility', menuVisibilityRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/partners', modules.partnership);
+app.use('/api/legal', modules.legal);
 app.use('/api/ai', aiManagementRoutes);
 app.use('/api', modules.jobManagement.routes);
 app.use('/api/users', modules.userManagement.routes.workProfileRoutes);
