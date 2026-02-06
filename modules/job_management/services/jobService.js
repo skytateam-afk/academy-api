@@ -28,6 +28,22 @@ class JobService {
             .leftJoin('job_applications', 'jobs.id', 'job_applications.job_id')
             .groupBy('jobs.id');
 
+        // Check if user has applied
+        // Check if user has applied
+        if (options.userId) {
+            dbQuery.select(knex.raw(`
+                CASE 
+                    WHEN EXISTS (
+                        SELECT 1 FROM job_applications ja 
+                        WHERE ja.job_id = jobs.id AND ja.user_id = ?
+                    ) THEN true 
+                    ELSE false 
+                END as is_applied
+            `, [options.userId]));
+        } else {
+            dbQuery.select(knex.raw('false as is_applied'));
+        }
+
         // Filter by status (public view sees only active)
         if (status === 'active') {
             dbQuery.where('jobs.is_active', true);
@@ -97,11 +113,11 @@ class JobService {
             .clearSelect()
             .select('jobs.id')
             .as('count_subquery');
-        
+
         const totalResult = await knex.count('* as total')
             .from(countSubquery)
             .first();
-        
+
         const total = parseInt(totalResult.total);
 
         // Fetch data
@@ -124,7 +140,7 @@ class JobService {
     /**
      * Get single job by ID
      */
-    async getJobById(id, publicView = true) {
+    async getJobById(id, publicView = true, userId = null) {
         const query = knex('jobs').where({ id }).first();
 
         // If public view, ensure it's active
@@ -132,10 +148,32 @@ class JobService {
             query.where('is_active', true);
         }
 
+        // Add is_applied check if userId provided
+        // Add is_applied check if userId provided
+        if (userId) {
+            query.select('jobs.*', knex.raw(`
+                CASE 
+                    WHEN EXISTS (
+                        SELECT 1 FROM job_applications ja 
+                        WHERE ja.job_id = jobs.id AND ja.user_id = ?
+                    ) THEN true 
+                    ELSE false 
+                END as is_applied
+            `, [userId]));
+        } else {
+            query.select('jobs.*', knex.raw('false as is_applied'));
+        }
+
         const job = await query;
         if (!job) {
             throw { status: 404, message: 'Job not found' };
         }
+
+        // Ensure is_applied is boolean (postgres might return it as check)
+        if (job.is_applied !== undefined) {
+            job.is_applied = !!job.is_applied;
+        }
+
         return job;
     }
 
@@ -145,7 +183,7 @@ class JobService {
     async createJob(data, logoFile) {
         // Parse JSON fields if they're strings
         const jobData = { ...data };
-        
+
         // Log incoming data for debugging
         logger.info('Incoming job data:', {
             requirementsType: typeof jobData.requirements,
@@ -153,7 +191,7 @@ class JobService {
             responsibilitiesType: typeof jobData.responsibilities,
             responsibilitiesValue: jobData.responsibilities
         });
-        
+
         // Handle requirements
         if (typeof jobData.requirements === 'string') {
             try {
@@ -170,7 +208,7 @@ class JobService {
             // Filter out empty strings if already an array
             jobData.requirements = jobData.requirements.filter(r => r && r.trim());
         }
-        
+
         // Handle responsibilities
         if (typeof jobData.responsibilities === 'string') {
             try {
@@ -187,7 +225,7 @@ class JobService {
             // Filter out empty strings if already an array
             jobData.responsibilities = jobData.responsibilities.filter(r => r && r.trim());
         }
-        
+
         // Convert string booleans to actual booleans
         if (typeof jobData.is_external === 'string') {
             jobData.is_external = jobData.is_external === 'true';
@@ -225,7 +263,7 @@ class JobService {
     async updateJob(id, data, logoFile) {
         // Parse JSON fields if they're strings
         const jobData = { ...data };
-        
+
         // Handle requirements
         if (typeof jobData.requirements === 'string') {
             try {
@@ -237,7 +275,7 @@ class JobService {
         if (!jobData.requirements || jobData.requirements.length === 0) {
             jobData.requirements = [];
         }
-        
+
         // Handle responsibilities
         if (typeof jobData.responsibilities === 'string') {
             try {
@@ -338,6 +376,18 @@ class JobService {
             email,
             phone
         } = applicantData;
+
+        // Check for existing application if user_id is provided
+        if (user_id) {
+            const existingApplication = await knex('job_applications')
+                .where({ job_id: jobId, user_id: user_id })
+                .whereIn('status', ['pending', 'shortlisted'])
+                .first();
+
+            if (existingApplication) {
+                throw { status: 400, message: 'You have already applied for this job and your application is pending or shortlisted.' };
+            }
+        }
 
         // Upload files to R2
         let resumeUrl = null;
@@ -446,7 +496,7 @@ class JobService {
             'SELECT * FROM job_profiles WHERE user_id = ? LIMIT 1',
             [userId]
         );
-        
+
         return result.rows[0] || null;
     }
 
@@ -455,7 +505,7 @@ class JobService {
      */
     async saveJobProfile(userId, data, resumeFile) {
         logger.info('saveJobProfile called with:', { userId, hasResumeFile: !!resumeFile });
-        
+
         const profileData = { ...data };
 
         // Parse preferred_types if it's a string

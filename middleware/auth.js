@@ -92,19 +92,19 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fabric-explorer-secret-key';
 function authenticateToken(req, res, next) {
     // Extract the Authorization header
     const authHeader = req.headers['authorization'];
-    
+
     // Parse the Bearer token (format: "Bearer <token>")
     // Split by space and take the second part (the actual token)
     const token = authHeader && authHeader.split(' ')[1];
-    
+
     // Check if token exists
     if (!token) {
         // Log the unauthorized access attempt for security monitoring
-        logger.warn('Access attempt without token', { 
+        logger.warn('Access attempt without token', {
             url: req.originalUrl,
-            ip: req.ip 
+            ip: req.ip
         });
-        
+
         // Log security event for audit trail
         logSecurityEvent('UNAUTHORIZED_ACCESS', {
             url: req.originalUrl,
@@ -112,14 +112,14 @@ function authenticateToken(req, res, next) {
             userAgent: req.get('user-agent'),
             reason: 'Missing authentication token'
         });
-        
+
         // Return 401 Unauthorized - authentication is required
-        return res.status(401).json({ 
+        return res.status(401).json({
             success: false,
-            error: 'Access token required' 
+            error: 'Access token required'
         });
     }
-    
+
     // Verify the JWT token
     // This checks:
     // - Token signature is valid (signed with JWT_SECRET)
@@ -128,14 +128,14 @@ function authenticateToken(req, res, next) {
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
             // Log the failed authentication attempt with more details
-            logger.warn('Invalid token attempt', { 
+            logger.warn('Invalid token attempt', {
                 url: req.originalUrl,
                 ip: req.ip,
                 error: err.message,
                 errorName: err.name,
                 token: token.substring(0, 20) + '...' // Log first 20 chars for debugging
             });
-            
+
             // Log security event for audit trail
             logSecurityEvent('INVALID_TOKEN', {
                 url: req.originalUrl,
@@ -144,11 +144,11 @@ function authenticateToken(req, res, next) {
                 reason: err.message,
                 tokenExpired: err.name === 'TokenExpiredError'
             });
-            
+
             // Provide explicit error messages based on the error type
             if (err.name === 'TokenExpiredError') {
                 // Token has expired - send explicit message for frontend detection
-                return res.status(403).json({ 
+                return res.status(403).json({
                     success: false,
                     error: 'Token has expired',
                     message: 'Your session has expired. Please sign in again.',
@@ -156,7 +156,7 @@ function authenticateToken(req, res, next) {
                 });
             } else if (err.name === 'JsonWebTokenError') {
                 // Token is malformed or invalid
-                return res.status(403).json({ 
+                return res.status(403).json({
                     success: false,
                     error: 'Invalid token',
                     message: 'Your session is invalid. Please sign in again.',
@@ -164,7 +164,7 @@ function authenticateToken(req, res, next) {
                 });
             } else {
                 // Generic token error
-                return res.status(403).json({ 
+                return res.status(403).json({
                     success: false,
                     error: 'Invalid or expired token',
                     message: 'Authentication failed. Please sign in again.',
@@ -172,12 +172,12 @@ function authenticateToken(req, res, next) {
                 });
             }
         }
-        
+
         // Token is valid - attach the decoded user information to the request
         // This makes user info available to subsequent middleware and route handlers
         // The user object typically contains: { username, iat, exp }
         req.user = user;
-        
+
         // Log successful authentication for debugging
         logger.info('Token verified successfully', {
             url: req.originalUrl,
@@ -185,13 +185,39 @@ function authenticateToken(req, res, next) {
             username: user.username,
             role: user.role
         });
-        
+
         // Proceed to the next middleware or route handler
+        next();
+    });
+}
+
+/**
+ * Optional JWT Authentication Middleware
+ * 
+ * Attempts to verify the JWT token if present. If valid, attaches user info to req.user.
+ * If missing or invalid, proceeds without error (req.user remains undefined).
+ * 
+ * @function optionalAuthenticateToken
+ */
+function optionalAuthenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return next();
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (!err) {
+            req.user = user;
+        }
+        // If error, we just proceed without setting req.user
         next();
     });
 }
 
 // Export the middleware function
 module.exports = {
-    authenticateToken
+    authenticateToken,
+    optionalAuthenticateToken
 };

@@ -525,6 +525,7 @@ const openApiSpec = {
           currency: { type: 'string', default: 'USD' },
           company_name: { type: 'string', example: 'Acme Corp' },
           company_logo_url: { type: 'string', nullable: true },
+          is_applied: { type: 'boolean', default: false, description: 'Indicates if the current user has applied for this job' },
           created_at: { type: 'string', format: 'date-time' },
           updated_at: { type: 'string', format: 'date-time' }
         }
