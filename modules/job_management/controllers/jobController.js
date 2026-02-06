@@ -6,7 +6,8 @@ class JobController {
         try {
             const result = await jobService.listJobs({
                 ...req.query,
-                status: 'active'
+                status: 'active',
+                userId: req.user ? req.user.userId : null
             });
             res.json({ success: true, data: result });
         } catch (error) {
@@ -17,7 +18,11 @@ class JobController {
     // Public: Get job detail
     async getJobDetail(req, res, next) {
         try {
-            const job = await jobService.getJobById(req.params.id, true);
+            const job = await jobService.getJobById(
+                req.params.id,
+                true,
+                req.user ? req.user.userId : null
+            );
             res.json({ success: true, data: job });
         } catch (error) {
             next(error);

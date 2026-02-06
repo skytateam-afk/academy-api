@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jobController = require('../controllers/jobController');
-const { authenticateToken } = require('../../../middleware/auth');
+const { authenticateToken, optionalAuthenticateToken } = require('../../../middleware/auth');
 const { requireAdmin } = require('../../../middleware/rbac');
 const multer = require('multer');
 
@@ -11,34 +11,34 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
-// -- Public Routes --
-router.get('/jobs', jobController.listPublicJobs);
-router.get('/jobs/:id', jobController.getJobDetail);
-router.post('/jobs/:id/apply',
-    upload.fields([{ name: 'resume', maxCount: 1 }, { name: 'cover_letter', maxCount: 1 }]),
-    jobController.applyForJob
-);
-
 // -- User Job Profile Routes --
 router.get('/jobs/profile/me', authenticateToken, jobController.getMyJobProfile);
-router.post('/jobs/profile/me', 
+router.post('/jobs/profile/me',
     authenticateToken,
     upload.single('resume'),
     jobController.saveMyJobProfile
 );
 
+// -- Public Routes --
+router.get('/jobs', optionalAuthenticateToken, jobController.listPublicJobs);
+router.get('/jobs/:id', optionalAuthenticateToken, jobController.getJobDetail);
+router.post('/jobs/:id/apply',
+    upload.fields([{ name: 'resume', maxCount: 1 }, { name: 'cover_letter', maxCount: 1 }]),
+    jobController.applyForJob
+);
+
 // -- Admin Routes --
 router.get('/admin/jobs', authenticateToken, requireAdmin, jobController.listAdminJobs);
-router.post('/admin/jobs', 
-    authenticateToken, 
-    requireAdmin, 
+router.post('/admin/jobs',
+    authenticateToken,
+    requireAdmin,
     upload.single('company_logo'),
     jobController.createJob
 );
 router.get('/admin/jobs/:id', authenticateToken, requireAdmin, jobController.getAdminJob);
-router.put('/admin/jobs/:id', 
-    authenticateToken, 
-    requireAdmin, 
+router.put('/admin/jobs/:id',
+    authenticateToken,
+    requireAdmin,
     upload.single('company_logo'),
     jobController.updateJob
 );
