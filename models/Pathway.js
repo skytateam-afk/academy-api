@@ -138,6 +138,30 @@ class Pathway {
 
             const pathways = await query;
 
+            // Populate institution_ids for each pathway
+            if (pathways.length > 0) {
+                const pathwayIds = pathways.map(p => p.id);
+                const institutionRecords = await knex('pathway_institutions')
+                    .select('pathway_id', 'institution_id')
+                    .whereIn('pathway_id', pathwayIds);
+
+                const institutionMap = {};
+                institutionRecords.forEach(record => {
+                    if (!institutionMap[record.pathway_id]) {
+                        institutionMap[record.pathway_id] = [];
+                    }
+                    institutionMap[record.pathway_id].push(record.institution_id);
+                });
+
+                pathways.forEach(pathway => {
+                    pathway.institution_ids = institutionMap[pathway.id] || [];
+                    // Ensure backward compatibility if institution_id column is used
+                    if (pathway.institution_id && !pathway.institution_ids.includes(pathway.institution_id)) {
+                        pathway.institution_ids.push(pathway.institution_id);
+                    }
+                });
+            }
+
             return {
                 pathways,
                 pagination: {
