@@ -39,6 +39,7 @@
 const jwt = require('jsonwebtoken');
 const logger = require('../config/winston');
 const { logSecurityEvent } = require('./auditLogger');
+const UserSubscription = require('../models/UserSubscription');
 
 // JWT secret key from environment or default
 const JWT_SECRET = process.env.JWT_SECRET || 'fabric-explorer-secret-key';
@@ -125,7 +126,7 @@ function authenticateToken(req, res, next) {
     // - Token signature is valid (signed with JWT_SECRET)
     // - Token has not expired (exp claim)
     // - Token structure is valid
-    jwt.verify(token, JWT_SECRET, (err, user) => {
+    jwt.verify(token, JWT_SECRET, async (err, user) => {
         if (err) {
             // Log the failed authentication attempt with more details
             logger.warn('Invalid token attempt', {
@@ -177,6 +178,22 @@ function authenticateToken(req, res, next) {
         // This makes user info available to subsequent middleware and route handlers
         // The user object typically contains: { username, iat, exp }
         req.user = user;
+
+        // Check for subscription expiration
+        // We do this "lazy" check here to ensure subscription status is up to date
+        // whenever the user is active, without needing a separate background job.
+        if (user.userId) {
+            try {
+                await UserSubscription.checkSubscriptionExpired(user.userId);
+            } catch (subError) {
+                // If this check fails, we log it but don't block the request
+                // We don't want a DB hiccup to prevent access if auth was successful
+                logger.error('Error checking subscription expiration', {
+                    userId: user.userId,
+                    error: subError.message
+                });
+            }
+        }
 
         // Log successful authentication for debugging
         logger.info('Token verified successfully', {
