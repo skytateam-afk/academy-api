@@ -360,9 +360,22 @@ class PaymentService {
      */
     async verifyPayment(transactionId, provider) {
         try {
-            const transaction = await db('transactions')
-                .where({ id: transactionId })
-                .first();
+            let transaction;
+
+            // Check if transactionId is a valid UUID
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(transactionId);
+
+            if (isUuid) {
+                transaction = await db('transactions')
+                    .where({ id: transactionId })
+                    .first();
+            } else {
+                // Try to find by provider transaction ID or reference
+                transaction = await db('transactions')
+                    .where({ provider_transaction_id: transactionId })
+                    .orWhere({ provider_reference: transactionId })
+                    .first();
+            }
 
             if (!transaction) {
                 return {
@@ -421,7 +434,7 @@ class PaymentService {
                 }
 
                 await db('transactions')
-                    .where({ id: transactionId })
+                    .where({ id: transaction.id })
                     .update({
                         status: 'completed',
                         paid_at: new Date(),
@@ -433,7 +446,7 @@ class PaymentService {
 
                 // Handle Course Enrollment
                 if (transaction.course_id) {
-                    await this.createEnrollment(transaction.user_id, transaction.course_id, transactionId);
+                    await this.createEnrollment(transaction.user_id, transaction.course_id, transaction.id);
 
                     // Send Notifications (Email + In-App)
                     try {
@@ -491,7 +504,7 @@ class PaymentService {
                             paymentProvider: provider,
                             subscriptionId: transaction.provider_transaction_id || transaction.provider_reference
                         });
-                        logger.info('Subscription activated via payment', { subscriptionId: metadata.subscriptionId, transactionId });
+                        logger.info('Subscription activated via payment', { subscriptionId: metadata.subscriptionId, transactionId: transaction.id });
                     } else if (metadata.tierId) {
                         // Create and activate subscription directly (matches course enrollment flow)
                         subscription = await UserSubscription.subscribeUser(transaction.user_id, metadata.tierId, {
@@ -501,7 +514,7 @@ class PaymentService {
                             amountPaid: transaction.amount,
                             metadata: metadata
                         });
-                        logger.info('Subscription created and activated via direct payment (tierId flow)', { subscriptionId: subscription.id, transactionId, tierId: metadata.tierId });
+                        logger.info('Subscription created and activated via direct payment (tierId flow)', { subscriptionId: subscription.id, transactionId: transaction.id, tierId: metadata.tierId });
                     }
 
                     // Send Notifications & Emails for Subscription
@@ -547,15 +560,15 @@ class PaymentService {
                             payment_status: 'paid',
                             payment_method: provider,
                             payment_provider_id: transaction.provider_transaction_id,
-                            transaction_id: transactionId,
+                            transaction_id: transaction.id,
                             paid_at: new Date()
                         });
 
                     // Update shop_transaction status
                     await db('shop_transactions')
-                        .where({ transaction_id: transactionId })
+                        .where({ transaction_id: transaction.id })
                         .update({
-                            transaction_id: transactionId // Ensure link
+                            transaction_id: transaction.id // Ensure link
                         });
                 }
 
@@ -575,7 +588,7 @@ class PaymentService {
                 } catch (e) { }
 
                 await db('transactions')
-                    .where({ id: transactionId })
+                    .where({ id: transaction.id })
                     .update({
                         status: 'failed',
                         payment_metadata: JSON.stringify({

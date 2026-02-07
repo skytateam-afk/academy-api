@@ -470,6 +470,12 @@ const openApiSpec = {
           is_featured: { type: 'boolean', default: false },
           enrollment_count_actual: { type: 'integer', default: 0 },
           institution_id: { type: 'string', format: 'uuid', nullable: true },
+          institution_ids: {
+            type: 'array',
+            items: { type: 'string', format: 'uuid' },
+            nullable: true,
+            description: 'List of institution IDs associated with this pathway'
+          },
           created_by: { type: 'string', format: 'uuid' },
           creator_username: { type: 'string', nullable: true },
           createdAt: { type: 'string', format: 'date-time' },

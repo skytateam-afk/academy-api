@@ -39,6 +39,13 @@
 const jwt = require('jsonwebtoken');
 const logger = require('../config/winston');
 const { logSecurityEvent } = require('./auditLogger');
+const UserSubscription = require('../models/UserSubscription');
+
+// Cache to store last subscription check timestamp for each user
+// key: userId, value: timestamp (ms)
+const subscriptionCheckCache = new Map();
+// Throttle interval: 5 minutes
+const SUBSCRIPTION_CHECK_THROTTLE_MS = 5 * 60 * 1000;
 
 // JWT secret key from environment or default
 const JWT_SECRET = process.env.JWT_SECRET || 'fabric-explorer-secret-key';
@@ -125,7 +132,7 @@ function authenticateToken(req, res, next) {
     // - Token signature is valid (signed with JWT_SECRET)
     // - Token has not expired (exp claim)
     // - Token structure is valid
-    jwt.verify(token, JWT_SECRET, (err, user) => {
+    jwt.verify(token, JWT_SECRET, async (err, user) => {
         if (err) {
             // Log the failed authentication attempt with more details
             logger.warn('Invalid token attempt', {
@@ -176,18 +183,55 @@ function authenticateToken(req, res, next) {
         // Token is valid - attach the decoded user information to the request
         // This makes user info available to subsequent middleware and route handlers
         // The user object typically contains: { username, iat, exp }
-        req.user = user;
+        try {
+            req.user = user;
 
-        // Log successful authentication for debugging
-        logger.info('Token verified successfully', {
-            url: req.originalUrl,
-            userId: user.userId,
-            username: user.username,
-            role: user.role
-        });
+            // Check for subscription expiration
+            // We do this "lazy" check here to ensure subscription status is up to date
+            // whenever the user is active, without needing a separate background job.
+            // Implemented throttling to check at most once every 5 minutes per user
+            if (user.userId) {
+                const now = Date.now();
+                const lastChecked = subscriptionCheckCache.get(user.userId);
 
-        // Proceed to the next middleware or route handler
-        next();
+                if (!lastChecked || (now - lastChecked > SUBSCRIPTION_CHECK_THROTTLE_MS)) {
+                    try {
+                        await UserSubscription.checkSubscriptionExpired(user.userId);
+
+                        // Prevent memory leak: if cache grows too large, cleanup old entries
+                        if (subscriptionCheckCache.size > 10000) {
+                            for (const [key, timestamp] of subscriptionCheckCache.entries()) {
+                                if (now - timestamp > SUBSCRIPTION_CHECK_THROTTLE_MS) {
+                                    subscriptionCheckCache.delete(key);
+                                }
+                            }
+                        }
+
+                        subscriptionCheckCache.set(user.userId, now);
+                    } catch (subError) {
+                        // If this check fails, we log it but don't block the request
+                        // We don't want a DB hiccup to prevent access if auth was successful
+                        logger.error('Error checking subscription expiration', {
+                            userId: user.userId,
+                            error: subError.message
+                        });
+                    }
+                }
+            }
+
+            // Log successful authentication for debugging
+            logger.info('Token verified successfully', {
+                url: req.originalUrl,
+                userId: user.userId,
+                username: user.username,
+                role: user.role
+            });
+
+            // Proceed to the next middleware or route handler
+            next();
+        } catch (error) {
+            next(error);
+        }
     });
 }
 

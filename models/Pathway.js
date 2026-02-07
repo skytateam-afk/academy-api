@@ -60,10 +60,26 @@ class Pathway {
             if (options.ignoreInstitutionFilter) {
                 // Do not apply any institution filter - show all pathways
             } else if (institutionId) {
-                query = query.where('p.institution_id', institutionId);
-            } else {
+                // Filter by institution (check both column and junction table)
+                query = query.where(function () {
+                    this.where('p.institution_id', institutionId)
+                        .orWhereExists(function () {
+                            this.select(knex.raw(1))
+                                .from('pathway_institutions as pi')
+                                .whereRaw('pi.pathway_id = p.id')
+                                .where('pi.institution_id', institutionId);
+                        });
+                });
+            } else if (!enrolledByUserId) {
                 // By default, exclude pathways that belong to an institution from global lists
-                query = query.whereNull('p.institution_id');
+                // ONLY if we are not filtering by enrollment (which has its own inclusion logic)
+                // Must check both column and junction table
+                query = query.whereNull('p.institution_id')
+                    .whereNotExists(function () {
+                        this.select(knex.raw(1))
+                            .from('pathway_institutions as pi')
+                            .whereRaw('pi.pathway_id = p.id');
+                    });
             }
 
             if (enrolledByUserId) {
@@ -77,7 +93,16 @@ class Pathway {
                 }).where(function () {
                     this.whereNotNull('pe_filter.id'); // Explicitly enrolled
                     if (userInstitutionId) {
-                        this.orWhere('p.institution_id', userInstitutionId); // Belongs to user's institution
+                        // Belongs to user's institution (check both)
+                        this.orWhere(function () {
+                            this.where('p.institution_id', userInstitutionId)
+                                .orWhereExists(function () {
+                                    this.select(knex.raw(1))
+                                        .from('pathway_institutions as pi')
+                                        .whereRaw('pi.pathway_id = p.id')
+                                        .where('pi.institution_id', userInstitutionId);
+                                });
+                        });
                     }
                 });
             }
@@ -137,6 +162,30 @@ class Pathway {
                 .offset(offset);
 
             const pathways = await query;
+
+            // Populate institution_ids for each pathway
+            if (pathways.length > 0) {
+                const pathwayIds = pathways.map(p => p.id);
+                const institutionRecords = await knex('pathway_institutions')
+                    .select('pathway_id', 'institution_id')
+                    .whereIn('pathway_id', pathwayIds);
+
+                const institutionMap = {};
+                institutionRecords.forEach(record => {
+                    if (!institutionMap[record.pathway_id]) {
+                        institutionMap[record.pathway_id] = [];
+                    }
+                    institutionMap[record.pathway_id].push(record.institution_id);
+                });
+
+                pathways.forEach(pathway => {
+                    pathway.institution_ids = institutionMap[pathway.id] || [];
+                    // Ensure backward compatibility if institution_id column is used
+                    if (pathway.institution_id && !pathway.institution_ids.includes(pathway.institution_id)) {
+                        pathway.institution_ids.push(pathway.institution_id);
+                    }
+                });
+            }
 
             return {
                 pathways,
@@ -210,6 +259,11 @@ class Pathway {
                 .select('institution_id')
                 .where('pathway_id', id);
             pathway.institution_ids = institutionRecords.map(r => r.institution_id);
+
+            // Ensure backward compatibility if institution_id column is used
+            if (pathway.institution_id && !pathway.institution_ids.includes(pathway.institution_id)) {
+                pathway.institution_ids.push(pathway.institution_id);
+            }
 
             return pathway;
         } catch (error) {
@@ -330,11 +384,6 @@ class Pathway {
             // Get the created pathway
             const createdPathway = await this.getById(pathway.id);
 
-            // Add institution_ids array from the junction table
-            const institutionRecords = await knex('pathway_institutions')
-                .select('institution_id')
-                .where('pathway_id', pathway.id);
-            createdPathway.institution_ids = institutionRecords.map(r => r.institution_id);
 
             return createdPathway;
         } catch (error) {
@@ -449,11 +498,6 @@ class Pathway {
             // Get the updated pathway
             const updatedPathway = await this.getById(id);
 
-            // Add institution_ids array from the junction table
-            const institutionRecords = await knex('pathway_institutions')
-                .select('institution_id')
-                .where('pathway_id', id);
-            updatedPathway.institution_ids = institutionRecords.map(r => r.institution_id);
 
             return updatedPathway;
         } catch (error) {

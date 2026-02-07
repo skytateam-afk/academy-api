@@ -375,48 +375,8 @@ class PaymentController {
             const result = await paymentService.verifyPayment(transactionId, provider);
 
             if (result.success) {
-                // Get course details for notification
-                const course = await db('courses')
-                    .where({ id: result.transaction.course_id })
-                    .first();
+                // Notifications are handled in paymentService.verifyPayment to duplications
 
-                // Send payment success notification
-                if (course) {
-                    notificationService.sendPaymentSuccessNotification(
-                        result.transaction.user_id,
-                        course.title,
-                        result.transaction.amount,
-                        result.transaction.currency
-                    ).catch(err => logger.error('Failed to send payment success notification', { error: err.message }));
-
-                    // Send enrollment notification
-                    notificationService.sendCourseEnrollmentNotification(
-                        result.transaction.user_id,
-                        course.id,
-                        course.title
-                    ).catch(err => logger.error('Failed to send enrollment notification', { error: err.message }));
-
-                    // Get user details for email notification
-                    const user = await db('users').where({ id: result.transaction.user_id }).first();
-
-                    if (user) {
-                        // Send payment success email notification (don't block response if it fails)
-                        emailService.sendPaymentSuccessEmail({
-                            email: user.email,
-                            username: user.username,
-                            courseName: course.title,
-                            amount: result.transaction.amount,
-                            currency: result.transaction.currency
-                        }).catch(err => logger.error('Failed to send payment success email', { error: err.message }));
-
-                        // Send enrollment email notification (don't block response if it fails)
-                        emailService.sendEnrollmentEmail({
-                            email: user.email,
-                            courseName: course.title,
-                            courseUrl: `${process.env.FRONTEND_URL}/courses/${course.id}`
-                        }).catch(err => logger.error('Failed to send enrollment email', { error: err.message }));
-                    }
-                }
 
                 res.status(200).json({
                     success: true,
@@ -424,34 +384,10 @@ class PaymentController {
                     data: result.transaction
                 });
             } else {
-                // Send payment failure notification
-                const transaction = await db('transactions').where({ id: transactionId }).first();
-                if (transaction) {
-                    const course = await db('courses').where({ id: transaction.course_id }).first();
-                    const user = await db('users').where({ id: transaction.user_id }).first();
-
-                    if (course) {
-                        notificationService.sendPaymentFailedNotification(
-                            transaction.user_id,
-                            course.title,
-                            result.message
-                        ).catch(err => logger.error('Failed to send payment failure notification', { error: err.message }));
-
-                        // Send payment failure email notification (don't block response if it fails)
-                        if (user) {
-                            emailService.sendPaymentFailedEmail({
-                                email: user.email,
-                                username: user.username,
-                                courseName: course.title,
-                                reason: result.message
-                            }).catch(err => logger.error('Failed to send payment failure email', { error: err.message }));
-                        }
-                    }
-                }
-
                 res.status(400).json({
                     success: false,
-                    error: result.message || 'Payment verification failed'
+                    error: result.error || 'Payment verification failed',
+                    code: result.code
                 });
             }
         } catch (error) {
@@ -497,48 +433,8 @@ class PaymentController {
                 const result = await paymentService.verifyPayment(transaction.id, provider);
 
                 if (result.success) {
-                    // Get course details for notification
-                    const course = await db('courses')
-                        .where({ id: result.transaction.course_id })
-                        .first();
+                    // Notifications are handled in paymentService.verifyPayment to duplications
 
-                    // Send payment success notification
-                    if (course) {
-                        notificationService.sendPaymentSuccessNotification(
-                            result.transaction.user_id,
-                            course.title,
-                            result.transaction.amount,
-                            result.transaction.currency
-                        ).catch(err => logger.error('Failed to send payment success notification', { error: err.message }));
-
-                        // Send enrollment notification
-                        notificationService.sendCourseEnrollmentNotification(
-                            result.transaction.user_id,
-                            course.id,
-                            course.title
-                        ).catch(err => logger.error('Failed to send enrollment notification', { error: err.message }));
-
-                        // Get user details for email notification
-                        const user = await db('users').where({ id: result.transaction.user_id }).first();
-
-                        if (user) {
-                            // Send payment success email notification (don't block response if it fails)
-                            emailService.sendPaymentSuccessEmail({
-                                email: user.email,
-                                username: user.username,
-                                courseName: course.title,
-                                amount: result.transaction.amount,
-                                currency: result.transaction.currency
-                            }).catch(err => logger.error('Failed to send payment success email', { error: err.message }));
-
-                            // Send enrollment email notification (don't block response if it fails)
-                            emailService.sendEnrollmentEmail({
-                                email: user.email,
-                                courseName: course.title,
-                                courseUrl: `${process.env.FRONTEND_URL}/courses/${course.id}`
-                            }).catch(err => logger.error('Failed to send enrollment email', { error: err.message }));
-                        }
-                    }
 
                     res.status(200).json({
                         success: true,
